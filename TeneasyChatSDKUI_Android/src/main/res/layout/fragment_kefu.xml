@@ -56,11 +56,25 @@
             app:layout_constraintTop_toBottomOf="@id/llTop"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/et_msg" />
+            app:layout_constraintBottom_toTopOf="@+id/tv_tips" />
 
+        <TextView
+            android:id="@+id/tv_tips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="#806200EE"
+            android:padding="5dp"
+            android:gravity="center"
+            android:text="系统提示"
+           app:layout_constraintTop_toBottomOf="@id/list_view">
+            >
+
+        </TextView>
         <EditText
             android:id="@+id/et_msg"
             android:layout_width="0dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_tips"
             android:layout_height="wrap_content"
             android:maxLines="5"
             android:background="@drawable/bg_edit_01"

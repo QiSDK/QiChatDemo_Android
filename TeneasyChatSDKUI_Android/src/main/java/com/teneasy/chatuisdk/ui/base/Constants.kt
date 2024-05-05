@@ -13,6 +13,6 @@ object Constants {
     //测试环境
     val httpToken = "CH0QARjq-xEgvQEo87iGnfQx.oCW-Y27VKjnbp8r6aJpMm3abfDRnioD91jQkR8RdA8Omc8Anx6iydqc59Hr-9crwrRARV9PZiGyrwzR9cH5HBg"
 
-
+    var uId = 123;
 
 }

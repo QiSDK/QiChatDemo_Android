@@ -28,6 +28,7 @@ import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
+import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
@@ -41,6 +42,7 @@ import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.MessageItem
+import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.XHttp
@@ -98,7 +100,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 // 上线前token需要替换为真实token, 第二个参数baseUrl也需要替换，第三个参数是userid, 第四个参数Sign
 
-        chatLib = ChatLib("CCcQARgOICIowqaSjeIw.9rO3unQwFrUUa-vJ6HvUQAbiAZN7XWBbaE_Oyd48C0Ae4xhzWWSriIGZZdVSvOajS1h_RFlQHZiFzadgBBuwDQ", wssUrl, 1125324, "9zgd9YUc")
+        chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 1125324, "9zgd9YUc")
 
         chatLib?.listener = this
         chatLib?.makeConnect()
@@ -106,120 +108,127 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     // UI初始化
     override fun initView() {
-        binding!!.setVariable(BR.vm, viewModel)
-        binding!!.lifecycleOwner = this
+       binding?.lifecycleOwner = this
 
-        msgAdapter = context?.let { MessageListAdapter(it) }!!
-        msgAdapter.setList(viewModel.mlMsgList.value)
+        binding?.apply {
 
-        val layoutManager = LinearLayoutManager(context)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        layoutManager.stackFromEnd = false
-        binding!!.listView.layoutManager = layoutManager
+            this.setVariable(BR.vm, viewModel)
 
-        binding!!.listView.adapter = msgAdapter
+            msgAdapter = context?.let { MessageListAdapter(it) }!!
+            msgAdapter.setList(viewModel.mlMsgList.value)
 
-        binding!!.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
-            if (!hasFocus) {
-                closeSoftKeyboard(v)
-            }
-        }
-        // 聊天界面输入框，输入事件。实现文本输入和表情输入的UI切换功能
-        binding!!.etMsg.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                // TODO Auto-generated method stub
-                // 输入框有内容的时候，显示发送按钮，隐藏图片选择按钮
-                viewModel.mlBtnSendVis.value = s != null && s.isNotEmpty()
-            }
+            val layoutManager = LinearLayoutManager(context)
+            layoutManager.orientation = LinearLayoutManager.VERTICAL
+            layoutManager.stackFromEnd = false
+            this.listView.layoutManager = layoutManager
 
-            override fun beforeTextChanged(
-                s: CharSequence?, start: Int, count: Int,
-                after: Int
-            ) {}
+            this.listView.adapter = msgAdapter
 
-            override fun onTextChanged(
-                s: CharSequence?, start: Int, before: Int,
-                count: Int
-            ) {}
-        })
-
-        // 点击发送按钮，发送消息
-        binding!!.btnSend.setOnClickListener { v: View ->
-            binding?.etMsg?.apply {
-                if (this.text.isEmpty()){
+            this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
+                if (!hasFocus) {
                     closeSoftKeyboard(v)
-                }else{
-                    sendMsg((binding?.etMsg?.text ?:"").toString())
-                    binding?.etMsg?.text?.clear()
                 }
             }
-
-        }
-        binding!!.etMsg.isFocusable = true
-        binding!!.etMsg.isFocusableInTouchMode = true;
-
-        // 发送表情
-        binding!!.btnSendExpr.setOnClickListener {
-            // 发送表情
-            if (viewModel.mlExprIcon.value == R.drawable.h5_biaoqing) {
-                viewModel.mlExprIcon.value = R.drawable.ht_shuru
-                binding!!.etMsg.requestFocus()
-                val inputMethodManager =  requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.showSoftInput(binding!!.etMsg, InputMethodManager.SHOW_IMPLICIT)
-                binding!!.etMsg.setRawInputType(InputType.TYPE_CLASS_TEXT)
-                binding!!.etMsg.setTextIsSelectable(true)
-            } else {
-                viewModel.mlExprIcon.value = R.drawable.h5_biaoqing
-                val inputMethodManager = requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.showSoftInput(binding!!.etMsg, InputMethodManager.SHOW_IMPLICIT)
-            }
-        }
-        binding!!.btnSendImg.setOnClickListener { v: View ->
-            // 发送表情
-            dialogBottomMenu.show(v)
-        }
-
-        // 底部菜单初始化
-        dialogBottomMenu = DialogBottomMenu(context)
-            .setItems(resources.getStringArray(R.array.bottom_menu))
-            .setOnItemClickListener(AdapterView.OnItemClickListener{ adapterView, view, i, l ->
-                when (i) {
-                    0 -> {
-                        // 选择相册
-                        showSelectPic(object : OnResultCallbackListener<LocalMedia> {
-                            override fun onResult(result: java.util.ArrayList<LocalMedia>) {
-                                if(result != null && result.size > 0) {
-                                    val item = result[0]
-                                    dialogBottomMenu.dismiss()
-                                    // 上传图片之前，首先在聊天框添加一个图片消息，更新聊天界面
-                                    //val id = viewModel.composeAChatmodelImg(item.path, false)
-                                    uploadImg(item.realPath)
-                                }
-                            }
-                            override fun onCancel() {}
-                        })
-                    }
-                    1 -> {
-                        // 拍照
-                         showCamera(object : OnResultCallbackListener<LocalMedia> {
-                            override fun onResult(result: java.util.ArrayList<LocalMedia>) {
-                                if(result != null && result.size > 0) {
-                                    val item = result[0]
-                                    dialogBottomMenu.dismiss()
-                                    //val id = viewModel.composeAChatmodelImg(item.path, false)
-                                    uploadImg(item.realPath)
-                                }
-                            }
-
-                            override fun onCancel() {}
-                        })
-                    }
-                    else -> {
-                        dialogBottomMenu.dismiss()
-                    }
+            // 聊天界面输入框，输入事件。实现文本输入和表情输入的UI切换功能
+            this.etMsg.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    // TODO Auto-generated method stub
+                    // 输入框有内容的时候，显示发送按钮，隐藏图片选择按钮
+                    viewModel.mlBtnSendVis.value = s != null && s.isNotEmpty()
                 }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?, start: Int, count: Int,
+                    after: Int
+                ) {}
+
+                override fun onTextChanged(
+                    s: CharSequence?, start: Int, before: Int,
+                    count: Int
+                ) {}
             })
-            .build()
+
+            // 点击发送按钮，发送消息
+            this.btnSend.setOnClickListener { v: View ->
+                binding?.etMsg?.apply {
+                    if (this.text.isEmpty()){
+                        closeSoftKeyboard(v)
+                    }else{
+                        sendMsg((binding?.etMsg?.text ?:"").toString())
+                        binding?.etMsg?.text?.clear()
+                    }
+                }
+
+            }
+            this.etMsg.isFocusable = true
+            this.etMsg.isFocusableInTouchMode = true;
+
+            // 发送表情
+            this.btnSendExpr.setOnClickListener {
+                // 发送表情
+                if (viewModel.mlExprIcon.value == R.drawable.h5_biaoqing) {
+                    viewModel.mlExprIcon.value = R.drawable.ht_shuru
+                    this.etMsg.requestFocus()
+                    val inputMethodManager =  requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.showSoftInput(this.etMsg, InputMethodManager.SHOW_IMPLICIT)
+                    this.etMsg.setRawInputType(InputType.TYPE_CLASS_TEXT)
+                    this.etMsg.setTextIsSelectable(true)
+                } else {
+                    viewModel.mlExprIcon.value = R.drawable.h5_biaoqing
+                    val inputMethodManager = requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.showSoftInput(this.etMsg, InputMethodManager.SHOW_IMPLICIT)
+                }
+            }
+            this.btnSendImg.setOnClickListener { v: View ->
+                // 发送表情
+                dialogBottomMenu.show(v)
+            }
+
+            // 底部菜单初始化
+            dialogBottomMenu = DialogBottomMenu(context)
+                .setItems(resources.getStringArray(R.array.bottom_menu))
+                .setOnItemClickListener(AdapterView.OnItemClickListener{ adapterView, view, i, l ->
+                    when (i) {
+                        0 -> {
+                            // 选择相册
+                            showSelectPic(object : OnResultCallbackListener<LocalMedia> {
+                                override fun onResult(result: java.util.ArrayList<LocalMedia>) {
+                                    if(result != null && result.size > 0) {
+                                        val item = result[0]
+                                        dialogBottomMenu.dismiss()
+                                        // 上传图片之前，首先在聊天框添加一个图片消息，更新聊天界面
+                                        //val id = viewModel.composeAChatmodelImg(item.path, false)
+                                        uploadImg(item.realPath)
+                                    }
+                                }
+                                override fun onCancel() {}
+                            })
+                        }
+                        1 -> {
+                            // 拍照
+                            showCamera(object : OnResultCallbackListener<LocalMedia> {
+                                override fun onResult(result: java.util.ArrayList<LocalMedia>) {
+                                    if(result != null && result.size > 0) {
+                                        val item = result[0]
+                                        dialogBottomMenu.dismiss()
+                                        //val id = viewModel.composeAChatmodelImg(item.path, false)
+                                        uploadImg(item.realPath)
+                                    }
+                                }
+
+                                override fun onCancel() {}
+                            })
+                        }
+                        else -> {
+                            dialogBottomMenu.dismiss()
+                        }
+                    }
+                })
+                .build()
+
+
+            this.tvTips.visibility = View.GONE
+        }
 
         initData()
     }
@@ -501,6 +510,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
       //  TODO("Not yet implemented")
+        val item = viewModel.mlMsgList.value?.find { it.payLoadId == payloadId }
+        if(item != null) {
+            item.sendStatus = MessageSendState.发送成功
+        }
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
@@ -509,10 +522,18 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun systemMsg(msg: Result) {
        // TODO("Not yet implemented")
-        Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
+        //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
+        showTip(msg.msg)
     }
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
         //TODO("Not yet implemented")
+    }
+
+    private fun showTip(msg: String){
+        runOnUiThread {
+            binding?.tvTips?.visibility = View.VISIBLE
+            binding?.tvTips?.text = msg
+        }
     }
 }
