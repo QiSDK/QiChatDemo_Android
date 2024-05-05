@@ -329,7 +329,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         val param = JsonObject()
         param.addProperty("workerId", workerId)
         val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", viewModel.getToken())
+        request.headers("X-Token", Constants.httpToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .workerInfo(param),
             object : ProgressLoadingCallBack<ReturnData<WorkerInfo>>(getProgressLoader()) {
