@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">TeneasyChatSdkDemo</string>
+
+    <array name="bottom_menu">
+        <item>从相册选择</item>
+        <item>拍照</item>
+        <item>取消</item>
+    </array>
+    <string name="str_inputquestion">请输入想咨询的问题</string>
+    <string name="all_emoji">所有表情</string>
+     <string name="send">发送</string>
+</resources>

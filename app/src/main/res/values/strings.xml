@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">TeneasyChatSdkDemo</string>
+
+    <array name="bottom_menu">
+        <item>从相册选择</item>
+        <item>拍照</item>
+        <item>取消</item>
+    </array>
+</resources>
