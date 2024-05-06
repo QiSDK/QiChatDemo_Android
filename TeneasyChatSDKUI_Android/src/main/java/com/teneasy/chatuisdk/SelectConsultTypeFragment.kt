@@ -11,6 +11,8 @@ import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
 import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 
 class SelectConsultTypeFragment : BaseBindingFragment<FragmentSelectConsultTypeBinding>() {
 
@@ -28,6 +30,10 @@ class SelectConsultTypeFragment : BaseBindingFragment<FragmentSelectConsultTypeB
                 adapter.updateData(it)
             }
         }
+
+
+       // this.findNavController().navigate(R.id.frg_kefu_main)
+
     }
 
     override fun onCreateView(

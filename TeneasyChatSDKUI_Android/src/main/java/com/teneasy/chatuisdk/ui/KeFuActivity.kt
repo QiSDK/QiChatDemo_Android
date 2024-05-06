@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.NavHostFragment
 import com.tbruyelle.rxpermissions3.RxPermissions
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
@@ -24,12 +25,11 @@ class KeFuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kefu)
         initXHttp2(application)
-        if (savedInstanceState == null) {
-            // transaction.replace(R.id.fragment, fragment, TAG_FRAGMENT);
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, KeFuFragment.newInstance(), TAG_FRAGMENT)
-                .commitNow()
-        }
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+
         rxPermissions = RxPermissions(this)
         rxPermissions!!
             .request(Manifest.permission.CAMERA)
