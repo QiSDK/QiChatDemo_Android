@@ -77,11 +77,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var timer: Timer? = null
     private var chatLib: ChatLib? = null
     private var consultId: Long = 0L
+    private var connected = false
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         viewModel = KeFuViewModel()
         initChatSDK("csapi.hfxg.xyz")
     }
@@ -449,6 +449,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
+
+        if (!connected){
+            Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
+            return
+        }
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, this.consultId)
       var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
@@ -462,6 +467,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     fun sendImgMsg(url: String) {
         if(chatLib == null){
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!connected){
+            Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
             return
         }
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG,  this.consultId)
@@ -506,6 +516,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun connected(c: GGateway.SCHi) {
        // TODO("Not yet implemented")
+        //if(c.workerId == 0) {
+            connected = true;
+        //}
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
