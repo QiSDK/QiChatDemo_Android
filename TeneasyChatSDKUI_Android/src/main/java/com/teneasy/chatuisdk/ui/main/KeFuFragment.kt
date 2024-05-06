@@ -83,7 +83,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
-        initChatSDK("csapi.xdev.stream")
+        initChatSDK("csapi.hfxg.xyz")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -96,17 +96,15 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
     private fun initChatSDK(baseUrl: String){
-        var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?token="
+        //第一次链接地址
+        var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?cert="
 
-// 上线前token需要替换为真实token, 第二个参数baseUrl也需要替换，第三个参数是userid, 第四个参数Sign
+        //之后链接地址
+        //var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?token="
 
-       // chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 1125324, "9zgd9YUc")
-
-        chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 364227, "9zgd9YUc")
-
-        /*
-        >userId:364227--->cert:Optional(COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg)---->baseUrl:https://csapi.xdev.stream---->sign:9zgd9YUc
-         */
+        // 上线前token需要替换为真实token, 第二个参数baseUrl也需要替换，第三个参数是userid, 第四个参数Sign
+        chatLib = ChatLib("COYBEAEYAiDwASix49bt9DE.Yg_cE8YuqROTk4CBm97UCuWrmBc9r8wXu8fiBh9Gw5T_yYeAtjeImyC0rJ--YRiq_uYka1mRUYSCoe76PLunAA", wssUrl, 1125324, "9zgd9YUc")
+        //chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 1125324, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
     }
@@ -523,6 +521,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
        // TODO("Not yet implemented")
         //if(c.workerId == 0) {
             connected = true;
+
         //}
     }
 

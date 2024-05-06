@@ -8,24 +8,22 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.databinding.SimpleListItemBinding
 
 class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<MyAdapter.NormalViewHolder>() {
     private var dataList: ArrayList<Consults> = data
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NormalViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simple_list_item, parent, false)
-        return NormalViewHolder(itemView)
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = SimpleListItemBinding.inflate(inflater, parent, false)
+        return NormalViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: NormalViewHolder, position: Int) {
-        holder.tv_title.text = data[position].name
+        holder.tvTitle.text = data[position].name
     }
 
-    inner class NormalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        val tv_title: TextView
-        init {
-            tv_title = itemView.findViewById(R.id.tv_title)
-        }
+    class NormalViewHolder(private val binding: SimpleListItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvTitle = binding.tvTitle
     }
 
     override fun getItemCount(): Int {
@@ -35,6 +33,7 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
     fun updateData(newData: ArrayList<Consults>) {
         dataList.clear()
         dataList.addAll(newData)
+
         notifyDataSetChanged()
     }
 }

@@ -26,16 +26,16 @@ class SelectConsultTypeViewModel : ViewModel() {
     fun stopLoading() {
         _isLoading.value = false
     }
-    private val _consultList = MutableLiveData<ArrayList<Consults>>()
-    val consultList: LiveData<ArrayList<Consults>>
-        get() = _consultList
-
-    fun setData(data: ArrayList<Consults>) {
-        _consultList.value = data
-    }
+     var consultList = MutableLiveData<ArrayList<Consults>>()
+//    val consultList: LiveData<ArrayList<Consults>>
+//        get() = _consultList
+//
+//    fun setData(data: ArrayList<Consults>) {
+//        _consultList.value = data
+//    }
 
     //query-entrance
-    private fun queryEntrance(consultId: Int) {
+    fun queryEntrance(consultId: Int) {
         startLoading()
         val param = JsonObject()
 
@@ -46,7 +46,8 @@ class SelectConsultTypeViewModel : ViewModel() {
             .queryEntrance(param),
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
                 override fun onSuccess(res: ReturnData<Entrance>) {
-                    setData(res.data.consults)
+                 //  setData(res.data.consults)
+                    consultList.value = res.data.consults
                 }
 
                 override fun onError(e: ApiException?) {

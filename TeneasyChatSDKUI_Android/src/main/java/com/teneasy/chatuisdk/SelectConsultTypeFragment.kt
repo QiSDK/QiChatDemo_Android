@@ -2,37 +2,26 @@ package com.teneasy.chatuisdk
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
 import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 
-class SelectConsultTypeFragment : BaseBindingFragment<FragmentSelectConsultTypeBinding>() {
 
+//class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>()
+class SelectConsultTypeFragment : Fragment(){
     private val viewModel: SelectConsultTypeViewModel by viewModels()
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MyAdapter
+    private var binding: FragmentSelectConsultTypeBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding?.let {
-            recyclerView = it.rvList
-            adapter = MyAdapter(viewModel.consultList.value ?: ArrayList())
-            recyclerView.adapter = adapter
-            viewModel.consultList.observe(this) {
-                adapter.updateData(it)
-            }
-        }
-
-
-       // this.findNavController().navigate(R.id.frg_kefu_main)
 
     }
 
@@ -40,13 +29,18 @@ class SelectConsultTypeFragment : BaseBindingFragment<FragmentSelectConsultTypeB
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_select_consult_type, container, false)
-    }
+        binding = FragmentSelectConsultTypeBinding.inflate(inflater, container, false)
+        binding?.let {
+            adapter = MyAdapter(ArrayList())
+            recyclerView = it.rvList
+            recyclerView.adapter = adapter
+            recyclerView.layoutManager = LinearLayoutManager(requireContext())
+            viewModel.consultList.observe(viewLifecycleOwner) {
+                adapter.updateData(it)
+            }
 
-    override fun onCreateViewBinding(
-        inflater: LayoutInflater,
-        parent: ViewGroup?
-    ): FragmentSelectConsultTypeBinding {
-        return FragmentSelectConsultTypeBinding.inflate(layoutInflater, parent, false)
+            viewModel.queryEntrance(1)
+        }
+        return  binding!!.root
     }
 }

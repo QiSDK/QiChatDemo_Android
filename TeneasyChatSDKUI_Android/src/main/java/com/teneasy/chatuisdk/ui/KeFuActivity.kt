@@ -24,7 +24,6 @@ class KeFuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kefu)
-        initXHttp2(application)
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -44,16 +43,6 @@ class KeFuActivity : AppCompatActivity() {
             }
     }
 
-    private fun initXHttp2(application: Application) {
-        //初始化网络请求框架，必须首先执行
-        XHttpSDK.init(application)
-        //需要调试的时候执行
-//        if (MyApp.isDebug()) {
-            XHttpSDK.debug()
-//        }
-        //设置网络请求的全局基础地址
-        XHttpSDK.setBaseUrl(Constants.baseUrl)
-    }
 
     override fun onBackPressed() {
         val fragment: KeFuFragment? =
