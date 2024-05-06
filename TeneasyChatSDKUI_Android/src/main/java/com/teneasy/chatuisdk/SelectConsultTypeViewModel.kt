@@ -33,10 +33,12 @@ class SelectConsultTypeViewModel : ViewModel() {
         _data.value = data
     }
 
-    private fun loadWorker(workerId: Int) {
+    //query-entrance
+    private fun queryEntrance(consultId: Int) {
         startLoading()
         val param = JsonObject()
-        param.addProperty("workerId", workerId)
+
+        param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.httpToken)
         request.call(request.create(MainApi.IMainTask::class.java)

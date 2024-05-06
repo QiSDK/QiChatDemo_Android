@@ -26,6 +26,14 @@ public class MainApi {
         @Headers({"Content-Type: application/json", "Accept: application/json"})
         Observable<ReturnData<WorkerInfo>> workerInfo(@Body JsonObject param);
 
+        /*
+        {
+  "consultId": 1
+         */
+        @POST("v1/api/query-entrance")
+        //@Headers({"Content-Type: application/json", "Accept: application/json"})
+        Observable<ReturnData<List<WorkerInfo>>> workerList(@Body JsonObject param);
+
         @Multipart
         @POST("/v1/assets/upload/")
 //        @Headers({"Content-Type: multipart/form-data", "Accept: multipart/form-data"})

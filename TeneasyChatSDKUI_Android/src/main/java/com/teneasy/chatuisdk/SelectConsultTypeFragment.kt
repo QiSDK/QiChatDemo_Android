@@ -7,13 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
+import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
+import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
 
-class SelectConsultTypeFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = SelectConsultTypeFragment()
-    }
+class SelectConsultTypeFragment : BaseBindingFragment<FragmentSelectConsultTypeBinding>() {
 
     private val viewModel: SelectConsultTypeViewModel by viewModels()
     private lateinit var recyclerView: RecyclerView
@@ -29,5 +28,12 @@ class SelectConsultTypeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return inflater.inflate(R.layout.fragment_select_consult_type, container, false)
+    }
+
+    override fun onCreateViewBinding(
+        inflater: LayoutInflater,
+        parent: ViewGroup?
+    ): FragmentSelectConsultTypeBinding {
+        return FragmentSelectConsultTypeBinding.inflate(layoutInflater, parent, false)
     }
 }
