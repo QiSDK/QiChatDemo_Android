@@ -20,7 +20,14 @@ class SelectConsultTypeFragment : BaseBindingFragment<FragmentSelectConsultTypeB
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // TODO: Use the ViewModel
+        binding?.let {
+            recyclerView = it.rvList
+            adapter = MyAdapter(viewModel.consultList.value ?: ArrayList())
+            recyclerView.adapter = adapter
+            viewModel.consultList.observe(this) {
+                adapter.updateData(it)
+            }
+        }
     }
 
     override fun onCreateView(

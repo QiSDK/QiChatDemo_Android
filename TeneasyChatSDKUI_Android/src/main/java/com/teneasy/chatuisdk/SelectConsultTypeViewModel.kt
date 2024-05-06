@@ -13,6 +13,7 @@ import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
+import com.xuexiang.xhttp2.exception.ApiException
 
 class SelectConsultTypeViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
@@ -25,12 +26,12 @@ class SelectConsultTypeViewModel : ViewModel() {
     fun stopLoading() {
         _isLoading.value = false
     }
-    private val _data = MutableLiveData<List<String>>()
-    val data: LiveData<List<String>>
-        get() = _data
+    private val _consultList = MutableLiveData<ArrayList<Consults>>()
+    val consultList: LiveData<ArrayList<Consults>>
+        get() = _consultList
 
-    fun setData(data: List<String>) {
-        _data.value = data
+    fun setData(data: ArrayList<Consults>) {
+        _consultList.value = data
     }
 
     //query-entrance
@@ -42,10 +43,15 @@ class SelectConsultTypeViewModel : ViewModel() {
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.httpToken)
         request.call(request.create(MainApi.IMainTask::class.java)
-            .workerInfo(param),
-            object : ProgressLoadingCallBack<ReturnData<WorkerInfo>>(null) {
-                override fun onSuccess(res: ReturnData<WorkerInfo>) {
+            .queryEntrance(param),
+            object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
+                override fun onSuccess(res: ReturnData<Entrance>) {
+                    setData(res.data.consults)
+                }
 
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
                 }
             })
     }

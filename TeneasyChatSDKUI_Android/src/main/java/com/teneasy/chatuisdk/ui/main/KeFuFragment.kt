@@ -83,7 +83,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
-        initChatSDK("csapi.hfxg.xyz")
+        initChatSDK("csapi.xdev.stream")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -100,8 +100,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 // 上线前token需要替换为真实token, 第二个参数baseUrl也需要替换，第三个参数是userid, 第四个参数Sign
 
-        chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 1125324, "9zgd9YUc")
+       // chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 1125324, "9zgd9YUc")
 
+        chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 364227, "9zgd9YUc")
+
+        /*
+        >userId:364227--->cert:Optional(COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg)---->baseUrl:https://csapi.xdev.stream---->sign:9zgd9YUc
+         */
         chatLib?.listener = this
         chatLib?.makeConnect()
     }

@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.http;
 
 import com.google.gson.JsonObject;
+import com.teneasy.chatuisdk.Entrance;
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class MainApi {
          */
         @POST("v1/api/query-entrance")
         //@Headers({"Content-Type: application/json", "Accept: application/json"})
-        Observable<ReturnData<List<WorkerInfo>>> workerList(@Body JsonObject param);
+        Observable<ReturnData<Entrance>> queryEntrance(@Body JsonObject param);
 
         @Multipart
         @POST("/v1/assets/upload/")

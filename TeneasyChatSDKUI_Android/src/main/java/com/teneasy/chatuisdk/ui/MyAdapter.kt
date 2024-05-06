@@ -6,17 +6,18 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
 
-class MyAdapter (private val data: List<String>) : RecyclerView.Adapter<MyAdapter.NormalViewHolder>() {
-
+class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<MyAdapter.NormalViewHolder>() {
+    private var dataList: ArrayList<Consults> = data
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NormalViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simple_list_item, parent, false)
         return NormalViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: NormalViewHolder, position: Int) {
-        holder.tv_title.text = data[position]
+        holder.tv_title.text = data[position].name
     }
 
     inner class NormalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -29,5 +30,11 @@ class MyAdapter (private val data: List<String>) : RecyclerView.Adapter<MyAdapte
 
     override fun getItemCount(): Int {
         return data.size
+    }
+
+    fun updateData(newData: ArrayList<Consults>) {
+        dataList.clear()
+        dataList.addAll(newData)
+        notifyDataSetChanged()
     }
 }
