@@ -34,6 +34,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
+import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
@@ -47,6 +48,7 @@ import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
+import com.xuexiang.xhttp2.exception.ApiException
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
 import okhttp3.*
@@ -83,6 +85,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
         initChatSDK("csapi.hfxg.xyz")
+
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,15 +99,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
     private fun initChatSDK(baseUrl: String){
-        //第一次链接地址
-        var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?cert="
-
-        //之后链接地址
-        //var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?token="
-
-        // 上线前token需要替换为真实token, 第二个参数baseUrl也需要替换，第三个参数是userid, 第四个参数Sign
-        chatLib = ChatLib("COYBEAEYAiDwASix49bt9DE.Yg_cE8YuqROTk4CBm97UCuWrmBc9r8wXu8fiBh9Gw5T_yYeAtjeImyC0rJ--YRiq_uYka1mRUYSCoe76PLunAA", wssUrl, 1125324, "9zgd9YUc")
-        //chatLib = ChatLib("COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA", wssUrl, 1125324, "9zgd9YUc")
+        var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
+        val token = SharedPreferencesReader().getString(Constants.wss_token, "")
+        chatLib = ChatLib(Constants.cert , token, wssUrl, 1125324, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
     }
@@ -125,6 +123,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.listView.layoutManager = layoutManager
 
             this.listView.adapter = msgAdapter
+
+            viewModel.mlMsgList?.observe(this@KeFuFragment) {
+                msgAdapter.notifyDataSetChanged()
+                this.listView.scrollToPosition(it?.size?.minus(1) ?: 0)
+            }
 
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
                 if (!hasFocus) {
@@ -232,7 +235,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
         }
 
-        initData()
+      //  initData()
     }
 
     // 数据初始化
@@ -294,15 +297,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
         } else if(event.what == 1 && event.data != null) {
 
-           /* if (event.data is MessageItem) {
-                // 解析数据
-                val data = event.data as MessageItem
-                viewModel.updateMsgStatus(data)
-            } else if (event.data is GGateway.SCHi) {
-                val data = event.data as GGateway.SCHi
-                val workId = data.workerId
-                loadWorker(workId)
-            }*/
         }
     }
 
@@ -354,8 +348,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                                 .into(binding!!.civAuthorImage)
                         }
                     }
+                } override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
                 }
-            })
+
+            }
+        )
     }
 
 
@@ -457,7 +456,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             return
         }
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
-      var messageItem = MessageItem()
+        var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
@@ -517,23 +516,27 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun connected(c: GGateway.SCHi) {
-       // TODO("Not yet implemented")
-        //if(c.workerId == 0) {
-            connected = true;
-
-        //}
+//        if(c.workerId != 0) {
+//            loadWorker(c.workerId)
+//        }
+        connected = true;
+        SharedPreferencesReader().putString(Constants.wss_token, c.token)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
-      //  TODO("Not yet implemented")
         val item = viewModel.mlMsgList.value?.find { it.payLoadId == payloadId }
         if(item != null) {
             item.sendStatus = MessageSendState.发送成功
         }
+       // msgAdapter.notifyDataSetChanged()
+       // binding?.listView?.scrollToPosition(viewModel.mlMsgList.value!!.size - 1)
+
+        hideTip()
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
         Toast.makeText(context, msg.content.data, Toast.LENGTH_SHORT).show()
+        hideTip()
     }
 
     override fun systemMsg(msg: Result) {
@@ -544,12 +547,25 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
         //TODO("Not yet implemented")
+
+        //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
+        //showTip(msg.consultId + "已接通"))
+        if (msg.workerId != 0){
+            loadWorker(msg.workerId)
+        }
     }
 
     private fun showTip(msg: String){
         runOnUiThread {
             binding?.tvTips?.visibility = View.VISIBLE
             binding?.tvTips?.text = msg
+        }
+    }
+
+    private fun hideTip(){
+        runOnUiThread {
+            binding?.tvTips?.visibility = View.GONE
+            binding?.tvTips?.text = ""
         }
     }
 }

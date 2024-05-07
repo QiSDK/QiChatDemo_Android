@@ -1,12 +1,17 @@
 package com.teneasy.chatuisdk.ui.base
 
 import android.app.Application
+import android.content.Context
 import com.xuexiang.xhttp2.XHttpSDK
 
 class ApplicationExt: Application(){
+    companion object {
+        var context: Context? = null
+    }
+
     override fun onCreate() {
         super.onCreate()
-
+        context = applicationContext
         initXHttp2(this)
     }
 
