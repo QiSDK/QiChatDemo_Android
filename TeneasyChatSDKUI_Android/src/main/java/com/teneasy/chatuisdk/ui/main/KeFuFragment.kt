@@ -76,7 +76,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     private var timer: Timer? = null
     private var chatLib: ChatLib? = null
-    private var consultId: Long = 0L
     private var connected = false
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
@@ -457,7 +456,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
             return
         }
-        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, this.consultId)
+        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
       var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
@@ -477,7 +476,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
             return
         }
-        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG,  this.consultId)
+        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false

@@ -8,5 +8,7 @@
     </array>
     <string name="str_inputquestion">请输入想咨询的问题</string>
     <string name="all_emoji">所有表情</string>
-     <string name="send">发送</string>
+    <string name="send">发送</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
