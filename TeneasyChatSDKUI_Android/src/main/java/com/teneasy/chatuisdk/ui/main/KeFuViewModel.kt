@@ -11,6 +11,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
+import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -38,6 +39,7 @@ class KeFuViewModel() : ViewModel() {
 
     var mlMsgList = MutableLiveData<ArrayList<MessageItem>?>()
     var mlWorkerInfo = MutableLiveData<WorkerInfo>()
+    var mlAutoReplyItem = MutableLiveData<AutoReplyItem>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
 
 
@@ -97,10 +99,8 @@ class KeFuViewModel() : ViewModel() {
         return chatModel
     }
 
-
-
     /**
-     * 通过workerId加载客服头像，并添加一条打招呼的消息
+     * 通过workerId加载客服信息
      * @param workerId
      */
     fun loadWorker(workerId: Int) {
@@ -118,6 +118,28 @@ class KeFuViewModel() : ViewModel() {
                     println(e)
                 }
 
+            }
+        )
+    }
+
+    /**
+     * 通过选择的consultId获取自动回复
+     * @param consultId
+     */
+    fun queryAutoReply(consultId: Int) {
+        val param = JsonObject()
+        param.addProperty("consultId", consultId)
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.httpToken)
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .queryAutoReply(param),
+            object : ProgressLoadingCallBack<ReturnData<AutoReplyItem>>(null) {
+                override fun onSuccess(res: ReturnData<AutoReplyItem>) {
+                    mlAutoReplyItem.postValue(res.data)
+                } override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
+                }
             }
         )
     }

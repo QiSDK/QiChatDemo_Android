@@ -230,16 +230,20 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
           //  initData()
             initObserver()
+            viewModel.queryAutoReply(1)
         }
     }
 
     private fun initObserver(){
-        viewModel.mlMsgList?.observe(this@KeFuFragment) {
+        viewModel.mlMsgList.observe(this@KeFuFragment) {
             msgAdapter.setList(it)
             refreshList()
         }
-        viewModel.mlWorkerInfo?.observe(this@KeFuFragment){
+        viewModel.mlWorkerInfo.observe(this@KeFuFragment){
             updateWorkInf(it)
+        }
+        viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
+            println(it)
         }
     }
 
