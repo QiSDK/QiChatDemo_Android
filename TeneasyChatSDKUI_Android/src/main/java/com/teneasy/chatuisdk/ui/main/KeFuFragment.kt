@@ -59,6 +59,7 @@ import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 /**
@@ -114,18 +115,22 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             this.setVariable(BR.vm, viewModel)
 
-            msgAdapter = context?.let { MessageListAdapter(it) }!!
-            msgAdapter.setList(viewModel.mlMsgList.value)
+            msgAdapter = MessageListAdapter(requireContext())
+            msgAdapter.setList(ArrayList())
 
             val layoutManager = LinearLayoutManager(context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
-            layoutManager.stackFromEnd = false
+            //layoutManager.stackFromEnd = false
             this.listView.layoutManager = layoutManager
 
             this.listView.adapter = msgAdapter
 
             viewModel.mlMsgList?.observe(this@KeFuFragment) {
-                msgAdapter.notifyDataSetChanged()
+
+                msgAdapter.setList(it)
+               // msgAdapter.notifyDataSetChanged()
+                println(it?.size)
+                // 滚动到底部
                 this.listView.scrollToPosition(it?.size?.minus(1) ?: 0)
             }
 
@@ -233,26 +238,23 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
             this.tvTips.visibility = View.GONE
-        }
 
-      //  initData()
+          //  initData()
+        }
     }
 
-    // 数据初始化
-    private fun initData() {
-        viewModel.mlMsgList.observe(this) {
-            msgAdapter.notifyDataSetChanged()
-
-            if(it!!.size > 1) {
-                val layoutManager  = binding!!.listView.layoutManager as LinearLayoutManager
-                layoutManager.scrollToPositionWithOffset(it.size - 1, 0)
-                binding!!.listView.post {
-                    val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
-                    if(target != null) {
-                        val offset = binding!!.listView.measuredHeight - target.measuredHeight - 50
-                        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
-                    }
-                }
+    private fun refreshList(){
+        msgAdapter.notifyDataSetChanged()
+    }
+    private fun refreshList2(){
+        msgAdapter.notifyDataSetChanged()
+        val layoutManager  = binding!!.listView.layoutManager as LinearLayoutManager
+        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
+        binding!!.listView.post {
+            val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
+            if(target != null) {
+                val offset = binding!!.listView.measuredHeight - target.measuredHeight - 50
+                layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
             }
         }
     }
@@ -521,6 +523,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 //        }
         connected = true;
         SharedPreferencesReader().putString(Constants.wss_token, c.token)
+
+        //loadWorker(3)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
@@ -529,8 +533,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             item.sendStatus = MessageSendState.发送成功
         }
        // msgAdapter.notifyDataSetChanged()
-       // binding?.listView?.scrollToPosition(viewModel.mlMsgList.value!!.size - 1)
-
+       //binding?.listView?.scrollToPosition(viewModel.mlMsgList.value!!.size - 1)
+        refreshList()
         hideTip()
     }
 
