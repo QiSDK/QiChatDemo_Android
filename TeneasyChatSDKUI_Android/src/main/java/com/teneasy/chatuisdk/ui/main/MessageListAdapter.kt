@@ -33,7 +33,6 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
 
     fun setList(list: ArrayList<MessageItem>?) {
         this.msgList = list//ArrayList(list)
-        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MsgViewHolder {

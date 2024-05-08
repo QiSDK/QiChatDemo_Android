@@ -228,7 +228,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
             this.tvTips.visibility = View.GONE
-
           //  initData()
             initObserver()
         }
@@ -237,10 +236,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun initObserver(){
         viewModel.mlMsgList?.observe(this@KeFuFragment) {
             msgAdapter.setList(it)
-            // msgAdapter.notifyDataSetChanged()
-            println(it?.size)
-            // 滚动到底部
-           //binding?.listView?.scrollToPosition(it?.size?.minus(1) ?: 0)
             refreshList()
         }
         viewModel.mlWorkerInfo?.observe(this@KeFuFragment){
@@ -249,8 +244,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun refreshList(){
-        msgAdapter.notifyDataSetChanged()
-        binding?.listView?.scrollToPosition(msgAdapter.itemCount - 1)
+        runOnUiThread {
+            msgAdapter.notifyDataSetChanged()
+            binding?.listView?.scrollToPosition(msgAdapter.itemCount - 1)
+        }
     }
     private fun refreshList2(){
         msgAdapter.notifyDataSetChanged()
