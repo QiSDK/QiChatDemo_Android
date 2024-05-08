@@ -1,13 +1,24 @@
 package com.teneasy.chatuisdk.ui.main
 
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.gson.JsonObject
 import com.google.protobuf.Timestamp
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.http.MainApi
+import com.teneasy.chatuisdk.ui.http.ReturnData
+import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
+import com.xuexiang.xhttp2.XHttp
+import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
+import com.xuexiang.xhttp2.exception.ApiException
 import java.util.Calendar
 import java.util.Date
 
@@ -25,8 +36,8 @@ class KeFuViewModel() : ViewModel() {
     val mlExprIcon = MutableLiveData<Int>()
     val mlMsgTypeTxt = MutableLiveData<Boolean>()
 
-    val mlMsgList = MutableLiveData<ArrayList<MessageItem>?>()
-
+    var mlMsgList = MutableLiveData<ArrayList<MessageItem>?>()
+    var mlWorkerInfo = MutableLiveData<WorkerInfo>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
 
 
@@ -86,5 +97,29 @@ class KeFuViewModel() : ViewModel() {
         return chatModel
     }
 
+
+
+    /**
+     * 通过workerId加载客服头像，并添加一条打招呼的消息
+     * @param workerId
+     */
+    fun loadWorker(workerId: Int) {
+        val param = JsonObject()
+        param.addProperty("workerId", workerId)
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.httpToken)
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .workerInfo(param),
+            object : ProgressLoadingCallBack<ReturnData<WorkerInfo>>(null) {
+                override fun onSuccess(res: ReturnData<WorkerInfo>) {
+                    mlWorkerInfo.postValue(res.data)
+                } override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
+                }
+
+            }
+        )
+    }
 
 }

@@ -10,6 +10,7 @@ import android.os.Message
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -80,14 +81,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var timer: Timer? = null
     private var chatLib: ChatLib? = null
     private var connected = false
+    private val TAG = "KeFuFragment"
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
         initChatSDK("csapi.hfxg.xyz")
-
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -124,16 +124,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.listView.layoutManager = layoutManager
 
             this.listView.adapter = msgAdapter
-
-            viewModel.mlMsgList?.observe(this@KeFuFragment) {
-
-                msgAdapter.setList(it)
-               // msgAdapter.notifyDataSetChanged()
-                println(it?.size)
-                // 滚动到底部
-                this.listView.scrollToPosition(it?.size?.minus(1) ?: 0)
-            }
-
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
                 if (!hasFocus) {
                     closeSoftKeyboard(v)
@@ -240,11 +230,27 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
 
           //  initData()
+            initObserver()
+        }
+    }
+
+    private fun initObserver(){
+        viewModel.mlMsgList?.observe(this@KeFuFragment) {
+            msgAdapter.setList(it)
+            // msgAdapter.notifyDataSetChanged()
+            println(it?.size)
+            // 滚动到底部
+           //binding?.listView?.scrollToPosition(it?.size?.minus(1) ?: 0)
+            refreshList()
+        }
+        viewModel.mlWorkerInfo?.observe(this@KeFuFragment){
+            updateWorkInf(it)
         }
     }
 
     private fun refreshList(){
         msgAdapter.notifyDataSetChanged()
+        binding?.listView?.scrollToPosition(msgAdapter.itemCount - 1)
     }
     private fun refreshList2(){
         msgAdapter.notifyDataSetChanged()
@@ -315,50 +321,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
-
-    /**
-     * 通过workerId加载客服头像，并添加一条打招呼的消息
-     * @param workerId
-     */
-    private fun loadWorker(workerId: Int) {
-        if (requireActivity().isFinishing){
-            return
-        }
-        val param = JsonObject()
-        param.addProperty("workerId", workerId)
-        val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", Constants.httpToken)
-        request.call(request.create(MainApi.IMainTask::class.java)
-            .workerInfo(param),
-            object : ProgressLoadingCallBack<ReturnData<WorkerInfo>>(getProgressLoader()) {
-                override fun onSuccess(res: ReturnData<WorkerInfo>) {
-                    if (res == null) {
-                        Toast.makeText(context, "Server error: 500", Toast.LENGTH_SHORT).show()
-                        return
-                    }
-                    if (res.msg.equals("ok", true) && res.data != null) {
-                        binding!!.tvTitle.text = "客服${res.data.workerName}"
-                       // viewModel.composeAChatmodel("你好，我是客服${res.data.workerName}", true)
-
-                        // 更新头像
-                        if (res.data.workerAvatar != null && res.data.workerAvatar?.isEmpty() == false) {
-                            val url = Constants.baseUrlImage + res.data.workerAvatar
-                            print("avatar:$url")
-                            Glide.with(binding!!.civAuthorImage).load(url).dontAnimate()
-                                .skipMemoryCache(true)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(binding!!.civAuthorImage)
-                        }
-                    }
-                } override fun onError(e: ApiException?) {
-                    super.onError(e)
-                    println(e)
-                }
-
-            }
-        )
-    }
-
 
     /**
      * 上传图片。上传成功后，会直接调用socket进行消息发送。
@@ -525,6 +487,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         SharedPreferencesReader().putString(Constants.wss_token, c.token)
 
         //loadWorker(3)
+        viewModel.loadWorker(2)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
@@ -535,6 +498,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
        // msgAdapter.notifyDataSetChanged()
        //binding?.listView?.scrollToPosition(viewModel.mlMsgList.value!!.size - 1)
         refreshList()
+        Log.i(TAG, "收到回执：${msg.content.data}")
         hideTip()
     }
 
@@ -555,7 +519,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
         //showTip(msg.consultId + "已接通"))
         if (msg.workerId != 0){
-            loadWorker(msg.workerId)
+           viewModel.loadWorker(msg.workerId)
         }
     }
 
@@ -571,5 +535,22 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             binding?.tvTips?.visibility = View.GONE
             binding?.tvTips?.text = ""
         }
+    }
+
+    private fun updateWorkInf(workerInfo: WorkerInfo){
+            binding?.let {
+                it.tvTitle.text = "${workerInfo.workerName}"
+                // viewModel.composeAChatmodel("你好，我是客服${res.data.workerName}", true)
+
+                // 更新头像
+                if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
+                    val url = Constants.baseUrlImage + workerInfo.workerAvatar
+                    print("avatar:$url")
+                    Glide.with(binding!!.civAuthorImage).load(url).dontAnimate()
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(binding!!.civAuthorImage)
+                }
+            }
     }
 }

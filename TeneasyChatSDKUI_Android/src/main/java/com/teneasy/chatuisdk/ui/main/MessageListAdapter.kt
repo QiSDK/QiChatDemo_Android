@@ -8,18 +8,12 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.ItemMessageBinding
-import com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
 import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
@@ -29,38 +23,33 @@ import java.util.*
  * 聊天界面列表adapter
  */
 class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageListAdapter.MsgViewHolder>() {
-    private var list: ArrayList<MessageItem>? = null
+    private var msgList: ArrayList<MessageItem>? = null
     var TYPE_Text : Int = 0
     val TYPE_Image : Int = 1
     val act: Context = myContext
     fun getList(): ArrayList<MessageItem>? {
-        return list
+        return msgList
     }
 
     fun setList(list: ArrayList<MessageItem>?) {
-        this.list = list//ArrayList(list)
+        this.msgList = list//ArrayList(list)
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MsgViewHolder {
-        //val view = LayoutInflater.from(parent.context).inflate(R.layout.item_message, parent, false)
-
-
-        val view= ItemMessageBinding.inflate(
+        val binding = ItemMessageBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
-        ).root
-
-
-        return MsgViewHolder(view)
+        )
+        return MsgViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MsgViewHolder, position: Int) {
-        if (list == null) {
+        if (msgList == null) {
             return
         }
-        val item = list!![position]
+        val item = msgList!![position]
 
         if (item.cMsg == null){
             return
@@ -158,10 +147,10 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
 
     override
     fun getItemViewType(position: Int) : Int{
-        if (list == null) {
+        if (msgList == null) {
             return TYPE_Text
         }
-        val obj = list!![position]
+        val obj = msgList!![position]
         obj.cMsg?.apply {
             return if (this.hasImage()){
                 return TYPE_Image
@@ -180,30 +169,17 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
     }
 
     override fun getItemCount(): Int {
-        return if (list == null) 0 else list!!.size
+        return if (msgList == null) 0 else msgList!!.size
     }
 
-    inner class MsgViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var tvLeftTime: TextView
-        var tvLeftMsg: EmoticonTextView
-        var ivLeftImg: AppCompatImageView
-
-        var tvRightTime: TextView
-        var tvRightMsg: EmoticonTextView
-        var ivRightImg: AppCompatImageView
-        var ivSendStatus: ImageView
-        var lySend: View
-
-        init {
-            tvLeftTime = itemView.findViewById(R.id.tv_left_time)
-            tvLeftMsg = itemView.findViewById(R.id.tv_left_msg) as EmoticonTextView
-            ivLeftImg = itemView.findViewById(R.id.iv_left_image)
-
-            ivRightImg = itemView.findViewById(R.id.iv_right_image)
-            tvRightTime = itemView.findViewById(R.id.tv_right_time)
-            tvRightMsg = itemView.findViewById(R.id.tv_right_msg)  as EmoticonTextView
-            ivSendStatus = itemView.findViewById(R.id.iv_send_status)
-            lySend = itemView.findViewById(R.id.layout_send)
-        }
+    inner class MsgViewHolder(binding: ItemMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvLeftTime = binding.tvLeftTime
+        var tvLeftMsg =  binding.tvLeftMsg
+        var tvRightTime =  binding.tvRightTime
+        var tvRightMsg =  binding.tvRightMsg
+        var ivRightImg =  binding.ivRightImage
+        var lySend =  binding.layoutSend
+        var ivLeftImg =  binding.ivLeftImage
+        var ivSendStatus =  binding.ivSendStatus
     }
 }
