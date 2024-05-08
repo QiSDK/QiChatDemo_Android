@@ -82,6 +82,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var chatLib: ChatLib? = null
     private var connected = false
     private val TAG = "KeFuFragment"
+    private var sayHello = false
+
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -533,7 +535,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
-                // viewModel.composeAChatmodel("你好，我是客服${res.data.workerName}", true)
+
+                if(!sayHello) {
+                    var chatModel = MessageItem()
+                    chatModel.cMsg = chatLib?.composeALocalMessage("您好，请问有什么可以帮到您！")
+                    chatModel.isLeft = true
+                    viewModel.addMsgItem(chatModel, 0)
+                    sayHello = true
+                }
 
                 // 更新头像
                 if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
