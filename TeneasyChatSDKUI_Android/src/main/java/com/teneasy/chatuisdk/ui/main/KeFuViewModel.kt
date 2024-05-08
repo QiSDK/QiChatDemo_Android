@@ -1,20 +1,16 @@
 package com.teneasy.chatuisdk.ui.main
 
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.gson.JsonObject
 import com.google.protobuf.Timestamp
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
+import com.teneasy.chatuisdk.ui.http.bean.AssignWorker
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
-import com.teneasy.sdk.ChatLib
-import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
 import com.xuexiang.xhttp2.XHttp
@@ -37,9 +33,10 @@ class KeFuViewModel() : ViewModel() {
     val mlExprIcon = MutableLiveData<Int>()
     val mlMsgTypeTxt = MutableLiveData<Boolean>()
 
-    var mlMsgList = MutableLiveData<ArrayList<MessageItem>?>()
-    var mlWorkerInfo = MutableLiveData<WorkerInfo>()
-    var mlAutoReplyItem = MutableLiveData<AutoReplyItem>()
+    val mlMsgList = MutableLiveData<ArrayList<MessageItem>?>()
+    val mlWorkerInfo = MutableLiveData<WorkerInfo>()
+    val mlAutoReplyItem = MutableLiveData<AutoReplyItem>()
+    val mlAssignWorker = MutableLiveData<AssignWorker>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
 
 
@@ -53,16 +50,10 @@ class KeFuViewModel() : ViewModel() {
         mlMsgMap.value = hashMapOf()
     }
 
-    /**
-     * 往聊天界面添加一个消息，不会触发socket消息发送。该方法自动会生成消息ID（以当前时间currentTimeMillis）
-     *
-     */
-    fun addMsgItem(data: MessageItem, payLoadId: Long) {
-        val list = mlMsgList.value
-        data.payLoadId = payLoadId
-        list?.add(data)
-        mlMsgList.value = list
-        //mlMsgMap.value!![data.payLoadId] = data
+    fun addMsgItem(newItem: MessageItem, payLoadId: Long) {
+        newItem.payLoadId = payLoadId
+        mlMsgList.value?.add(newItem)
+        mlMsgList.postValue(mlMsgList.value)
     }
 
     fun getToken():String {
@@ -118,6 +109,28 @@ class KeFuViewModel() : ViewModel() {
                     println(e)
                 }
 
+            }
+        )
+    }
+
+    /**
+     * 通过选择的consultId分配客服
+     * @param consultId
+     */
+    fun assignWorker(consultId: Int) {
+        val param = JsonObject()
+        param.addProperty("consultId", consultId)
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.httpToken)
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .assignWorker(param),
+            object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
+                override fun onSuccess(res: ReturnData<AssignWorker>) {
+                    mlAssignWorker.postValue(res.data)
+                } override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
+                }
             }
         )
     }

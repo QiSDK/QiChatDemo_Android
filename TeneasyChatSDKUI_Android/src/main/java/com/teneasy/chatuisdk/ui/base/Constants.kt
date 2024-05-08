@@ -13,7 +13,7 @@ class Constants {
     var uId = 123;
     companion object {
          var CONSULT_ID: Long = 123
-         var httpToken = "COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA"
+         var httpToken = "COYBEAEYByDwASiGj-iT9TE.BfASgRkP3zgKXYntaTmTYgDhOrytn2YKcRBimAKkELQKF9uwgYjdkEPWEZxFRXWyVHe1zyBm7_hKs6EbS3IxCg"
          var cert = "COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA"
         val baseUrl = "https://csapi.hfxg.xyz"  //用于大多数Api
         val baseUrlApi = "https://csapi.xdev.stream"  //用于请求数据，上传图片

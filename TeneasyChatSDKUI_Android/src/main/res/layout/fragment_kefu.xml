@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
-            android:textColor="#806200EE"
+            android:textColor="#806495ED"
             android:padding="5dp"
             android:gravity="center"
             android:text="系统提示"

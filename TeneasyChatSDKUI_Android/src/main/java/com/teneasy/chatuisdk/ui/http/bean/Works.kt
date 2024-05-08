@@ -11,5 +11,4 @@ data class Works (
   @SerializedName("nimId"        ) var nimId        : String? = null,
   @SerializedName("connectState" ) var connectState : String? = null,
   @SerializedName("onlineState"  ) var onlineState  : String? = null
-
 )

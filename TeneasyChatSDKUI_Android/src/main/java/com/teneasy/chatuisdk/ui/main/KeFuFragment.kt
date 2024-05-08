@@ -230,7 +230,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
           //  initData()
             initObserver()
-            viewModel.queryAutoReply(1)
+            viewModel.assignWorker(1)
         }
     }
 
@@ -242,6 +242,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.mlWorkerInfo.observe(this@KeFuFragment){
             updateWorkInf(it)
         }
+
+        viewModel.mlAssignWorker.observe(this@KeFuFragment){
+            if(it.workerId != 0) {
+                viewModel.loadWorker(it.workerId)
+                viewModel.queryAutoReply(1)
+            }
+        }
+
         viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
             println(it)
         }
@@ -455,27 +463,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         println("确保通信在活跃状态")
     }
 
-    /**
-     * 根据消息类型和状态，更新消息的显示状态
-     */
-  /*  fun updateMsgStatus(data: MessageItem) {
-        if (data!!.isLeft)
-            addMsgItem(data)
-        else {
-            if (data.payLoadId == null || data.payLoadId <= 0) {
-                // 初始添加
-                addMsgItem(data)
-            } else {
-                val list = mlMsgList.value
-                var msgItem = mlMsgMap.value!![data.payLoadId]
-                if(msgItem != null) {
-                    msgItem.sendStatus = data.sendStatus
-                    mlMsgList.value = list
-                }
-            }
-        }
-    } */
-
     fun onDestory() {
         chatLib?.disConnect()
     }
@@ -488,7 +475,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         SharedPreferencesReader().putString(Constants.wss_token, c.token)
 
         //loadWorker(3)
-        viewModel.loadWorker(2)
+        //viewModel.loadWorker(2)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
@@ -504,8 +491,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
-        Toast.makeText(context, msg.content.data, Toast.LENGTH_SHORT).show()
+        //Toast.makeText(context, msg.content.data, Toast.LENGTH_SHORT).show()
         hideTip()
+
+        var messageItem = MessageItem()
+        messageItem.cMsg = msg
+        messageItem.isLeft = true
+        viewModel.addMsgItem(messageItem, 0)
     }
 
     override fun systemMsg(msg: Result) {
