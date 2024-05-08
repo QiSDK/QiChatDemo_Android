@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.teneasy.chatuisdk.databinding.ItemMessageBinding
+import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
@@ -89,7 +90,7 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
 
                 Glide.with(act)
                     .asBitmap()
-                    .load(item.cMsg!!.image.uri).dontAnimate()
+                    .load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
                     .skipMemoryCache(true)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .into(object: CustomTarget<Bitmap>() {
@@ -126,7 +127,7 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
 //                    .into(holder.ivLeftImg)
                 Glide.with(act)
                     .asBitmap()
-                    .load(item.cMsg!!.image.uri).dontAnimate()
+                    .load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
                     .skipMemoryCache(true)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .into(object: CustomTarget<Bitmap>() {
