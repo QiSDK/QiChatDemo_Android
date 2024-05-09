@@ -25,6 +25,7 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
         holder.tvTitle.text = data[position].name
         holder.itemView.setOnClickListener {
             Constants.CONSULT_ID = data[position].consultId?:0L
+            Constants.originConsultId = Constants.CONSULT_ID
             it.findNavController().navigate(R.id.frg_kefu_main)
         }
     }
@@ -40,7 +41,6 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
     fun updateData(newData: ArrayList<Consults>) {
         dataList.clear()
         dataList.addAll(newData)
-
         notifyDataSetChanged()
     }
 }

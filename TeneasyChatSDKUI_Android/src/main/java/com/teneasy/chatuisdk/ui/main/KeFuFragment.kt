@@ -7,7 +7,10 @@ import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
+import android.view.ContextMenu
 import android.view.LayoutInflater
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -30,6 +33,8 @@ import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
+import com.teneasy.sdk.LineDetectDelegate
+import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -49,7 +54,7 @@ import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 /**
  * 客服主界面fragment
@@ -76,7 +81,18 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
-        initChatSDK("csapi.hfxg.xyz")
+
+        //检测线路地址，以逗号分开
+        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream",  object :
+            LineDetectDelegate {
+            override fun useTheLine(line: String) {
+                initChatSDK(line)
+            }
+            override fun lineError(error: Result) {
+                println(error.msg)
+            }
+        }, Constants.merchantId) //123是商户号
+        lineLib.getLine()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -87,11 +103,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         requireActivity().title = "客服"
     }
 
-
     private fun initChatSDK(baseUrl: String){
         var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         val token = SharedPreferencesReader().getString(Constants.wss_token, "")
-        chatLib = ChatLib(Constants.cert , token, wssUrl, 1125324, "9zgd9YUc")
+        chatLib = ChatLib(Constants.cert , token, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
     }
@@ -134,11 +149,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             // 问题点击事件
             qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
-                val txtMsg = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
-                sendLocalMsg(txtMsg)
+                val answerTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
+                val questionTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.question?.content?.data ?:""
+                // 发送提问消息
+                sendLocalMsg(questionTxt, false)
+                // 自动回答
+                sendLocalMsg(answerTxt)
             }
-
-
 
             // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
@@ -299,7 +316,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 //需要执行的任务
                 chatLib?.sendHeartBeat()
             }
-        }, 0,5000)    //每隔5秒发送心跳
+        }, 0,30000)    //每隔5秒发送心跳
     }
 
     // 关闭计时器
@@ -485,14 +502,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun connected(c: GGateway.SCHi) {
-//        if(c.workerId != 0) {
-//            loadWorker(c.workerId)
-//        }
         connected = true;
         SharedPreferencesReader().putString(Constants.wss_token, c.token)
-
-        //loadWorker(3)
-        //viewModel.loadWorker(2)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
@@ -500,34 +511,28 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if(item != null) {
             item.sendStatus = MessageSendState.发送成功
         }
-       // msgAdapter.notifyDataSetChanged()
-       //binding?.listView?.scrollToPosition(viewModel.mlMsgList.value!!.size - 1)
         refreshList()
         Log.i(TAG, "收到回执：${msg.content.data}")
         hideTip()
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
-        //Toast.makeText(context, msg.content.data, Toast.LENGTH_SHORT).show()
-        hideTip()
-
-        var messageItem = MessageItem()
-        messageItem.cMsg = msg
-        messageItem.isLeft = true
-        viewModel.addMsgItem(messageItem, 0)
+        if (msg.consultId != Constants.CONSULT_ID){
+            //免用户端在当前会话里显示其他咨询类型客服发来的消息。
+            showTip("其他客服有新消息！")
+        }else {
+            var messageItem = MessageItem()
+            messageItem.cMsg = msg
+            messageItem.isLeft = true
+            viewModel.addMsgItem(messageItem, 0)
+        }
     }
 
     override fun systemMsg(msg: Result) {
-       // TODO("Not yet implemented")
-        //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
         showTip(msg.msg)
     }
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
-        //TODO("Not yet implemented")
-
-        //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
-        //showTip(msg.consultId + "已接通"))
         if (msg.workerId != 0){
            viewModel.loadWorker(msg.workerId)
         }
@@ -567,10 +572,34 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
     }
 
-    private fun sendLocalMsg(msg: String){
+    private fun sendLocalMsg(msg: String, isLeft: Boolean = true){
         var chatModel = MessageItem()
         chatModel.cMsg = chatLib?.composeALocalMessage(msg)
-        chatModel.isLeft = true
+        chatModel.isLeft = isLeft
+        chatModel.sendStatus = MessageSendState.发送成功
         viewModel.addMsgItem(chatModel, 0)
+    }
+
+
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater = MenuInflater(requireContext())
+        inflater.inflate(R.menu.context_menu, menu) // Inflate the context menu layout
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        // Handle context menu item clicks
+        when (item.itemId) {
+            R.id.action_item1 -> {
+                //Toast.makeText(this, "Action 1 clicked", Toast.LENGTH_SHORT).show()
+                return true
+            }
+            R.id.action_item2 -> {
+                //Toast.makeText(this, "Action 2 clicked", Toast.LENGTH_SHORT).show()
+                return true
+            }
+            // Add more menu items as needed
+        }
+        return super.onContextItemSelected(item)
     }
 }
