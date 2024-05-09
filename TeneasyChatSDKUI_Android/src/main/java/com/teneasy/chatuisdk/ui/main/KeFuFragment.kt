@@ -61,7 +61,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private lateinit var msgAdapter: MessageListAdapter
-
+    private lateinit var qaAdapter: GroupedQAdapter
     private lateinit var viewModel: KeFuViewModel
 
     private var mIProgressLoader: IProgressLoader? = null
@@ -104,6 +104,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             this.setVariable(BR.vm, viewModel)
 
+            // 初始化聊天消息列表
             msgAdapter = MessageListAdapter(requireContext())
             msgAdapter.setList(ArrayList())
 
@@ -111,8 +112,26 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             //layoutManager.stackFromEnd = false
             this.rcvMsg.layoutManager = layoutManager
-
             this.rcvMsg.adapter = msgAdapter
+
+            // 初始化自动回复列表
+            this.rcvAutoReply.layoutManager = LinearLayoutManager(context)
+            qaAdapter = GroupedQAdapter(requireContext(), ArrayList(), null)
+            this.rcvAutoReply.adapter = qaAdapter
+
+            qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
+                if (qaAdapter.isExpand(groupPosition)) {
+                    qaAdapter.collapseGroup(groupPosition)
+                } else {
+                    qaAdapter.collapseTheResetGroup(groupPosition)
+                    qaAdapter.expandGroup(groupPosition)
+                }
+//                mAdapter?.selectedAuthKind = mVisibleToList.get(groupPosition).kind
+//                mAdapter?.notifyDataChanged()
+//                mMomFeedAuthBean?.kind = mVisibleToList.get(groupPosition).kind
+            }
+
+            // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
                 if (!hasFocus) {
                     closeSoftKeyboard(v)
@@ -248,7 +267,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
          */
         viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
-            println(it)
+
+            it.qa.apply {
+                qaAdapter.setDataList(this)
+            }
+
         }
     }
 

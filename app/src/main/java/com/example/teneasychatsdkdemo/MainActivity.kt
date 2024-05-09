@@ -12,11 +12,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        val btnKeFu =  findViewById<MotionButton>(R.id.btn_send)
-//        btnKeFu.setOnClickListener({
-//            val keFuIntent = Intent(this, KeFuActivity :: class.java)
-//            this.startActivity(keFuIntent)
-//        })
+        val btnKeFu =  findViewById<MotionButton>(R.id.btn_send)
+        btnKeFu.setOnClickListener({
+            val keFuIntent = Intent(this, KeFuActivity :: class.java)
+            this.startActivity(keFuIntent)
+        })
 
         val keFuIntent = Intent(this, KeFuActivity :: class.java)
         this.startActivity(keFuIntent)
