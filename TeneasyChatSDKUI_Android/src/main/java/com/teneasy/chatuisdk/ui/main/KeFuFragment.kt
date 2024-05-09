@@ -119,6 +119,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             qaAdapter = GroupedQAdapter(requireContext(), ArrayList(), null)
             this.rcvAutoReply.adapter = qaAdapter
 
+            // 提问列表点击事件
             qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
                 if (qaAdapter.isExpand(groupPosition)) {
                     qaAdapter.collapseGroup(groupPosition)
@@ -130,6 +131,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 //                mAdapter?.notifyDataChanged()
 //                mMomFeedAuthBean?.kind = mVisibleToList.get(groupPosition).kind
             }
+
+            // 问题点击事件
+            qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
+                val txtMsg = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
+                sendLocalMsg(txtMsg)
+            }
+
+
 
             // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
@@ -541,12 +550,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
-
                 if(!sayHello) {
-                    var chatModel = MessageItem()
-                    chatModel.cMsg = chatLib?.composeALocalMessage("您好，请问有什么可以帮到您！")
-                    chatModel.isLeft = true
-                    viewModel.addMsgItem(chatModel, 0)
+                    //sendLocalMsg("您好，请问有什么可以帮到您！")
                     sayHello = true
                 }
 
@@ -560,5 +565,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         .into(binding!!.civAuthorImage)
                 }
             }
+    }
+
+    private fun sendLocalMsg(msg: String){
+        var chatModel = MessageItem()
+        chatModel.cMsg = chatLib?.composeALocalMessage(msg)
+        chatModel.isLeft = true
+        viewModel.addMsgItem(chatModel, 0)
     }
 }
