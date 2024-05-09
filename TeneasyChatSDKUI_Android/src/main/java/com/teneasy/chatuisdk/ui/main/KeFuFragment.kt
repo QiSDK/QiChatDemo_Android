@@ -242,6 +242,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
         }
 
+        /*
+        自动回复 有两种情况：
+1、一级问题，点击后回复对应的答案；
+2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
+         */
         viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
             println(it)
         }

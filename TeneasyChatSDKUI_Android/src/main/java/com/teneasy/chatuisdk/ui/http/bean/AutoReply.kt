@@ -19,8 +19,9 @@ data class AutoReply(
         val id: Long,
         val question: Question,
         val content: String,
-        val answer: List<Any?>,
-        val related: List<QA>? = null
+        val answer: List<Question?>,
+        val related: List<QA>? = null,
+        var isExpand: Boolean
     )
 
     data class Question (
