@@ -2,11 +2,7 @@ package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
-import android.graphics.Rect
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -14,17 +10,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.Window
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.gson.JsonObject
-import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
@@ -36,8 +28,6 @@ import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
-import com.teneasy.chatuisdk.ui.http.MainApi
-import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.MessageEventBus
@@ -47,11 +37,10 @@ import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
-import com.xuexiang.xhttp2.XHttp
-import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
-import com.xuexiang.xhttp2.exception.ApiException
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.EventBus
@@ -61,7 +50,6 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.abs
 
 /**
  * 客服主界面fragment
@@ -83,7 +71,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var connected = false
     private val TAG = "KeFuFragment"
     private var sayHello = false
-
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,9 +110,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             val layoutManager = LinearLayoutManager(context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             //layoutManager.stackFromEnd = false
-            this.listView.layoutManager = layoutManager
+            this.rcvMsg.layoutManager = layoutManager
 
-            this.listView.adapter = msgAdapter
+            this.rcvMsg.adapter = msgAdapter
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
                 if (!hasFocus) {
                     closeSoftKeyboard(v)
@@ -232,7 +219,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
           //  initData()
             initObserver()
-            viewModel.assignWorker(1)
+            viewModel.assignWorker(Constants.CONSULT_ID)
         }
     }
 
@@ -248,7 +235,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
             if(it.workerId != 0) {
                 viewModel.loadWorker(it.workerId)
-                viewModel.queryAutoReply(1)
+                lifecycleScope.launch {
+                    delay(100L)
+                    viewModel.queryAutoReply(Constants.CONSULT_ID)
+                }
             }
         }
 
@@ -260,19 +250,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun refreshList(){
         runOnUiThread {
             msgAdapter.notifyDataSetChanged()
-            binding?.listView?.scrollToPosition(msgAdapter.itemCount - 1)
-        }
-    }
-    private fun refreshList2(){
-        msgAdapter.notifyDataSetChanged()
-        val layoutManager  = binding!!.listView.layoutManager as LinearLayoutManager
-        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
-        binding!!.listView.post {
-            val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
-            if(target != null) {
-                val offset = binding!!.listView.measuredHeight - target.measuredHeight - 50
-                layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
-            }
+            binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
         }
     }
 

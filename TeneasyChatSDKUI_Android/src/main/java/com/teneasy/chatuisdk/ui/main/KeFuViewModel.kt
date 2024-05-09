@@ -9,6 +9,7 @@ import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.AssignWorker
+import com.teneasy.chatuisdk.ui.http.bean.AutoReply
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ui.MessageItem
@@ -145,7 +146,7 @@ class KeFuViewModel() : ViewModel() {
      * 通过选择的consultId分配客服
      * @param consultId
      */
-    fun assignWorker(consultId: Int) {
+    fun assignWorker(consultId: Long) {
         val param = JsonObject()
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
@@ -167,16 +168,18 @@ class KeFuViewModel() : ViewModel() {
      * 通过选择的consultId获取自动回复
      * @param consultId
      */
-    fun queryAutoReply(consultId: Int) {
+    fun queryAutoReply(consultId: Long) {
         val param = JsonObject()
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.httpToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryAutoReply(param),
-            object : ProgressLoadingCallBack<ReturnData<AutoReplyItem>>(null) {
-                override fun onSuccess(res: ReturnData<AutoReplyItem>) {
-                    mlAutoReplyItem.postValue(res.data)
+            object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
+                override fun onSuccess(res: ReturnData<AutoReply>) {
+                    res.data.autoReplyItem?.let {
+                        mlAutoReplyItem.postValue(it)
+                    }
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)

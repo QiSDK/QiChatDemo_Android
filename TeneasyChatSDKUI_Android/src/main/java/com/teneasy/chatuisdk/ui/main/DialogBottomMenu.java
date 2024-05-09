@@ -3,7 +3,6 @@ package com.teneasy.chatuisdk.ui.main;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -49,7 +48,7 @@ public class DialogBottomMenu {
     private void init() {
         popupWindow = new PopupWindow();
         contentView = LayoutInflater.from(context).inflate(R.layout.dialog_bottom_menu, null);
-        listView = contentView.findViewById(R.id.list_view);
+        listView = contentView.findViewById(R.id.rcv_msg);
         tvTitle = contentView.findViewById(R.id.tv_title);
 
         items = new ArrayList<>();

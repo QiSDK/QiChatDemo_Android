@@ -3,6 +3,7 @@ package com.teneasy.chatuisdk.ui.http;
 import com.google.gson.JsonObject;
 import com.teneasy.chatuisdk.Entrance;
 import com.teneasy.chatuisdk.ui.http.bean.AssignWorker;
+import com.teneasy.chatuisdk.ui.http.bean.AutoReply;
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem;
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo;
 
@@ -37,7 +38,7 @@ public class MainApi {
         Observable<ReturnData<AssignWorker>> assignWorker(@Body JsonObject param);
 
         @POST("v1/api/query-auto-reply")
-        Observable<ReturnData<AutoReplyItem>> queryAutoReply(@Body JsonObject param);
+        Observable<ReturnData<AutoReply>> queryAutoReply(@Body JsonObject param);
 
         @Multipart
         @POST("/v1/assets/upload/")

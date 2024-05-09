@@ -1,6 +1,9 @@
 package com.teneasy.chatuisdk.ui.http.bean
 
 
+data class AutoReply(
+    var autoReplyItem : AutoReplyItem?
+)
 
     data class AutoReplyItem (
         val id: String,
