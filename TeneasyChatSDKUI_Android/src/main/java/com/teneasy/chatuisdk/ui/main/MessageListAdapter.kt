@@ -202,7 +202,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .watchView(tvLeftMsg)
             tvLeftMsg.setOnLongClickListener(OnLongClickListener {
                 builder.asAttachList(
-                    arrayOf<String>("复制","引用", "删除"), null,
+                    //"删除"前端App不需要
+                    arrayOf<String>("复制","回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
@@ -214,7 +215,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                                 1 -> {
                                     //复制
-                                    println("引用")
+                                    println("回复")
                                     listener?.onQuote(it.tag as Int)
                                 }
                                 2 -> {
@@ -233,7 +234,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .watchView(tvRightMsg)
             tvRightMsg.setOnLongClickListener(OnLongClickListener {
                 builder2.asAttachList(
-                    arrayOf<String>("复制","引用", "撤回"), null,
+                    //"撤回", "编辑" 前端App不需要
+                    arrayOf<String>("复制","回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
@@ -245,14 +247,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                                 1 -> {
                                     //复制
-                                    println("引用")
+                                    println("回复")
                                     listener?.onQuote(it.tag as Int)
                                 }
                                 2 -> {
                                     //删除
                                     println("删除")
                                     listener?.onDelete(it.tag as Int)
-                                }
+                                } 3 -> {
+                                //删除
+                                println("编辑")
+                                listener?.onReSend(it.tag as Int)
+                            }
                             }
                         }
                     })

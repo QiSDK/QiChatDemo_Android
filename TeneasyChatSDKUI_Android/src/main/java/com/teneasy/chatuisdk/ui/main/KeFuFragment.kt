@@ -35,6 +35,7 @@ import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
+import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.LineDetectDelegate
@@ -58,7 +59,6 @@ import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
-
 
 /**
  * 客服主界面fragment
@@ -107,6 +107,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             EventBus.getDefault().register(this)
         }
         requireActivity().title = "客服"
+
+        hidetvQuotedMsg()
     }
 
     private fun initChatSDK(baseUrl: String){
@@ -137,25 +139,20 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
                 override fun onCopy(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)
-                    val text = messageItem?.cMsg?.content?.data
-
-              /*      // Get the system clipboard service
-                    val clipboardManager: ClipboardManager =
-                        getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-
-                    // Create a new ClipData object with the text
-                    val clipData = ClipData.newPlainText("textToCp", text)
-
-                    // Set the primary clip on the clipboard
-                    clipboardManager.setPrimaryClip(clipData)*/
+                    val text = messageItem?.cMsg?.content?.data?:""
+                    Utils().copyText(text, requireContext())
                 }
 
                 override fun onReSend(position: Int) {
+
                 }
 
                 override fun onQuote(position: Int) {
+                    //this.QuoteMessage.text = msgAdapter.msgList?.get(position)?.cMsg?.content?.data
+                    binding?.tvQuotedMsg?.visibility = View.VISIBLE
+                    binding?.tvQuotedMsg?.tag = position
+                    showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
                 }
-
             } )
             msgAdapter.setList(ArrayList())
 
@@ -224,7 +221,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     if (this.text.isEmpty()){
                         closeSoftKeyboard(v)
                     }else{
-                        sendMsg((binding?.etMsg?.text ?:"").toString())
+                        var txt = this.text.toString() + "\n" + binding?.tvQuotedMsg?.text.toString()
+                        if(binding?.tvQuotedMsg?.text.toString().isNotEmpty()){
+                            txt = txt + "\n" + binding?.tvQuotedMsg?.text.toString()
+                        }
+                        sendMsg(txt)
+                        hidetvQuotedMsg()
                         binding?.etMsg?.text?.clear()
                     }
                 }
@@ -620,26 +622,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.addMsgItem(chatModel, 0)
     }
 
-
-    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        val inflater = MenuInflater(requireContext())
-        inflater.inflate(R.menu.context_menu, menu) // Inflate the context menu layout
+    private fun hidetvQuotedMsg(){
+        binding?.tvQuotedMsg?.visibility = View.GONE
+        binding?.tvQuotedMsg?.text = ""
     }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        // Handle context menu item clicks
-        when (item.itemId) {
-            R.id.action_item1 -> {
-                //Toast.makeText(this, "Action 1 clicked", Toast.LENGTH_SHORT).show()
-                return true
-            }
-            R.id.action_item2 -> {
-                //Toast.makeText(this, "Action 2 clicked", Toast.LENGTH_SHORT).show()
-                return true
-            }
-            // Add more menu items as needed
-        }
-        return super.onContextItemSelected(item)
+    private fun showQuotedMsg(txt: String){
+        binding?.tvQuotedMsg?.visibility = View.VISIBLE
+        binding?.tvQuotedMsg?.text = txt
     }
 }

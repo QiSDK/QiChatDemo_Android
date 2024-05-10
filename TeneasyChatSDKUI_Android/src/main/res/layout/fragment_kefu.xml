@@ -82,6 +82,18 @@
             >
 
         </TextView>
+        <TextView
+            android:id="@+id/tv_QuotedMsg"
+            app:layout_constraintLeft_toLeftOf="@id/et_msg"
+            app:layout_constraintBottom_toTopOf="@id/et_msg"
+            app:layout_constraintRight_toRightOf="@id/btn_send_img"
+            android:background="@color/_xpopup_light_color"
+            android:text="引用"
+            android:paddingLeft="@dimen/dp_10"
+            android:gravity="center_vertical|left"
+            android:layout_width="0dp"
+            android:layout_height="30dp">   </TextView>
+
         <EditText
             android:id="@+id/et_msg"
             android:layout_width="0dp"
@@ -101,6 +113,10 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/btn_send_expr" />
 
+
+
+
+
         <ImageView
             android:id="@+id/btn_send_expr"
             android:layout_width="32dp"
@@ -108,6 +124,7 @@
             android:textColor="@color/black"
             android:layout_marginEnd="10dp"
             setImage="@{vm.mlExprIcon}"
+            gravity="center"
             app:layout_constraintBottom_toBottomOf="@+id/et_msg"
             app:layout_constraintRight_toLeftOf="@+id/btn_send_img"
             />
