@@ -35,7 +35,7 @@ class SelectConsultTypeFragment : Fragment(){
             viewModel.consultList.observe(viewLifecycleOwner) {
                 adapter.updateData(it)
                 if (!it.isEmpty()) {
-                    this.tvEmpty.visibility = View.VISIBLE
+                    this.tvEmpty.visibility = View.GONE
                 }
             }
 
