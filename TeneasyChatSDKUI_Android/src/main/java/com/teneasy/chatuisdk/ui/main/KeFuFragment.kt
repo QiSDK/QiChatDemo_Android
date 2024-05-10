@@ -153,7 +153,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 override fun onReSend(position: Int) {
                 }
 
-                override fun onReference(position: Int) {
+                override fun onQuote(position: Int) {
                 }
 
             } )

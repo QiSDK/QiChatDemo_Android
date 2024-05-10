@@ -5,9 +5,7 @@ package com.teneasy.chatuisdk.ui.main;
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.view.ContextMenu
 import android.view.LayoutInflater
-import android.view.MenuInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
@@ -30,7 +28,7 @@ interface MessageItemOperateListener {
     fun onDelete(position: Int)
     fun onCopy(position: Int)
     fun onReSend(position: Int)
-    fun onReference(position: Int)
+    fun onQuote(position: Int)
 }
 /**
  * 聊天界面列表adapter
@@ -217,7 +215,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                                 1 -> {
                                     //复制
                                     println("引用")
-                                    listener?.onReference(it.tag as Int)
+                                    listener?.onQuote(it.tag as Int)
                                 }
                                 2 -> {
                                     //删除
@@ -248,7 +246,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                                 1 -> {
                                     //复制
                                     println("引用")
-                                    listener?.onReference(it.tag as Int)
+                                    listener?.onQuote(it.tag as Int)
                                 }
                                 2 -> {
                                     //删除
