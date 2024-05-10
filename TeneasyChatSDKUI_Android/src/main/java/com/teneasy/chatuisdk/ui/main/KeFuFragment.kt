@@ -65,10 +65,6 @@ import java.util.*
  */
 class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDelegate {
 
-    companion object {
-        fun newInstance() = KeFuFragment()
-    }
-
     private lateinit var msgAdapter: MessageListAdapter
     private lateinit var qaAdapter: GroupedQAdapter
     private lateinit var viewModel: KeFuViewModel
@@ -80,8 +76,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var connected = false
     private val TAG = "KeFuFragment"
     private var sayHello = false
-
-
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,7 +142,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 }
 
                 override fun onQuote(position: Int) {
-                    //this.QuoteMessage.text = msgAdapter.msgList?.get(position)?.cMsg?.content?.data
                     binding?.tvQuotedMsg?.visibility = View.VISIBLE
                     binding?.tvQuotedMsg?.tag = position
                     showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
@@ -221,7 +214,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     if (this.text.isEmpty()){
                         closeSoftKeyboard(v)
                     }else{
-                        var txt = this.text.toString() + "\n" + binding?.tvQuotedMsg?.text.toString()
+                        var txt = this.text.toString()
                         if(binding?.tvQuotedMsg?.text.toString().isNotEmpty()){
                             txt = txt + "\n" + binding?.tvQuotedMsg?.text.toString()
                         }
@@ -436,12 +429,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         if(body != null) {
                             val path = response.body!!.string()
                             // 发送图片
-                            sendImgMsg(Constants.baseUrlImage + path)
+                            sendImgMsg(path)//Constants.baseUrlImage +
                         } else {
                             // 上传失败
                             Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
                         }
-
                     }
                 })
 

@@ -103,19 +103,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 Glide.with(act)
                     .asBitmap()
-                    .load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
-                    .skipMemoryCache(true)
+                    .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
+                    //.skipMemoryCache(true)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(object: CustomTarget<Bitmap>() {
-                        override fun onResourceReady(
-                            resource: Bitmap,transition: Transition<in Bitmap>?
-                        ) {
-                            holder.ivRightImg.setImageBitmap(resource)
-//                            resource.width
-//                            holder.ivRightImg.measuredHeight
-                        }
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                    })
+                    .into(holder.ivRightImg)
             }
         } else {
             holder.tvLeftMsg.tag = position
