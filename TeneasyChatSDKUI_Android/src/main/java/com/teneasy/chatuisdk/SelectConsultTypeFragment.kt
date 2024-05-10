@@ -12,8 +12,6 @@ import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
 import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
 
-
-//class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>()
 class SelectConsultTypeFragment : Fragment(){
     private val viewModel: SelectConsultTypeViewModel by viewModels()
     private lateinit var recyclerView: RecyclerView
@@ -22,25 +20,27 @@ class SelectConsultTypeFragment : Fragment(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         binding = FragmentSelectConsultTypeBinding.inflate(inflater, container, false)
-        binding?.let {
+        binding?.apply {
             adapter = MyAdapter(ArrayList())
-            recyclerView = it.rvList
+            recyclerView = this.rvList
             recyclerView.adapter = adapter
             recyclerView.layoutManager = LinearLayoutManager(requireContext())
             viewModel.consultList.observe(viewLifecycleOwner) {
                 adapter.updateData(it)
+                if (!it.isEmpty()) {
+                    this.tvEmpty.visibility = View.VISIBLE
+                }
             }
 
-            viewModel.queryEntrance(1)
+            viewModel.queryEntrance()
         }
-        return  binding!!.root
+        return  binding?.root
     }
 }

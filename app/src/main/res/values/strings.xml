@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TeneasyChatSdkDemo</string>
+    <string name="app_name">QL Demo</string>
 
     <array name="bottom_menu">
         <item>从相册选择</item>

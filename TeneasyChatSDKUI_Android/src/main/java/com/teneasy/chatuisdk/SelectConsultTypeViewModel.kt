@@ -35,18 +35,15 @@ class SelectConsultTypeViewModel : ViewModel() {
 //    }
 
     //query-entrance
-    fun queryEntrance(consultId: Int) {
+    fun queryEntrance() {
         startLoading()
         val param = JsonObject()
-
-        param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.httpToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryEntrance(param),
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
                 override fun onSuccess(res: ReturnData<Entrance>) {
-                 //  setData(res.data.consults)
                     consultList.value = res.data.consults
                 }
 
