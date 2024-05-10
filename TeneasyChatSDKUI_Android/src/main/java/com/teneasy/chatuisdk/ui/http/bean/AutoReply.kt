@@ -1,6 +1,9 @@
 package com.teneasy.chatuisdk.ui.http.bean
 
 
+data class AutoReply(
+    var autoReplyItem : AutoReplyItem?
+)
 
     data class AutoReplyItem (
         val id: String,
@@ -16,8 +19,9 @@ package com.teneasy.chatuisdk.ui.http.bean
         val id: Long,
         val question: Question,
         val content: String,
-        val answer: List<Any?>,
-        val related: List<QA>? = null
+        val answer: List<Question?>,
+        val related: List<QA>? = null,
+        var isExpand: Boolean
     )
 
     data class Question (

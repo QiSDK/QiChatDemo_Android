@@ -2,29 +2,24 @@ package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
-import android.graphics.Rect
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
+import android.view.ContextMenu
 import android.view.LayoutInflater
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.Window
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.gson.JsonObject
-import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
@@ -36,10 +31,10 @@ import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
-import com.teneasy.chatuisdk.ui.http.MainApi
-import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
+import com.teneasy.sdk.LineDetectDelegate
+import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -47,11 +42,10 @@ import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
-import com.xuexiang.xhttp2.XHttp
-import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
-import com.xuexiang.xhttp2.exception.ApiException
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.EventBus
@@ -60,8 +54,7 @@ import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.math.abs
+
 
 /**
  * 客服主界面fragment
@@ -73,7 +66,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private lateinit var msgAdapter: MessageListAdapter
-
+    private lateinit var qaAdapter: GroupedQAdapter
     private lateinit var viewModel: KeFuViewModel
 
     private var mIProgressLoader: IProgressLoader? = null
@@ -84,12 +77,22 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private val TAG = "KeFuFragment"
     private var sayHello = false
 
-
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
-        initChatSDK("csapi.hfxg.xyz")
+
+        //检测线路地址，以逗号分开
+        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream",  object :
+            LineDetectDelegate {
+            override fun useTheLine(line: String) {
+                initChatSDK(line)
+            }
+            override fun lineError(error: Result) {
+                println(error.msg)
+            }
+        }, Constants.merchantId) //123是商户号
+        lineLib.getLine()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -100,11 +103,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         requireActivity().title = "客服"
     }
 
-
     private fun initChatSDK(baseUrl: String){
         var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         val token = SharedPreferencesReader().getString(Constants.wss_token, "")
-        chatLib = ChatLib(Constants.cert , token, wssUrl, 1125324, "9zgd9YUc")
+        chatLib = ChatLib(Constants.cert , token, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
     }
@@ -117,15 +119,45 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             this.setVariable(BR.vm, viewModel)
 
+            // 初始化聊天消息列表
             msgAdapter = MessageListAdapter(requireContext())
             msgAdapter.setList(ArrayList())
 
             val layoutManager = LinearLayoutManager(context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             //layoutManager.stackFromEnd = false
-            this.listView.layoutManager = layoutManager
+            this.rcvMsg.layoutManager = layoutManager
+            this.rcvMsg.adapter = msgAdapter
 
-            this.listView.adapter = msgAdapter
+            // 初始化自动回复列表
+            this.rcvAutoReply.layoutManager = LinearLayoutManager(context)
+            qaAdapter = GroupedQAdapter(requireContext(), ArrayList(), null)
+            this.rcvAutoReply.adapter = qaAdapter
+
+            // 提问列表点击事件
+            qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
+                if (qaAdapter.isExpand(groupPosition)) {
+                    qaAdapter.collapseGroup(groupPosition)
+                } else {
+                    qaAdapter.collapseTheResetGroup(groupPosition)
+                    qaAdapter.expandGroup(groupPosition)
+                }
+//                mAdapter?.selectedAuthKind = mVisibleToList.get(groupPosition).kind
+//                mAdapter?.notifyDataChanged()
+//                mMomFeedAuthBean?.kind = mVisibleToList.get(groupPosition).kind
+            }
+
+            // 问题点击事件
+            qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
+                val answerTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
+                val questionTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.question?.content?.data ?:""
+                // 发送提问消息
+                sendLocalMsg(questionTxt, false)
+                // 自动回答
+                sendLocalMsg(answerTxt)
+            }
+
+            // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
                 if (!hasFocus) {
                     closeSoftKeyboard(v)
@@ -232,7 +264,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
           //  initData()
             initObserver()
-            viewModel.assignWorker(1)
+            viewModel.assignWorker(Constants.CONSULT_ID)
         }
     }
 
@@ -248,31 +280,31 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
             if(it.workerId != 0) {
                 viewModel.loadWorker(it.workerId)
-                viewModel.queryAutoReply(1)
+                lifecycleScope.launch {
+                    delay(100L)
+                    viewModel.queryAutoReply(Constants.CONSULT_ID)
+                }
             }
         }
 
+        /*
+        自动回复 有两种情况：
+1、一级问题，点击后回复对应的答案；
+2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
+         */
         viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
-            println(it)
+
+            it.qa.apply {
+                qaAdapter.setDataList(this)
+            }
+
         }
     }
 
     private fun refreshList(){
         runOnUiThread {
             msgAdapter.notifyDataSetChanged()
-            binding?.listView?.scrollToPosition(msgAdapter.itemCount - 1)
-        }
-    }
-    private fun refreshList2(){
-        msgAdapter.notifyDataSetChanged()
-        val layoutManager  = binding!!.listView.layoutManager as LinearLayoutManager
-        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
-        binding!!.listView.post {
-            val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
-            if(target != null) {
-                val offset = binding!!.listView.measuredHeight - target.measuredHeight - 50
-                layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
-            }
+            binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
         }
     }
 
@@ -284,7 +316,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 //需要执行的任务
                 chatLib?.sendHeartBeat()
             }
-        }, 0,5000)    //每隔5秒发送心跳
+        }, 0,30000)    //每隔5秒发送心跳
     }
 
     // 关闭计时器
@@ -470,14 +502,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun connected(c: GGateway.SCHi) {
-//        if(c.workerId != 0) {
-//            loadWorker(c.workerId)
-//        }
         connected = true;
         SharedPreferencesReader().putString(Constants.wss_token, c.token)
-
-        //loadWorker(3)
-        //viewModel.loadWorker(2)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
@@ -485,34 +511,28 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if(item != null) {
             item.sendStatus = MessageSendState.发送成功
         }
-       // msgAdapter.notifyDataSetChanged()
-       //binding?.listView?.scrollToPosition(viewModel.mlMsgList.value!!.size - 1)
         refreshList()
         Log.i(TAG, "收到回执：${msg.content.data}")
         hideTip()
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
-        //Toast.makeText(context, msg.content.data, Toast.LENGTH_SHORT).show()
-        hideTip()
-
-        var messageItem = MessageItem()
-        messageItem.cMsg = msg
-        messageItem.isLeft = true
-        viewModel.addMsgItem(messageItem, 0)
+        if (msg.consultId != Constants.CONSULT_ID){
+            //免用户端在当前会话里显示其他咨询类型客服发来的消息。
+            showTip("其他客服有新消息！")
+        }else {
+            var messageItem = MessageItem()
+            messageItem.cMsg = msg
+            messageItem.isLeft = true
+            viewModel.addMsgItem(messageItem, 0)
+        }
     }
 
     override fun systemMsg(msg: Result) {
-       // TODO("Not yet implemented")
-        //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
         showTip(msg.msg)
     }
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
-        //TODO("Not yet implemented")
-
-        //Toast.makeText(context, msg.msg, Toast.LENGTH_SHORT).show()
-        //showTip(msg.consultId + "已接通"))
         if (msg.workerId != 0){
            viewModel.loadWorker(msg.workerId)
         }
@@ -535,12 +555,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
-
                 if(!sayHello) {
-                    var chatModel = MessageItem()
-                    chatModel.cMsg = chatLib?.composeALocalMessage("您好，请问有什么可以帮到您！")
-                    chatModel.isLeft = true
-                    viewModel.addMsgItem(chatModel, 0)
+                    //sendLocalMsg("您好，请问有什么可以帮到您！")
                     sayHello = true
                 }
 
@@ -554,5 +570,36 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         .into(binding!!.civAuthorImage)
                 }
             }
+    }
+
+    private fun sendLocalMsg(msg: String, isLeft: Boolean = true){
+        var chatModel = MessageItem()
+        chatModel.cMsg = chatLib?.composeALocalMessage(msg)
+        chatModel.isLeft = isLeft
+        chatModel.sendStatus = MessageSendState.发送成功
+        viewModel.addMsgItem(chatModel, 0)
+    }
+
+
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater = MenuInflater(requireContext())
+        inflater.inflate(R.menu.context_menu, menu) // Inflate the context menu layout
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        // Handle context menu item clicks
+        when (item.itemId) {
+            R.id.action_item1 -> {
+                //Toast.makeText(this, "Action 1 clicked", Toast.LENGTH_SHORT).show()
+                return true
+            }
+            R.id.action_item2 -> {
+                //Toast.makeText(this, "Action 2 clicked", Toast.LENGTH_SHORT).show()
+                return true
+            }
+            // Add more menu items as needed
+        }
+        return super.onContextItemSelected(item)
     }
 }

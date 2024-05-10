@@ -20,3 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -keep class androidx.appcompat.widget.** { *; }
+-dontwarn com.lxj.xpopup.widget.**
+-keep class com.lxj.xpopup.widget.**{*;}

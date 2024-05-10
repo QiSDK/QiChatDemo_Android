@@ -5,20 +5,26 @@ package com.teneasy.chatuisdk.ui.main;
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.view.ContextMenu
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.lxj.xpopup.XPopup
+import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.databinding.ItemMessageBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
+
 
 /**
  * 聊天界面列表adapter
@@ -172,7 +178,7 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
         return if (msgList == null) 0 else msgList!!.size
     }
 
-    inner class MsgViewHolder(binding: ItemMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class MsgViewHolder(binding: ItemMessageBinding) : RecyclerView.ViewHolder(binding.root){
         val tvLeftTime = binding.tvLeftTime
         var tvLeftMsg =  binding.tvLeftMsg
         var tvRightTime =  binding.tvRightTime
@@ -181,5 +187,57 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
         var lySend =  binding.layoutSend
         var ivLeftImg =  binding.ivLeftImage
         var ivSendStatus =  binding.ivSendStatus
+
+        init {
+            // 必须在事件发生前，调用这个方法来监视View的触摸
+            val builder: XPopup.Builder = XPopup.Builder(act)
+                .watchView(tvLeftMsg)
+            tvLeftMsg.setOnLongClickListener(OnLongClickListener {
+                builder.asAttachList(
+                    arrayOf<String>("复制","引用", "删除"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    //置顶
+                                    println("复制")
+                                }
+
+                                1 -> {
+                                    //复制
+                                    println("复制")
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+
+            val builder2: XPopup.Builder = XPopup.Builder(act)
+                .watchView(tvRightMsg)
+            tvRightMsg.setOnLongClickListener(OnLongClickListener {
+                builder2.asAttachList(
+                    arrayOf<String>("复制","引用", "撤回"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    //置顶
+                                    println("复制")
+                                }
+
+                                1 -> {
+                                    //复制
+                                    println("复制")
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+        }
     }
+
 }

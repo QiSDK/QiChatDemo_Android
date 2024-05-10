@@ -108,6 +108,9 @@ dependencies {
 
     // Jetpack Compose Integration
     implementation "androidx.navigation:navigation-compose:$nav_version"
+    implementation 'com.github.donkingliang:GroupedRecyclerViewAdapter:2.4.3'
+
+    implementation 'com.github.li-xiaojun:XPopup:2.10.0'
 }
 
 // ./gradlew publish
