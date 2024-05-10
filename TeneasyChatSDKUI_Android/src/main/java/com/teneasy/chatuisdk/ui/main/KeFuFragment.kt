@@ -1,6 +1,9 @@
 package com.teneasy.chatuisdk.ui.main;
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
 import android.text.Editable
@@ -16,6 +19,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -77,6 +81,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private val TAG = "KeFuFragment"
     private var sayHello = false
 
+
+
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,7 +126,37 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.setVariable(BR.vm, viewModel)
 
             // 初始化聊天消息列表
-            msgAdapter = MessageListAdapter(requireContext())
+            msgAdapter = MessageListAdapter(requireContext(), object : MessageItemOperateListener {
+                override fun onDelete(position: Int) {
+                   val messageItem = msgAdapter.msgList?.get(position)
+                    messageItem?.let {
+                        chatLib?.deleteMessage(it.cMsg?.msgId ?: 0)
+                        viewModel.removeMsgItem(it)
+                    }
+                }
+
+                override fun onCopy(position: Int) {
+                    val messageItem = msgAdapter.msgList?.get(position)
+                    val text = messageItem?.cMsg?.content?.data
+
+              /*      // Get the system clipboard service
+                    val clipboardManager: ClipboardManager =
+                        getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+
+                    // Create a new ClipData object with the text
+                    val clipData = ClipData.newPlainText("textToCp", text)
+
+                    // Set the primary clip on the clipboard
+                    clipboardManager.setPrimaryClip(clipData)*/
+                }
+
+                override fun onReSend(position: Int) {
+                }
+
+                override fun onReference(position: Int) {
+                }
+
+            } )
             msgAdapter.setList(ArrayList())
 
             val layoutManager = LinearLayoutManager(context)
@@ -504,6 +540,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun connected(c: GGateway.SCHi) {
         connected = true;
         SharedPreferencesReader().putString(Constants.wss_token, c.token)
+    }
+
+    override fun msgDeleted(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
+        viewModel.removeMsgItem(payloadId, msg.msgId)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {

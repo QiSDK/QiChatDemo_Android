@@ -57,6 +57,22 @@ class KeFuViewModel() : ViewModel() {
         mlMsgList.postValue(mlMsgList.value)
     }
 
+    fun removeMsgItem(payLoadId: Long, msgId: Long){
+        val newList = mlMsgList.value?.toMutableList() ?: mutableListOf()
+        for (item in newList) {
+            if (item.payLoadId == payLoadId || item.cMsg?.msgId == msgId) {
+                newList.remove(item)
+                mlMsgList.postValue(newList as ArrayList<MessageItem>?)
+                return
+            }
+        }
+    }
+
+    fun removeMsgItem(messageItem: MessageItem){
+        mlMsgList.value?.remove(messageItem)
+        mlMsgList.postValue(mlMsgList.value)
+    }
+
     /**
     * 通过指定的图片地址，创建图片消息实体。一般用于UI层对用户显示的自定义消息（该方法并未调用socket发送消息）。
     * 如需发送至后端，需获取返回的消息实体，再调用发送方法

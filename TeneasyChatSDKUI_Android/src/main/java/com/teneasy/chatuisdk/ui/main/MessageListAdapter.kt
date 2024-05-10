@@ -26,17 +26,24 @@ import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
 
 
+interface MessageItemOperateListener {
+    fun onDelete(position: Int)
+    fun onCopy(position: Int)
+    fun onReSend(position: Int)
+    fun onReference(position: Int)
+}
 /**
  * 聊天界面列表adapter
  */
-class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageListAdapter.MsgViewHolder>() {
-    private var msgList: ArrayList<MessageItem>? = null
+class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<MessageListAdapter.MsgViewHolder>() {
+    var msgList: ArrayList<MessageItem>? = null
     var TYPE_Text : Int = 0
     val TYPE_Image : Int = 1
     val act: Context = myContext
-    fun getList(): ArrayList<MessageItem>? {
-        return msgList
-    }
+    private var listener: MessageItemOperateListener? = listener
+//    fun getList(): ArrayList<MessageItem>? {
+//        return msgList
+//    }
 
     fun setList(list: ArrayList<MessageItem>?) {
         this.msgList = list//ArrayList(list)
@@ -68,6 +75,8 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
             localTime = TimeUtil.getTimeStringAutoShort2(msgDate, true)
         }
         if (!item.isLeft) {
+
+            holder.tvRightMsg.tag = position
             holder.tvRightTime.text = localTime
             holder.tvRightTime.visibility = View.VISIBLE
             holder.tvRightMsg.visibility = View.VISIBLE
@@ -111,6 +120,7 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
                     })
             }
         } else {
+            holder.tvLeftMsg.tag = position
             holder.tvLeftTime.text = localTime
             holder.tvLeftTime.visibility = View.VISIBLE
             holder.tvLeftMsg.visibility = View.VISIBLE
@@ -201,11 +211,18 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
                                 0 -> {
                                     //置顶
                                     println("复制")
+                                    listener?.onCopy(it.tag as Int)
                                 }
 
                                 1 -> {
                                     //复制
-                                    println("复制")
+                                    println("引用")
+                                    listener?.onReference(it.tag as Int)
+                                }
+                                2 -> {
+                                    //删除
+                                    println("删除")
+                                    listener?.onDelete(it.tag as Int)
                                 }
                             }
                         }
@@ -225,11 +242,18 @@ class MessageListAdapter (myContext: Context) : RecyclerView.Adapter<MessageList
                                 0 -> {
                                     //置顶
                                     println("复制")
+                                    listener?.onCopy(it.tag as Int)
                                 }
 
                                 1 -> {
                                     //复制
-                                    println("复制")
+                                    println("引用")
+                                    listener?.onReference(it.tag as Int)
+                                }
+                                2 -> {
+                                    //删除
+                                    println("删除")
+                                    listener?.onDelete(it.tag as Int)
                                 }
                             }
                         }
