@@ -16,12 +16,22 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
+import com.teneasy.chatuisdk.databinding.ItemHeaderRecyleviewBinding
 import com.teneasy.chatuisdk.databinding.ItemMessageBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.JsonObject
+import com.teneasy.chatuisdk.ui.http.MainApi
+import com.teneasy.chatuisdk.ui.http.ReturnData
+import com.teneasy.chatuisdk.ui.http.bean.AutoReply
+import com.xuexiang.xhttp2.XHttp
+import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
+import com.xuexiang.xhttp2.exception.ApiException
 
 
 interface MessageItemOperateListener {
@@ -29,16 +39,19 @@ interface MessageItemOperateListener {
     fun onCopy(position: Int)
     fun onReSend(position: Int)
     fun onQuote(position: Int)
+    fun onSendLocalMsg(msg: String, isLeft: Boolean)
 }
 /**
  * 聊天界面列表adapter
  */
-class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<MessageListAdapter.MsgViewHolder>() {
+class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var msgList: ArrayList<MessageItem>? = null
     var TYPE_Text : Int = 0
     val TYPE_Image : Int = 1
+    val TYPE_Header : Int = 2
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
+    private lateinit var qaAdapter: GroupedQAdapter
 //    fun getList(): ArrayList<MessageItem>? {
 //        return msgList
 //    }
@@ -47,115 +60,134 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         this.msgList = list//ArrayList(list)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MsgViewHolder {
-        val binding = ItemMessageBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return MsgViewHolder(binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        if (viewType == TYPE_Header) {
+            val binding = ItemHeaderRecyleviewBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false)
+            return HeaderViewHolder(binding)
+        }else {
+            val binding = ItemMessageBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+            return MsgViewHolder(binding)
+        }
     }
 
-    override fun onBindViewHolder(holder: MsgViewHolder, position: Int) {
-        if (msgList == null) {
-            return
-        }
-        val item = msgList!![position]
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is HeaderViewHolder) {
+           // holder.rcvQa.adapter = qaAdapter
+        }else if (holder is MsgViewHolder) {
+            if (msgList == null) {
+                return
+            }
+            //因为headerView占了1个位置，所以要减1
+            val newPos = position - 1
+            val item = msgList!![newPos]
 
-        if (item.cMsg == null){
-            return
-        }
+            if (item.cMsg == null) {
+                return
+            }
 
-        var localTime = "Time error"
+            var localTime = "Time error"
 
-        item.cMsg?.let {
-            val msgDate =  Date(it.msgTime.seconds * 1000L)
-            localTime = TimeUtil.getTimeStringAutoShort2(msgDate, true)
-        }
-        if (!item.isLeft) {
-
-            holder.tvRightMsg.tag = position
-            holder.tvRightTime.text = localTime
-            holder.tvRightTime.visibility = View.VISIBLE
-            holder.tvRightMsg.visibility = View.VISIBLE
-            holder.lySend.visibility = View.VISIBLE
-
-            holder.tvLeftTime.visibility = View.GONE
-            holder.ivLeftImg.visibility = View.GONE
-            holder.tvLeftMsg.visibility = View.GONE
-
-            if(item.sendStatus != MessageSendState.发送成功) {
-                holder.ivSendStatus.visibility = View.VISIBLE
-            } else
-                holder.ivSendStatus.visibility = View.GONE
-
-            if (getItemViewType(position) == TYPE_Text){
+            item.cMsg?.let {
+                val msgDate = Date(it.msgTime.seconds * 1000L)
+                localTime = TimeUtil.getTimeStringAutoShort2(msgDate, true)
+            }
+            if (!item.isLeft) {
+                holder.tvRightMsg.tag = newPos
+                holder.tvRightTime.text = localTime
+                holder.tvRightTime.visibility = View.VISIBLE
                 holder.tvRightMsg.visibility = View.VISIBLE
-               holder.ivRightImg.visibility = View.GONE
-                holder.tvRightMsg.text = item.cMsg!!.content.data
-            }else{
-                holder.tvRightMsg.visibility = View.GONE
-                holder.ivRightImg.visibility = View.VISIBLE
+                holder.lySend.visibility = View.VISIBLE
+
+                holder.tvLeftTime.visibility = View.GONE
+                holder.ivLeftImg.visibility = View.GONE
+                holder.tvLeftMsg.visibility = View.GONE
+
+                if (item.sendStatus != MessageSendState.发送成功) {
+                    holder.ivSendStatus.visibility = View.VISIBLE
+                } else
+                    holder.ivSendStatus.visibility = View.GONE
+
+                if (getItemViewType(position) == TYPE_Text) {
+                    holder.tvRightMsg.visibility = View.VISIBLE
+                    holder.ivRightImg.visibility = View.GONE
+                    holder.tvRightMsg.text = item.cMsg!!.content.data
+                } else {
+                    holder.tvRightMsg.visibility = View.GONE
+                    holder.ivRightImg.visibility = View.VISIBLE
 //                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 //                    .into(holder.ivRightImg)
 
-                Glide.with(act)
-                    .asBitmap()
-                    .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
-                    //.skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(holder.ivRightImg)
-            }
-        } else {
-            holder.tvLeftMsg.tag = position
-            holder.tvLeftTime.text = localTime
-            holder.tvLeftTime.visibility = View.VISIBLE
-            holder.tvLeftMsg.visibility = View.VISIBLE
-            holder.tvRightTime.visibility = View.GONE
-            holder.tvRightMsg.visibility = View.GONE
-            holder.ivRightImg.visibility = View.GONE
-            holder.tvRightMsg.visibility = View.GONE
-            holder.lySend.visibility = View.GONE
-
-            if (getItemViewType(position) == TYPE_Text){
+                    Glide.with(act)
+                        .asBitmap()
+                        .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
+                        //.skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(holder.ivRightImg)
+                }
+            } else {
+                holder.tvLeftMsg.tag = newPos
+                holder.tvLeftTime.text = localTime
+                holder.tvLeftTime.visibility = View.VISIBLE
                 holder.tvLeftMsg.visibility = View.VISIBLE
-                holder.ivLeftImg.visibility = View.GONE
-                holder.tvLeftMsg.text = item.cMsg!!.content.data
-            }else{
-                holder.tvLeftMsg.visibility = View.GONE
-                holder.ivLeftImg.visibility = View.VISIBLE
+                holder.tvRightTime.visibility = View.GONE
+                holder.tvRightMsg.visibility = View.GONE
+                holder.ivRightImg.visibility = View.GONE
+                holder.tvRightMsg.visibility = View.GONE
+                holder.lySend.visibility = View.GONE
+
+                if (getItemViewType(position) == TYPE_Text) {
+                    holder.tvLeftMsg.visibility = View.VISIBLE
+                    holder.ivLeftImg.visibility = View.GONE
+                    holder.tvLeftMsg.text = item.cMsg!!.content.data
+                } else {
+                    holder.tvLeftMsg.visibility = View.GONE
+                    holder.ivLeftImg.visibility = View.VISIBLE
 //                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 //                    .into(holder.ivLeftImg)
-                Glide.with(act)
-                    .asBitmap()
-                    .load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(object: CustomTarget<Bitmap>() {
-                        override fun onResourceReady(
-                            resource: Bitmap,transition: Transition<in Bitmap>?
-                        ) {
-                            holder.ivLeftImg.setImageBitmap(resource)
+                    Glide.with(act)
+                        .asBitmap()
+                        .load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(
+                                resource: Bitmap, transition: Transition<in Bitmap>?
+                            ) {
+                                holder.ivLeftImg.setImageBitmap(resource)
 //                            resource.width
 //                            holder.ivLeftImg.width
 //                            holder.ivLeftImg.measuredHeight
-                        }
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                    })
+                            }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {}
+                        })
+                }
             }
         }
     }
 
     override
     fun getItemViewType(position: Int) : Int{
+
+        if (position == 0) {
+            return TYPE_Header
+        }
         if (msgList == null) {
             return TYPE_Text
         }
-        val obj = msgList!![position]
+
+        val obj = msgList!![position - 1]
         obj.cMsg?.apply {
             return if (this.hasImage()){
                 return TYPE_Image
@@ -163,20 +195,60 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 return TYPE_Text
             }
         }
-        // 因为要处理接收和自己发送的消息，所以单纯的判断msg是不够的。需要直接判断imgPath是否为空
-//        if(obj.isSend) {
-//            if(obj.imgPath != null && obj.imgPath.isNotEmpty()) {
-//                return TYPE_Image
-//            }
-//        } else {
-//        }
         return TYPE_Text
     }
 
     override fun getItemCount(): Int {
-        return if (msgList == null) 0 else msgList!!.size
+        return if (msgList == null) 1 else msgList!!.size + 1
     }
 
+    inner class HeaderViewHolder(binding: ItemHeaderRecyleviewBinding) : RecyclerView.ViewHolder(binding.root){
+        var rcvQa = binding.rcvQa
+        init {
+            // 初始化自动回复列表
+            rcvQa.layoutManager = LinearLayoutManager(act)
+            qaAdapter = GroupedQAdapter(act, ArrayList(), null)
+            rcvQa.adapter = qaAdapter
+
+            val param = JsonObject()
+            param.addProperty("consultId", Constants.CONSULT_ID)
+            val request = XHttp.custom().accessToken(false)
+            request.headers("X-Token", Constants.httpToken)
+            request.call(request.create(MainApi.IMainTask::class.java)
+                .queryAutoReply(param),
+                object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
+                    override fun onSuccess(res: ReturnData<AutoReply>) {
+                        res.data.autoReplyItem?.qa?.let {
+                            qaAdapter.setDataList(it)
+                        }
+                    } override fun onError(e: ApiException?) {
+                        super.onError(e)
+                        println(e)
+                    }
+                }
+            )
+
+            // 提问列表点击事件
+            qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
+                if (qaAdapter.isExpand(groupPosition)) {
+                    qaAdapter.collapseGroup(groupPosition)
+                } else {
+                    qaAdapter.collapseTheResetGroup(groupPosition)
+                    qaAdapter.expandGroup(groupPosition)
+                }
+            }
+
+            // 问题点击事件
+            qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
+                val answerTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
+                val questionTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.question?.content?.data ?:""
+                // 发送提问消息
+                listener?.onSendLocalMsg(questionTxt, false)
+                // 自动回答
+                listener?.onSendLocalMsg(answerTxt, true)
+            }
+        }
+    }
     inner class MsgViewHolder(binding: ItemMessageBinding) : RecyclerView.ViewHolder(binding.root){
         val tvLeftTime = binding.tvLeftTime
         var tvLeftMsg =  binding.tvLeftMsg
