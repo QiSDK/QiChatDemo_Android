@@ -40,6 +40,11 @@ public class MainApi {
         @POST("v1/api/query-auto-reply")
         Observable<ReturnData<AutoReply>> queryAutoReply(@Body JsonObject param);
 
+        @POST("v1/api/message/sync")
+        Observable<ReturnData<AutoReply>> syncMessage(@Body JsonObject param);
+
+
+
         @Multipart
         @POST("/v1/assets/upload/")
 //        @Headers({"Content-Type: multipart/form-data", "Accept: multipart/form-data"})

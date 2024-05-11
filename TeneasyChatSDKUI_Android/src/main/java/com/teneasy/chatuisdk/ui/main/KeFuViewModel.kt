@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.google.protobuf.Timestamp
+import com.teneasy.chatuisdk.Entrance
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.http.MainApi
@@ -71,6 +72,42 @@ class KeFuViewModel() : ViewModel() {
     fun removeMsgItem(messageItem: MessageItem){
         mlMsgList.value?.remove(messageItem)
         mlMsgList.postValue(mlMsgList.value)
+    }
+
+    /*
+    {
+  "chatId": "0",
+  "msgId": "0",
+  "count": 0,
+  "withLastOne": true,
+  "workerId": 0,
+  "consultId": 0,
+  "userId": 0
+}
+     */
+
+    ///v1/api/message/sync
+    //query-entrance
+    fun syncMessage() {
+        val param = JsonObject()
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.httpToken)
+
+        /*
+        https://csapi.hfxg.xyz/v1/api/
+         */
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .queryEntrance(param),
+            object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
+                override fun onSuccess(res: ReturnData<Entrance>) {
+                   // consultList.value = res.data.consults
+                }
+
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
+                }
+            })
     }
 
     /**
