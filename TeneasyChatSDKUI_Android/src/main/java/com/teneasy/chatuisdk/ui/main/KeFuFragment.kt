@@ -19,8 +19,10 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -93,7 +95,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
         }, Constants.merchantId) //123是商户号
         lineLib.getLine()
+
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            findNavController().popBackStack()
+        }
     }
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -300,6 +308,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
           //  initData()
             initObserver()
             viewModel.assignWorker(Constants.CONSULT_ID)
+
+            this.llClose.setOnClickListener {
+                findNavController().popBackStack()
+            }
         }
     }
 
