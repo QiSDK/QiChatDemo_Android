@@ -5,6 +5,8 @@ import com.teneasy.chatuisdk.Entrance;
 import com.teneasy.chatuisdk.ui.http.bean.AssignWorker;
 import com.teneasy.chatuisdk.ui.http.bean.AutoReply;
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem;
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory;
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request;
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo;
 
 import java.util.List;
@@ -41,7 +43,7 @@ public class MainApi {
         Observable<ReturnData<AutoReply>> queryAutoReply(@Body JsonObject param);
 
         @POST("v1/api/message/sync")
-        Observable<ReturnData<AutoReply>> syncMessage(@Body JsonObject param);
+        Observable<ReturnData<ChatHistory>> queryChatHistory(@Body Request param);
 
 
 

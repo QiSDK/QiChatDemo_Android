@@ -85,7 +85,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel = KeFuViewModel()
 
         //检测线路地址，以逗号分开
-        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream",  object :
+        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream,https://wcsapi.qixin14.xyz",  object :
             LineDetectDelegate {
             override fun useTheLine(line: String) {
                 initChatSDK(line)

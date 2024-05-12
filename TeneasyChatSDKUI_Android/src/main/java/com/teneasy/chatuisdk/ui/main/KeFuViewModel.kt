@@ -1,5 +1,6 @@
 package com.teneasy.chatuisdk.ui.main
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
@@ -12,6 +13,9 @@ import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.AssignWorker
 import com.teneasy.chatuisdk.ui.http.bean.AutoReply
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.list
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
@@ -40,7 +44,7 @@ class KeFuViewModel() : ViewModel() {
     val mlAutoReplyItem = MutableLiveData<AutoReplyItem>()
     val mlAssignWorker = MutableLiveData<AssignWorker>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
-
+    val mHistoryList = MutableLiveData<List<list>?>()
 
     init {
         mlSendMsg.value = ""
@@ -72,42 +76,6 @@ class KeFuViewModel() : ViewModel() {
     fun removeMsgItem(messageItem: MessageItem){
         mlMsgList.value?.remove(messageItem)
         mlMsgList.postValue(mlMsgList.value)
-    }
-
-    /*
-    {
-  "chatId": "0",
-  "msgId": "0",
-  "count": 0,
-  "withLastOne": true,
-  "workerId": 0,
-  "consultId": 0,
-  "userId": 0
-}
-     */
-
-    ///v1/api/message/sync
-    //query-entrance
-    fun syncMessage() {
-        val param = JsonObject()
-        val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", Constants.httpToken)
-
-        /*
-        https://csapi.hfxg.xyz/v1/api/
-         */
-        request.call(request.create(MainApi.IMainTask::class.java)
-            .queryEntrance(param),
-            object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
-                override fun onSuccess(res: ReturnData<Entrance>) {
-                   // consultList.value = res.data.consults
-                }
-
-                override fun onError(e: ApiException?) {
-                    super.onError(e)
-                    println(e)
-                }
-            })
     }
 
     /**
@@ -227,6 +195,41 @@ class KeFuViewModel() : ViewModel() {
                 override fun onSuccess(res: ReturnData<AutoReply>) {
                     res.data.autoReplyItem?.let {
                         mlAutoReplyItem.postValue(it)
+                    }
+                } override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
+                }
+            }
+        )
+    }
+
+
+    /*
+    {
+  "chatId": "0",
+  "msgId": "0",
+  "count": 0,
+  "withLastOne": true,
+  "workerId": 0,
+  "consultId": 0,
+  "userId": 0
+}
+ */
+    fun queryChatHistory(consultId: Long) {
+
+        var param = Request(0, "0", 100, true, Constants.workerId, Constants.CONSULT_ID, Constants.userId)
+
+        //val param = JsonObject()
+        //param.addProperty("consultId", consultId)
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.httpToken)
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .queryChatHistory(param),
+            object : ProgressLoadingCallBack<ReturnData<ChatHistory>>(null) {
+                override fun onSuccess(res: ReturnData<ChatHistory>) {
+                    res.data.list?.let {
+                        mHistoryList.postValue(it)
                     }
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
