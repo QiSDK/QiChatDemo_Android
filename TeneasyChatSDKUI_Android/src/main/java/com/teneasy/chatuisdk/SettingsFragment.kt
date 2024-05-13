@@ -3,8 +3,11 @@ package com.teneasy.chatuisdk
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
+import androidx.navigation.fragment.findNavController
 import com.teneasy.chatuisdk.databinding.FragmentSettingsBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
@@ -37,6 +40,9 @@ var binding: FragmentSettingsBinding? = null
             param2 = it.getString(ARG_PARAM2)
         }
 
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            findNavController().popBackStack()
+        }
         Utils().readConfig()
     }
 
@@ -70,6 +76,13 @@ var binding: FragmentSettingsBinding? = null
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)
+            }
+
+            this.root.setOnTouchListener { v, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                       Utils().closeSoftKeyboard(v)
+                    }
+                    true
             }
         }
 

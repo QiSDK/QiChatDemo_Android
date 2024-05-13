@@ -30,10 +30,6 @@ class SelectConsultTypeFragment : Fragment(){
         super.onCreate(savedInstanceState)
         //初始化配置
         Utils().readConfig()
-
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            findNavController().popBackStack()
-        }
     }
 
     override fun onCreateView(
