@@ -27,4 +27,8 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <string name="settings">设置</string>
+    <string name="lineDetecting">线路检测中...</string>
+    <string name="connect_to_worker">连接客服中，请稍后...</string>
 </resources>

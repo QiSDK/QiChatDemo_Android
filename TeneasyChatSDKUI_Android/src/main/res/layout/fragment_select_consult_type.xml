@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="连接客服中，请稍后..."
+            android:text="@string/connect_to_worker"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textColor="@color/ps_color_blue"
-            android:text="线路检测中..."
+            android:text="@string/lineDetecting"
             android:layout_marginBottom="100dp"
             app:layout_constraintBottom_toBottomOf="parent"
             >

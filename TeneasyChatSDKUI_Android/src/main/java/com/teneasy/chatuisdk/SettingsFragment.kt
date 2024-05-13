@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.navigation.fragment.findNavController
+import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.chatuisdk.databinding.FragmentSettingsBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
@@ -76,6 +77,8 @@ var binding: FragmentSettingsBinding? = null
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)
+
+                ToastUtils.showToast(requireContext(), "保存成功")
             }
 
             this.root.setOnTouchListener { v, event ->

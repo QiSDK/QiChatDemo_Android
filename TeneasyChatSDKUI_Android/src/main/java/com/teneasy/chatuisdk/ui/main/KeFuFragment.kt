@@ -33,6 +33,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
+import com.teneasy.sdk.BuildConfig
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
@@ -183,7 +184,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
                 if (!hasFocus) {
-                    closeSoftKeyboard(v)
+                    Utils().closeSoftKeyboard(v)
                 }
             }
             // 聊天界面输入框，输入事件。实现文本输入和表情输入的UI切换功能
@@ -209,7 +210,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.btnSend.setOnClickListener { v: View ->
                 binding?.etMsg?.apply {
                     if (this.text.isEmpty()){
-                        closeSoftKeyboard(v)
+                        Utils().closeSoftKeyboard(v)
                     }else{
                         var txt = this.text.toString()
                         if(binding?.tvQuotedMsg?.text.toString().isNotEmpty()){
@@ -293,7 +294,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
           //  initData()
             initObserver()
             viewModel.assignWorker(Constants.CONSULT_ID)
-
+            //viewModel.queryAutoReply(Constants.CONSULT_ID)
             this.llClose.setOnClickListener {
                 findNavController().popBackStack()
             }
@@ -381,20 +382,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         } else if(event.what == 1 && event.data != null) {
 
         }
-    }
-
-    /**
-     * 关闭软键盘
-     *
-     * @param view 当前页面上任意一个可用的view
-     */
-    private fun closeSoftKeyboard(view: View?) {
-        if (view == null || view.windowToken == null) {
-            return
-        }
-        val imm: InputMethodManager =
-            view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     /**
@@ -534,6 +521,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun connected(c: GGateway.SCHi) {
         connected = true;
+        println(c.id)
         UserPreferences().putString(Constants.wss_token, c.token)
     }
 
@@ -564,7 +552,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun systemMsg(msg: Result) {
-        showTip(msg.msg)
+        //只需要调试的时候显示系统消息，其他情况不显示，避免频繁的系统提示影响用户体验
+        if (BuildConfig.DEBUG) {
+            showTip(msg.msg)
+        }
     }
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
@@ -595,6 +586,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     sayHello = true
                 }
 
+                showTip("您好，${workerInfo.workerName}客服为您服务！")
                 // 更新头像
                 if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
                     val url = Constants.baseUrlImage + workerInfo.workerAvatar

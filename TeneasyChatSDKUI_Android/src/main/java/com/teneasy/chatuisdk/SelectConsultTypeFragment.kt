@@ -58,6 +58,9 @@ class SelectConsultTypeFragment : Fragment(){
     override fun onResume() {
         super.onResume()
 
+        //binding?.tvLine?.text = "当前线路："
+        //binding?.tvEmpty?.text = "连接客服中，请稍后..."
+
         //检测线路地址，以逗号分开
         val lineLib = LineDetectLib(Constants.lines,  object :
             LineDetectDelegate {
