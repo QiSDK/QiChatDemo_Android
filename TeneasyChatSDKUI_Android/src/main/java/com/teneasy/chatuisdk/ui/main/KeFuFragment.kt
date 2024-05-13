@@ -84,17 +84,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
 
-        //检测线路地址，以逗号分开
-        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream,https://wcsapi.qixin14.xyz",  object :
-            LineDetectDelegate {
-            override fun useTheLine(line: String) {
-                initChatSDK(line)
-            }
-            override fun lineError(error: Result) {
-                println(error.msg)
-            }
-        }, Constants.merchantId) //123是商户号
-        lineLib.getLine()
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             findNavController().popBackStack()

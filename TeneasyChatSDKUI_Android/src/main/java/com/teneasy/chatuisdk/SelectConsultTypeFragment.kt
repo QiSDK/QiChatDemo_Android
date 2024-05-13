@@ -10,7 +10,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
+import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
+import com.teneasy.sdk.LineDetectDelegate
+import com.teneasy.sdk.LineDetectLib
+import com.teneasy.sdk.Result
+import com.xuexiang.xhttp2.XHttpSDK
 
 class SelectConsultTypeFragment : Fragment(){
     private val viewModel: SelectConsultTypeViewModel by viewModels()
@@ -39,8 +44,30 @@ class SelectConsultTypeFragment : Fragment(){
                 }
             }
 
-            viewModel.queryEntrance()
+            //viewModel.queryEntrance()
         }
         return  binding?.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        //检测线路地址，以逗号分开
+        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream,https://wcsapi.qixin14.xyz",  object :
+            LineDetectDelegate {
+            override fun useTheLine(line: String) {
+                //设置网络请求的全局基础地址
+                XHttpSDK.setBaseUrl(Constants.baseUrl)
+                //initChatSDK(line)
+                activity?.runOnUiThread {
+                    binding?.tvLine?.text = "当前线路：" + line
+                    viewModel.queryEntrance()
+                }
+            }
+            override fun lineError(error: Result) {
+                println(error.msg)
+            }
+        }, Constants.merchantId) //123是商户号
+        lineLib.getLine()
     }
 }
