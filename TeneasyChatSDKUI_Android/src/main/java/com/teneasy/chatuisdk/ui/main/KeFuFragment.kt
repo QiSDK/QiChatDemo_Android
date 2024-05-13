@@ -30,6 +30,7 @@ import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
+import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
@@ -101,8 +102,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     private fun initChatSDK(baseUrl: String){
         var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
-        val token = UserPreferences().getString(Constants.wss_token, "")
-        chatLib = ChatLib(Constants.cert , token, wssUrl, Constants.userId, "9zgd9YUc")
+        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
     }
@@ -526,7 +526,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun connected(c: GGateway.SCHi) {
         connected = true;
         println(c.id)
-        UserPreferences().putString(Constants.wss_token, c.token)
+        UserPreferences().putString(PARAM_XTOKEN, c.token)
     }
 
     override fun msgDeleted(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {

@@ -32,6 +32,6 @@ class Constants {
         var merchantId = 230
         var userId = 1125324
         var workerId = 2
-        val wss_token = "wss_token"
+        //val wss_token = "wss_token"
     }
 }
