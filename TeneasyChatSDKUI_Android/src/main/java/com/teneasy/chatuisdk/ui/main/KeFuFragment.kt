@@ -80,7 +80,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         arguments?.let {
             wssBaseUrl = it.getString(PARAM_WSS_BASE_URL) ?: ""
-            initChatSDK(Constants.baseUrl)
+            initChatSDK(Constants.domain)
         }
 
        requireActivity().onBackPressedDispatcher.addCallback(this) {

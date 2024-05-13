@@ -72,7 +72,7 @@ var binding: FragmentSettingsBinding? = null
                 Constants.userId =  this.etUserId.text.toString().toInt()
 
                 UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
-                UserPreferences().putString(PARAM_WSS_BASE_URL, Constants.baseUrl)
+                UserPreferences().putString(PARAM_WSS_BASE_URL, Constants.domain)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)

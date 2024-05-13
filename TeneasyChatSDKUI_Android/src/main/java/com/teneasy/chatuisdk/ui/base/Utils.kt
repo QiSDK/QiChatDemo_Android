@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 
 class Utils {
 
@@ -24,7 +23,7 @@ class Utils {
 
     fun readConfig() {
         Constants.xToken = UserPreferences().getString(PARAM_XTOKEN, Constants.xToken)
-        Constants.baseUrl = UserPreferences().getString(PARAM_WSS_BASE_URL, Constants.baseUrl)
+        Constants.domain = UserPreferences().getString(PARAM_WSS_BASE_URL, Constants.domain)
         Constants.userId = UserPreferences().getInt(PARAM_USER_ID, Constants.userId)
         Constants.merchantId = UserPreferences().getInt(PARAM_MERCHANT_ID, Constants.merchantId)
         Constants.lines = UserPreferences().getString(PARAM_LINES, Constants.lines)

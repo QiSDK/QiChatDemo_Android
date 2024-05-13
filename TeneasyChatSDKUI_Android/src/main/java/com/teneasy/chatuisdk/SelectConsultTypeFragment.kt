@@ -5,17 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Utils
-import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.Result
@@ -65,7 +62,7 @@ class SelectConsultTypeFragment : Fragment(){
         val lineLib = LineDetectLib(Constants.lines,  object :
             LineDetectDelegate {
             override fun useTheLine(line: String) {
-                Constants.baseUrl = line
+                Constants.domain = line
                 //设置网络请求的全局基础地址
                 XHttpSDK.setBaseUrl(Constants.baseUrlApi)
                 //initChatSDK(line)

@@ -24,6 +24,6 @@ class ApplicationExt: Application(){
         XHttpSDK.debug()
 //        }
         //设置网络请求的全局基础地址
-        XHttpSDK.setBaseUrl(Constants.baseUrl)
+        XHttpSDK.setBaseUrl(Constants.domain)
     }
 }

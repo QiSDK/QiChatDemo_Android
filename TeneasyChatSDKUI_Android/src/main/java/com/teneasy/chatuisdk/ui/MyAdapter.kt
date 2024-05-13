@@ -1,12 +1,8 @@
 package com.teneasy.chatuisdk.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.Consults
@@ -29,7 +25,7 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
             Constants.CONSULT_ID = data[position].consultId?:0L
 
             var bundle = Bundle()
-            bundle.putString(PARAM_WSS_BASE_URL, Constants.baseUrl)
+            bundle.putString(PARAM_WSS_BASE_URL, Constants.domain)
             it.findNavController().navigate(R.id.frg_kefu_main, bundle)
         }
     }
