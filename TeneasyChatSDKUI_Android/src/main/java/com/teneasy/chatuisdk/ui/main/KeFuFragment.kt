@@ -312,7 +312,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
             if(it.workerId != 0) {
-                viewModel.loadWorker(it.workerId)
+                //viewModel.loadWorker(it.workerId)
+                var workInfo = WorkerInfo()
+                workInfo.workerName = it.nick
+                workInfo.workerAvatar = it.avatar
+                updateWorkInf(workInfo)
                 lifecycleScope.launch {
                     delay(100L)
                     viewModel.queryAutoReply(Constants.CONSULT_ID)
@@ -536,7 +540,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
         refreshList()
         Log.i(TAG, "收到回执：${msg.content.data}")
-        hideTip()
+        //hideTip()
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
@@ -559,9 +563,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
-        if (msg.workerId != 0){
-           viewModel.loadWorker(msg.workerId)
-        }
+        var workInfo = WorkerInfo()
+        workInfo.workerName = msg.workerName
+        workInfo.workerAvatar = msg.workerAvatar
+        updateWorkInf(workInfo)
     }
 
     private fun showTip(msg: String){
