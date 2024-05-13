@@ -27,7 +27,6 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
         holder.tvTitle.text = data[position].name
         holder.itemView.setOnClickListener {
             Constants.CONSULT_ID = data[position].consultId?:0L
-            Constants.originConsultId = Constants.CONSULT_ID
 
             var bundle = Bundle()
             bundle.putString(PARAM_WSS_BASE_URL, Constants.baseUrl)

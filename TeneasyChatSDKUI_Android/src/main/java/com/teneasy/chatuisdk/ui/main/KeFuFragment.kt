@@ -1,26 +1,19 @@
 package com.teneasy.chatuisdk.ui.main;
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
-import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
-import android.view.ContextMenu
 import android.view.LayoutInflater
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,12 +30,10 @@ import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
-import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
+import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
-import com.teneasy.sdk.LineDetectDelegate
-import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -109,7 +100,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     private fun initChatSDK(baseUrl: String){
         var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
-        val token = SharedPreferencesReader().getString(Constants.wss_token, "")
+        val token = UserPreferences().getString(Constants.wss_token, "")
         chatLib = ChatLib(Constants.cert , token, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
@@ -422,7 +413,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     .build()
 
                 val request2 = Request.Builder().url(Constants.baseUrlApi + "/v1/assets/upload/")
-                    .addHeader("X-Token", Constants.httpToken)
+                    .addHeader("X-Token", Constants.xToken)
                     .post(multipartBody).build()
 
                 val okHttpClient = OkHttpClient()
@@ -543,7 +534,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun connected(c: GGateway.SCHi) {
         connected = true;
-        SharedPreferencesReader().putString(Constants.wss_token, c.token)
+        UserPreferences().putString(Constants.wss_token, c.token)
     }
 
     override fun msgDeleted(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {

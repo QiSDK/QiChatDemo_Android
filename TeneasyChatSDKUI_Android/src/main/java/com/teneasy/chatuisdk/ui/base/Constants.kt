@@ -2,6 +2,14 @@ package com.teneasy.chatuisdk.ui.base
 
 
 const val PARAM_WSS_BASE_URL = "wssBaseUrl"
+const val PARAM_USER_ID = "USER_ID"
+const val PARAM_CERT = "CERT"
+const val PARAM_MERCHANT_ID = "MERCHANT_ID"
+const val PARAM_WORKER_ID = "WORKER_ID"
+const val PARAM_WS_TOKEN = "WS_TOKEN"
+const val PARAM_XTOKEN = "HTTPTOKEN"
+const val PARAM_LINES = "LINES"
+
 class Constants {
 
     //开发环境
@@ -12,9 +20,10 @@ class Constants {
     //测试环境
 
     companion object {
-         var originConsultId: Long = 123
+         //var originConsultId: Long = 123
+        var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
          var CONSULT_ID: Long = 123
-         var httpToken = "COYBEAEYASDyASje0-aD9zE.7pv4F2mBEwiQSbNSzTB8nqt9uLHdAGwq_Oz9QjlcQoF2NGihilLq0ZawGv8bDkr8Huq_wsFy2bQWFYCrISqFAw"
+         var xToken = "COYBEAEYASDyASje0-aD9zE.7pv4F2mBEwiQSbNSzTB8nqt9uLHdAGwq_Oz9QjlcQoF2NGihilLq0ZawGv8bDkr8Huq_wsFy2bQWFYCrISqFAw"
          var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
         var baseUrl = "csapi.hfxg.xyz"  //用于大多数Api
         val baseUrlApi = "https://" + baseUrl  //用于请求数据，上传图片

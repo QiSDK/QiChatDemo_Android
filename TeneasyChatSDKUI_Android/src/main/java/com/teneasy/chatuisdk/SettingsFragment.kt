@@ -5,10 +5,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.databinding.FragmentSettingsBinding
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.PARAM_LINES
+import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
+import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
+import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
+import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
+import com.teneasy.chatuisdk.ui.base.UserPreferences
+import com.teneasy.chatuisdk.ui.base.Utils
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -31,6 +36,8 @@ var binding: FragmentSettingsBinding? = null
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
+        Utils().readConfig()
     }
 
     override fun onCreateView(
@@ -44,8 +51,26 @@ var binding: FragmentSettingsBinding? = null
 //        binding?.tvBack?.setOnClickListener {
 //            requireActivity().onBackPressed()
 //        }
-        binding?.let {
-            it.etLine.setText(Constants.baseUrl)
+        binding?.apply {
+            this.etLine?.setText(Constants.lines)
+            this.etXToken?.setText(Constants.xToken)
+            this.etWssCert?.setText(Constants.cert)
+            this.etMerchanId?.setText(Constants.merchantId.toString())
+            this.etUserId?.setText(Constants.userId.toString())
+
+            this.btnSave.setOnClickListener {
+                Constants.lines = this.etLine.text.toString()
+                Constants.xToken = this.etXToken.text.toString()
+                Constants.cert = this.etWssCert.text.toString()
+                Constants.merchantId =  this.etMerchanId.text.toString().toInt()
+                Constants.userId =  this.etUserId.text.toString().toInt()
+
+                UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
+                UserPreferences().putString(PARAM_WSS_BASE_URL, Constants.baseUrl)
+                UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
+                UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
+                UserPreferences().putString(PARAM_LINES, Constants.lines)
+            }
         }
 
 

@@ -1,11 +1,9 @@
 package com.teneasy.chatuisdk.ui.main
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.google.protobuf.Timestamp
-import com.teneasy.chatuisdk.Entrance
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.http.MainApi
@@ -143,7 +141,7 @@ class KeFuViewModel() : ViewModel() {
         val param = JsonObject()
         param.addProperty("workerId", workerId)
         val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", Constants.httpToken)
+        request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .workerInfo(param),
             object : ProgressLoadingCallBack<ReturnData<WorkerInfo>>(null) {
@@ -166,7 +164,7 @@ class KeFuViewModel() : ViewModel() {
         val param = JsonObject()
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", Constants.httpToken)
+        request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .assignWorker(param),
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
@@ -188,7 +186,7 @@ class KeFuViewModel() : ViewModel() {
         val param = JsonObject()
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", Constants.httpToken)
+        request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryAutoReply(param),
             object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
@@ -223,7 +221,7 @@ class KeFuViewModel() : ViewModel() {
         //val param = JsonObject()
         //param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
-        request.headers("X-Token", Constants.httpToken)
+        request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryChatHistory(param),
             object : ProgressLoadingCallBack<ReturnData<ChatHistory>>(null) {

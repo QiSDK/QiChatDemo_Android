@@ -19,4 +19,13 @@ class Utils {
 
         //Toast.makeText(context, "复制成功", Toast.LENGTH_SHORT).show()
     }
+
+    fun readConfig(){
+        Constants.xToken = UserPreferences().getString(PARAM_XTOKEN, Constants.xToken)
+        Constants.baseUrl = UserPreferences().getString(PARAM_WSS_BASE_URL, Constants.baseUrl)
+        Constants.userId = UserPreferences().getInt(PARAM_USER_ID, Constants.userId)
+        Constants.merchantId = UserPreferences().getInt(PARAM_MERCHANT_ID, Constants.merchantId)
+        Constants.lines = UserPreferences().getString(PARAM_LINES, Constants.lines)
+        Constants.cert = UserPreferences().getString(PARAM_CERT, Constants.cert)
+    }
 }

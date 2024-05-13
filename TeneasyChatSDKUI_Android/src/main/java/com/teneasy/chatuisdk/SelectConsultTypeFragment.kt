@@ -5,13 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.main.BaseBindingFragment
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
@@ -25,7 +28,12 @@ class SelectConsultTypeFragment : Fragment(){
     private var binding: FragmentSelectConsultTypeBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //初始化配置
+        Utils().readConfig()
 
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            findNavController().popBackStack()
+        }
     }
 
     override fun onCreateView(
@@ -46,6 +54,10 @@ class SelectConsultTypeFragment : Fragment(){
                     this.tvEmpty.text = "暂无数据"
                 }
             }
+
+            this.ivSettings.setOnClickListener {
+                it.findNavController().navigate(R.id.frg_settings)
+            }
         }
         return  binding?.root
     }
@@ -54,7 +66,7 @@ class SelectConsultTypeFragment : Fragment(){
         super.onResume()
 
         //检测线路地址，以逗号分开
-        val lineLib = LineDetectLib("https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz",  object :
+        val lineLib = LineDetectLib(Constants.lines,  object :
             LineDetectDelegate {
             override fun useTheLine(line: String) {
                 Constants.baseUrl = line

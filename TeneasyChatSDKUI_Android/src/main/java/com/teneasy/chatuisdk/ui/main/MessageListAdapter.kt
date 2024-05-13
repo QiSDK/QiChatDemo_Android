@@ -23,7 +23,6 @@ import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.http.MainApi
@@ -213,7 +212,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             val param = JsonObject()
             param.addProperty("consultId", Constants.CONSULT_ID)
             val request = XHttp.custom().accessToken(false)
-            request.headers("X-Token", Constants.httpToken)
+            request.headers("X-Token", Constants.xToken)
             request.call(request.create(MainApi.IMainTask::class.java)
                 .queryAutoReply(param),
                 object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {

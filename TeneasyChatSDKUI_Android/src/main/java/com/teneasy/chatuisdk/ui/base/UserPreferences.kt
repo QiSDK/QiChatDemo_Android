@@ -3,7 +3,7 @@ package com.teneasy.chatuisdk.ui.base
 import android.content.Context
 import android.content.SharedPreferences
 
-class SharedPreferencesReader {
+class UserPreferences {
     private val sharedPreferences: SharedPreferences =
         ApplicationExt.context!!.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
 
