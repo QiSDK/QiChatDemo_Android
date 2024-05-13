@@ -6,7 +6,7 @@
     <fragment
         android:id="@+id/frg_consult_type"
         android:name="com.teneasy.chatuisdk.SelectConsultTypeFragment"
-        android:label="Profile">
+        android:label="Consult Type">
 
         <!-- Action to navigate from Profile to Friends List. -->
         <action
@@ -17,7 +17,13 @@
     <fragment
         android:id="@+id/frg_kefu_main"
         android:name="com.teneasy.chatuisdk.ui.main.KeFuFragment"
-        android:label="Friends List" />
+        android:label="KeFu" />
+
+    <fragment
+        android:id="@+id/frg_settings"
+        android:name="com.teneasy.chatuisdk.ui.main.SettingFragment"
+        android:label="KeFu" />
+
 
     <!-- Add other fragment destinations similarly. -->
 </navigation>

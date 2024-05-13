@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui
 
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.SimpleListItemBinding
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
 
 class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<MyAdapter.NormalViewHolder>() {
     private var dataList: ArrayList<Consults> = data
@@ -26,7 +28,10 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
         holder.itemView.setOnClickListener {
             Constants.CONSULT_ID = data[position].consultId?:0L
             Constants.originConsultId = Constants.CONSULT_ID
-            it.findNavController().navigate(R.id.frg_kefu_main)
+
+            var bundle = Bundle()
+            bundle.putString(PARAM_WSS_BASE_URL, Constants.baseUrl)
+            it.findNavController().navigate(R.id.frg_kefu_main, bundle)
         }
     }
 

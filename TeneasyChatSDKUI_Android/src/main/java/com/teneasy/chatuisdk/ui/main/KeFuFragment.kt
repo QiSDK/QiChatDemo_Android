@@ -36,6 +36,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
+import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
 import com.teneasy.chatuisdk.ui.base.SharedPreferencesReader
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
@@ -62,6 +63,7 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 
+
 /**
  * 客服主界面fragment
  */
@@ -78,14 +80,19 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var connected = false
     private val TAG = "KeFuFragment"
     private var sayHello = false
+    private var wssBaseUrl = ""
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
 
+        arguments?.let {
+            wssBaseUrl = it.getString(PARAM_WSS_BASE_URL) ?: ""
+            initChatSDK(Constants.baseUrl)
+        }
 
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+       requireActivity().onBackPressedDispatcher.addCallback(this) {
             findNavController().popBackStack()
         }
     }
@@ -610,6 +617,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun sendLocalMsg(msg: String, isLeft: Boolean = true){
+        if (chatLib == null){
+            showTip("SDK还未初始化")
+            return
+        }
         var chatModel = MessageItem()
         chatModel.cMsg = chatLib?.composeALocalMessage(msg)
         chatModel.isLeft = isLeft

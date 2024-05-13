@@ -46,14 +46,6 @@ class SelectConsultTypeFragment : Fragment(){
                     this.tvEmpty.text = "暂无数据"
                 }
             }
-
-            tvLine?.setOnClickListener {
-                Constants.CONSULT_ID = 1
-                Constants.originConsultId = Constants.CONSULT_ID
-                it.findNavController().navigate(R.id.frg_kefu_main)
-            }
-
-            //viewModel.queryEntrance()
         }
         return  binding?.root
     }
@@ -65,8 +57,9 @@ class SelectConsultTypeFragment : Fragment(){
         val lineLib = LineDetectLib("https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz",  object :
             LineDetectDelegate {
             override fun useTheLine(line: String) {
+                Constants.baseUrl = line
                 //设置网络请求的全局基础地址
-                XHttpSDK.setBaseUrl(Constants.baseUrl)
+                XHttpSDK.setBaseUrl(Constants.baseUrlApi)
                 //initChatSDK(line)
                 activity?.runOnUiThread {
                     binding?.tvLine?.text = "当前线路：" + line

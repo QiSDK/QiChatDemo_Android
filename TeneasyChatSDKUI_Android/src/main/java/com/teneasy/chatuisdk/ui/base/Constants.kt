@@ -1,7 +1,8 @@
 package com.teneasy.chatuisdk.ui.base
 
-class Constants {
 
+const val PARAM_WSS_BASE_URL = "wssBaseUrl"
+class Constants {
 
     //开发环境
 
@@ -13,10 +14,10 @@ class Constants {
     companion object {
          var originConsultId: Long = 123
          var CONSULT_ID: Long = 123
-         var httpToken = "COYBEAEYByDwASiGj-iT9TE.BfASgRkP3zgKXYntaTmTYgDhOrytn2YKcRBimAKkELQKF9uwgYjdkEPWEZxFRXWyVHe1zyBm7_hKs6EbS3IxCg"
-         var cert = "COYBEAUYASDwASja5o2V9DE.9Fhv9o1HueJOkqzylMJoUggw7PjsoBtF38-vncusatONba9rgIv3LcrMZj7kjTA_79IvBOYpGTx-ygEt2wpSDA"
-        val baseUrl = "https://csapi.hfxg.xyz"  //用于大多数Api
-        val baseUrlApi = "https://csapi.xdev.stream"  //用于请求数据，上传图片
+         var httpToken = "COYBEAEYASDyASje0-aD9zE.7pv4F2mBEwiQSbNSzTB8nqt9uLHdAGwq_Oz9QjlcQoF2NGihilLq0ZawGv8bDkr8Huq_wsFy2bQWFYCrISqFAw"
+         var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
+        var baseUrl = "csapi.hfxg.xyz"  //用于大多数Api
+        val baseUrlApi = "https://" + baseUrl  //用于请求数据，上传图片
         val baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
 
         var merchantId = 230
