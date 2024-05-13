@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/frg_settings"
-        android:name="com.teneasy.chatuisdk.ui.main.SettingFragment"
+        android:name="com.teneasy.chatuisdk.SettingsFragment"
         android:label="KeFu" />
 
 
