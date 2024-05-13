@@ -49,6 +49,7 @@ class SelectConsultTypeViewModel : ViewModel() {
 
                 override fun onError(e: ApiException?) {
                     super.onError(e)
+                    consultList.value = ArrayList()
                     println(e)
                 }
             })

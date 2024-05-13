@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
@@ -38,10 +39,18 @@ class SelectConsultTypeFragment : Fragment(){
             recyclerView.adapter = adapter
             recyclerView.layoutManager = LinearLayoutManager(requireContext())
             viewModel.consultList.observe(viewLifecycleOwner) {
-                adapter.updateData(it)
                 if (!it.isEmpty()) {
+                    adapter.updateData(it)
                     this.tvEmpty.visibility = View.GONE
+                }else{
+                    this.tvEmpty.text = "暂无数据"
                 }
+            }
+
+            tvLine?.setOnClickListener {
+                Constants.CONSULT_ID = 1
+                Constants.originConsultId = Constants.CONSULT_ID
+                it.findNavController().navigate(R.id.frg_kefu_main)
             }
 
             //viewModel.queryEntrance()
@@ -53,7 +62,7 @@ class SelectConsultTypeFragment : Fragment(){
         super.onResume()
 
         //检测线路地址，以逗号分开
-        val lineLib = LineDetectLib("https://csh5.hfxg.xyz,https://csapi.xdev.stream,https://wcsapi.qixin14.xyz",  object :
+        val lineLib = LineDetectLib("https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz",  object :
             LineDetectDelegate {
             override fun useTheLine(line: String) {
                 //设置网络请求的全局基础地址
@@ -66,6 +75,9 @@ class SelectConsultTypeFragment : Fragment(){
             }
             override fun lineError(error: Result) {
                 println(error.msg)
+                activity?.runOnUiThread {
+                    binding?.tvLine?.text = "无可用线路"
+                }
             }
         }, Constants.merchantId) //123是商户号
         lineLib.getLine()

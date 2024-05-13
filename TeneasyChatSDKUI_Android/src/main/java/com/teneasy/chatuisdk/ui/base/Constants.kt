@@ -10,7 +10,6 @@ class Constants {
     //  val baseUrlApi = "https://csapi.ertw.xyz"//用于请求数据，上传图片
     //测试环境
 
-    var uId = 123;
     companion object {
          var originConsultId: Long = 123
          var CONSULT_ID: Long = 123
