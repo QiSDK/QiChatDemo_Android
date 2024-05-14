@@ -467,12 +467,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
      */
     fun sendMsg(txt: String) {
         if(chatLib == null){
-            Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
+           // Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
+            showTip("SDK还未初始化")
             return
         }
 
         if (!connected){
-            Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
+            showTip("SDK尚未连接成功")
             return
         }
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
