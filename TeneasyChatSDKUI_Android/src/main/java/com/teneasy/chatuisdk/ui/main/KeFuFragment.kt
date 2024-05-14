@@ -305,7 +305,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.tvTips.visibility = View.GONE
           //  initData()
             initObserver()
-            viewModel.assignWorker(Constants.CONSULT_ID)
+            //viewModel.assignWorker(Constants.CONSULT_ID)
             //viewModel.queryAutoReply(Constants.CONSULT_ID)
             this.llClose.setOnClickListener {
                 findNavController().popBackStack()
@@ -324,7 +324,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
 
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
-            if(it.workerId != 0) {
+            //if(it.workerId != 0) {
                 //viewModel.loadWorker(it.workerId)
                 var workInfo = WorkerInfo()
                 workInfo.workerName = it.nick
@@ -335,7 +335,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     viewModel.queryAutoReply(Constants.CONSULT_ID)
                     viewModel.queryChatHistory(Constants.CONSULT_ID)
                 }
-            }
+            //}
         }
 
         viewModel.mHistoryList.observe(this@KeFuFragment){
@@ -555,7 +555,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         println(c.id)
         showTip("连接成功")
         Log.i(TAG, "连接成功")
+
         UserPreferences().putString(PARAM_XTOKEN, c.token)
+        Constants.xToken = c.token
+        if (!sayHello) {
+            viewModel.assignWorker(Constants.CONSULT_ID)
+        }
     }
 
     override fun systemMsg(msg: Result) {
