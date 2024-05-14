@@ -106,6 +106,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onResume() {
         super.onResume()
+        //定时检测链接状态
+        startTimer()
     }
 
     // UI初始化
@@ -352,13 +354,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         reConnectTimer?.schedule(object : TimerTask() {
             override fun run() {
-                if (!connected) {
+                if (chatLib == null || !connected) {
                     initChatSDK(Constants.domain)
                 }else{
                     closeTimer()
                 }
             }
-        }, 0,1000)
+        }, 500,1000)
     }
 
     // 关闭计时器
