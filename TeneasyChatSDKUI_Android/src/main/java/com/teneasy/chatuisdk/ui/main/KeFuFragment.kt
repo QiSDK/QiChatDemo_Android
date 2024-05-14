@@ -89,9 +89,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if(!EventBus.getDefault().isRegistered(this)) {
+        /*if(!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
-        }
+        }*/
         requireActivity().title = "客服"
 
         hidetvQuotedMsg()
