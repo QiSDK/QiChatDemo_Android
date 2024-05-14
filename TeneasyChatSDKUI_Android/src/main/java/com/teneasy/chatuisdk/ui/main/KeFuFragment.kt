@@ -370,7 +370,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     initChatSDK(Constants.domain)
                 }else{
                     Log.d(TAG, "Timer 关闭")
-                    closeTimer()
+                   // closeTimer()
                 }
             }
         }, 3000,5000)
@@ -543,7 +543,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if (msg.code > 0 && msg.code < 1010) {
             connected = false
             //失去链接，重试连接
-            startTimer()
+            //startTimer()
         }else{
             showTip(msg.msg)
         }
