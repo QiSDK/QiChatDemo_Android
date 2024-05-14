@@ -32,12 +32,12 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
             bundle.putString(PARAM_DOMAIN, Constants.domain)
             it.findNavController().navigate(R.id.frg_kefu_main, bundle)
         }
-        //if (data[position].unread?: 0 > 0) {
+        if (data[position].unread?: 0 > 0) {
             holder.tvRedDotView.setUnreadCount(data[position].unread?: 0)
             holder.tvRedDotView.visibility = View.VISIBLE
-//        } else {
-//            holder.tvRedDotView.visibility = View.GONE
-//        }
+        } else {
+            holder.tvRedDotView.visibility = View.GONE
+        }
 
           /*  val url = Constants.baseUrlImage + data.avatar
             print("avatar:$url")

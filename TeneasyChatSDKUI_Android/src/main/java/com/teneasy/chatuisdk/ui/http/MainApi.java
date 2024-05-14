@@ -43,7 +43,7 @@ public class MainApi {
         Observable<ReturnData<AutoReply>> queryAutoReply(@Body JsonObject param);
 
         @POST("v1/api/message/sync")
-        Observable<ReturnData<ChatHistory>> queryChatHistory(@Body Request param);
+        Observable<ReturnData<ChatHistory>> queryChatHistory(@Body JsonObject param);
 
 
 

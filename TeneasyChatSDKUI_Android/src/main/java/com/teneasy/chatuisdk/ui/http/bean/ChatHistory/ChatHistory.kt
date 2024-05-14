@@ -10,9 +10,9 @@ data class ChatHistory (
 )
 
 data class list (
-  val chatID: String,
+  val chatId: String,
 
-  val msgID: String,
+  val msgId: String,
 
   val msgTime: String,
   val sender: String,
@@ -26,10 +26,10 @@ data class list (
 
   val consultID: String,
 
-  val content: Content,
-  val image: Audio,
-  val audio: Audio,
-  val video: Audio,
+  val content: Content?,
+  val image: Audio?,
+  val audio: Audio?,
+  val video: Audio?,
   val geo: Geo,
   val file: File,
   val workerTrans: WorkerTrans,
@@ -116,17 +116,17 @@ data class WorkerTrans (
 )
 
 data class Request (
-  val chatID: Long,
+  val chatId: Long,
 
-  val msgID: String,
+  val msgId: String,
 
   val count: Int,
   val withLastOne: Boolean,
 
-  val workerID: Int,
+  val workerId: Int,
 
-  val consultID: Long,
+  val consultId: Long,
 
-  val userID: Int
+  val userId: Int
 )
 

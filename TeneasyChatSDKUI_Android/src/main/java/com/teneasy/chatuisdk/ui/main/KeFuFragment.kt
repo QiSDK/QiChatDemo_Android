@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
@@ -33,6 +34,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
+import com.teneasy.sdk.BuildConfig
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -50,6 +52,7 @@ import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -84,6 +87,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
        requireActivity().onBackPressedDispatcher.addCallback(this) {
             findNavController().popBackStack()
         }
+
+        mIProgressLoader = getProgressLoader()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -309,6 +314,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun initObserver(){
+        mIProgressLoader?.showLoading()
         viewModel.mlMsgList.observe(this@KeFuFragment) {
             msgAdapter.setList(it)
             refreshList()
@@ -327,8 +333,31 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 lifecycleScope.launch {
                     delay(100L)
                     viewModel.queryAutoReply(Constants.CONSULT_ID)
+                    viewModel.queryChatHistory(Constants.CONSULT_ID)
                 }
             }
+        }
+
+        viewModel.mHistoryList.observe(this@KeFuFragment){
+           it?.run {
+               var qaList = ArrayList<MessageItem>()
+               for (item in this.reversed()) {
+                   // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
+                   var isLeft = true
+                   if (item.sender == item.chatId){
+                       isLeft = false
+                   }
+                   if(item.msgFmt == "MSG_TEXT") {
+                       val qaItem =  viewModel.composeTextMsg(item, isLeft)
+                       qaList.add(qaItem)
+                   }else if(item.msgFmt == "MSG_IMG") {
+                       val qaItem = viewModel.composeImgMsg(item, isLeft)
+                       qaList.add(qaItem)
+                   }
+               }
+               viewModel.addAllMsgItem(qaList)
+               mIProgressLoader?.dismissLoading()
+           }
         }
 
         /*
@@ -369,8 +398,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     Log.d(TAG, "SDK 重新初始化")
                     initChatSDK(Constants.domain)
                 }else{
-                    Log.d(TAG, "Timer 关闭")
                    // closeTimer()
+                    hideTip()
                 }
             }
         }, 3000,5000)
@@ -378,6 +407,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     // 关闭计时器
     private fun closeTimer() {
+        //Log.d(TAG, "Timer 关闭")
         if(reConnectTimer != null) {
             reConnectTimer?.cancel()
             reConnectTimer = null
@@ -490,10 +520,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
-
-        if (!connected){
-            showTip("SDK尚未连接成功")
-        }
     }
 
     /**
@@ -510,10 +536,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
-
-        if (!connected){
-            return
-        }
     }
 
     /**
@@ -545,7 +567,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             //失去链接，重试连接
             //startTimer()
         }else{
-            showTip(msg.msg)
+                //showTip(msg.msg)
         }
         Log.i(TAG, msg.msg)
     }

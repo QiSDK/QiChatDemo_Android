@@ -1,11 +1,13 @@
 package com.teneasy.chatuisdk.ui.main
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.google.protobuf.Timestamp
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.AssignWorker
@@ -15,7 +17,9 @@ import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.list
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
+import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.MessageItem
+import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
@@ -43,6 +47,7 @@ class KeFuViewModel() : ViewModel() {
     val mlAssignWorker = MutableLiveData<AssignWorker>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
     val mHistoryList = MutableLiveData<List<list>?>()
+    val Tag = "KeFuFragment"
 
     init {
         mlSendMsg.value = ""
@@ -57,6 +62,11 @@ class KeFuViewModel() : ViewModel() {
     fun addMsgItem(newItem: MessageItem, payLoadId: Long) {
         newItem.payLoadId = payLoadId
         mlMsgList.value?.add(newItem)
+        mlMsgList.postValue(mlMsgList.value)
+    }
+
+    fun addAllMsgItem(newItems: List<MessageItem>) {
+        mlMsgList.value?.addAll(newItems)
         mlMsgList.postValue(mlMsgList.value)
     }
 
@@ -83,34 +93,66 @@ class KeFuViewModel() : ViewModel() {
     * @param isLeft
     */
     //撰写一条图片信息
-    fun composeImgMsg(imgPath: String, isLeft: Boolean) : MessageItem{
+    fun composeImgMsg(history: list, isLeft: Boolean) : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageImage.newBuilder()
 
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
-        cal.time = Date()
+        cal.time = Utils().convertStrToDate(history.msgTime)
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
-
-        //d.t = msgDate.time
         cMsg.msgTime = d.build()
-        cMContent.uri = imgPath
+
+        if (history.image != null) {
+            cMContent.uri = history.image.uri
+        }else{
+            cMContent.uri = ""
+        }
         cMsg.setImage(cMContent)
 
         var chatModel = MessageItem()
         chatModel.cMsg = cMsg.build()
-        chatModel.imgPath = imgPath
+        //chatModel.imgPath = imgPath
         chatModel.isLeft = isLeft
+        chatModel.sendStatus = MessageSendState.发送成功
+
         return chatModel
     }
 
-    /**
-     * 创建本地消息实体。一般用于UI层对用户显示的自定义消息（该方法并未调用socket发送消息）。
-     * @param text
-     * @param isLeft
-     */
-    //撰写一条图片信息
+
+    fun composeTextMsg(history: list,  isLeft: Boolean) : MessageItem{
+        var cMsg = CMessage.Message.newBuilder()
+        var cMContent = CMessage.MessageContent.newBuilder()
+
+        var d = Timestamp.newBuilder()
+        val cal = Calendar.getInstance()
+        cal.time = Utils().convertStrToDate(history.msgTime)
+        val millis = cal.timeInMillis
+        d.seconds = (millis * 0.001).toLong()
+        cMsg.msgTime = d.build()
+
+        if (history.workerChanged != null){
+            cMContent.data = history.workerChanged.greeting
+        }
+        else if (history.content != null) {
+            cMContent.data = history.content.data
+        }else{
+            cMContent.data = "历史消息"
+        }
+        cMsg.setContent(cMContent)
+
+        var chatModel = MessageItem()
+        chatModel.cMsg = cMsg.build()
+        chatModel.isLeft = isLeft
+        chatModel.sendStatus = MessageSendState.发送成功
+
+        //mlMsgList.value?.add(chatModel)
+        //mlMsgList.postValue(mlMsgList.value)
+        return chatModel
+    }
+
+
     fun composeLocalMsg(text: String, isLeft: Boolean) : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
@@ -215,11 +257,11 @@ class KeFuViewModel() : ViewModel() {
 }
  */
     fun queryChatHistory(consultId: Long) {
-
-        var param = Request(0, "0", 100, true, Constants.workerId, Constants.CONSULT_ID, Constants.userId)
-
-        //val param = JsonObject()
-        //param.addProperty("consultId", consultId)
+        //var param = Request(0, "0", 0, true, 0, consultId, 0)
+        val param = JsonObject()
+        param.addProperty("consultId", consultId)
+        param.addProperty("chatId", 0)
+        param.addProperty("count", 50)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
@@ -231,7 +273,7 @@ class KeFuViewModel() : ViewModel() {
                     }
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
-                    println(e)
+                    Log.d(Tag, e.toString())
                 }
             }
         )

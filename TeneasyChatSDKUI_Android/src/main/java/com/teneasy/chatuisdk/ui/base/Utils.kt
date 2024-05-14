@@ -5,6 +5,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import com.google.protobuf.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Utils {
 
@@ -38,4 +42,16 @@ class Utils {
                 view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
+
+    fun convertStrToDate(datetimeString: String): Date {
+        //yyyy-MM-dd'T'HH:mm:sss'Z'
+        var date = Date()
+        try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault())
+             date = dateFormat.parse(datetimeString)
+        }catch (ex:Exception){
+
+        }
+        return date
+    }
 }
