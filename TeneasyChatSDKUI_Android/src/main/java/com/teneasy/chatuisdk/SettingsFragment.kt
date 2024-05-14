@@ -14,7 +14,7 @@ import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
 import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
-import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
+import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -73,7 +73,7 @@ var binding: FragmentSettingsBinding? = null
                 Constants.userId =  this.etUserId.text.toString().toInt()
 
                 UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
-                UserPreferences().putString(PARAM_WSS_BASE_URL, Constants.domain)
+                UserPreferences().putString(PARAM_DOMAIN, Constants.domain)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)

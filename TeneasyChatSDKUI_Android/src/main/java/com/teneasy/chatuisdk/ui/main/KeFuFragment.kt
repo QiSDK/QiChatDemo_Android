@@ -1,6 +1,5 @@
 package com.teneasy.chatuisdk.ui.main;
 
-import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
 import android.text.Editable
@@ -29,14 +28,13 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
-import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
+import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.BuildConfig
 import com.teneasy.sdk.ChatLib
-import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.MessageItem
@@ -50,8 +48,6 @@ import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -68,12 +64,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     private var mIProgressLoader: IProgressLoader? = null
 
-    private var timer: Timer? = null
+    private var reConnectTimer: Timer? = null
     private var chatLib: ChatLib? = null
     private var connected = false
     private val TAG = "KeFuFragment"
     private var sayHello = false
     private var wssBaseUrl = ""
+    private var retryTimes = 0
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,8 +78,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel = KeFuViewModel()
 
         arguments?.let {
-            wssBaseUrl = it.getString(PARAM_WSS_BASE_URL) ?: ""
-            initChatSDK(Constants.domain)
+            wssBaseUrl = it.getString(PARAM_DOMAIN) ?: ""
+            initChatSDK(wssBaseUrl)
         }
 
        requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -101,10 +98,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun initChatSDK(baseUrl: String){
-        var wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
+        val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 
     // UI初始化
@@ -348,19 +349,23 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     // 启动计时器，持续调用心跳方法
     private fun startTimer() {
         closeTimer()
-        timer?.schedule(object : TimerTask() {
+        Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
+        reConnectTimer?.schedule(object : TimerTask() {
             override fun run() {
-                //需要执行的任务
-                chatLib?.sendHeartBeat()
+                if (!connected) {
+                    initChatSDK(Constants.domain)
+                }else{
+                    closeTimer()
+                }
             }
-        }, 0,30000)    //每隔5秒发送心跳
+        }, 0,1000)
     }
 
     // 关闭计时器
     private fun closeTimer() {
-        if(timer != null) {
-            timer?.cancel()
-            timer = null
+        if(reConnectTimer != null) {
+            reConnectTimer?.cancel()
+            reConnectTimer = null
         }
     }
 
@@ -370,22 +375,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 ProgressDialogLoader(context)
         }
         return mIProgressLoader
-    }
-
-
-    // EventBus 消息接收解析，针对socket sdk中的消息进行捕捉和解析。
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun updateMsg(event: MessageEventBus<Any>) {
-        if(event.what == 0) {
-            // 解析状态
-            if(event.arg == 200) {
-                startTimer()
-            } else {
-                closeTimer()
-            }
-        } else if(event.what == 1 && event.data != null) {
-
-        }
     }
 
     /**
@@ -559,6 +548,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         //只需要调试的时候显示系统消息，其他情况不显示，避免频繁的系统提示影响用户体验
         if (BuildConfig.DEBUG) {
             showTip(msg.msg)
+        }
+        if (msg.code > 0 && msg.code < 1010) {
+            connected = false
+            //失去链接，重试连接
+            startTimer()
         }
     }
 

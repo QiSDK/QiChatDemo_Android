@@ -23,7 +23,7 @@ class Utils {
 
     fun readConfig() {
         Constants.xToken = UserPreferences().getString(PARAM_XTOKEN, Constants.xToken)
-        Constants.domain = UserPreferences().getString(PARAM_WSS_BASE_URL, Constants.domain)
+        Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         Constants.userId = UserPreferences().getInt(PARAM_USER_ID, Constants.userId)
         Constants.merchantId = UserPreferences().getInt(PARAM_MERCHANT_ID, Constants.merchantId)
         Constants.lines = UserPreferences().getString(PARAM_LINES, Constants.lines)

@@ -9,7 +9,7 @@ import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.SimpleListItemBinding
 import com.teneasy.chatuisdk.ui.base.Constants
-import com.teneasy.chatuisdk.ui.base.PARAM_WSS_BASE_URL
+import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 
 class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<MyAdapter.NormalViewHolder>() {
     private var dataList: ArrayList<Consults> = data
@@ -25,7 +25,7 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
             Constants.CONSULT_ID = data[position].consultId?:0L
 
             var bundle = Bundle()
-            bundle.putString(PARAM_WSS_BASE_URL, Constants.domain)
+            bundle.putString(PARAM_DOMAIN, Constants.domain)
             it.findNavController().navigate(R.id.frg_kefu_main, bundle)
         }
     }

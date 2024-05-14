@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.MyAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
+import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
@@ -66,6 +68,7 @@ class SelectConsultTypeFragment : Fragment(){
             LineDetectDelegate {
             override fun useTheLine(line: String) {
                 Constants.domain = line
+                UserPreferences().putString(line, PARAM_DOMAIN)
                 //设置网络请求的全局基础地址
                 XHttpSDK.setBaseUrl(Constants.baseUrlApi)
                 //initChatSDK(line)

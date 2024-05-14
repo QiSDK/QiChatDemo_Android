@@ -1,7 +1,7 @@
 package com.teneasy.chatuisdk.ui.base
 
 
-const val PARAM_WSS_BASE_URL = "wssBaseUrl"
+const val PARAM_DOMAIN = "wssBaseUrl"
 const val PARAM_USER_ID = "USER_ID"
 const val PARAM_CERT = "CERT"
 const val PARAM_MERCHANT_ID = "MERCHANT_ID"
