@@ -33,7 +33,6 @@ import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
-import com.teneasy.sdk.BuildConfig
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -108,6 +107,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         super.onResume()
         //定时检测链接状态
         startTimer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        closeTimer()
     }
 
     // UI初始化
@@ -348,19 +352,28 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
     }
 
-    // 启动计时器，持续调用心跳方法
     private fun startTimer() {
-        closeTimer()
+        //closeTimer()
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
+        if(reConnectTimer == null) {
+            reConnectTimer = Timer()
+        }
+
+        if(!connected) {
+            showTip("正在重新连接...")
+            Log.i(TAG, "正在重新连接...")
+        }
         reConnectTimer?.schedule(object : TimerTask() {
             override fun run() {
                 if (chatLib == null || !connected) {
+                    Log.d(TAG, "SDK 重新初始化")
                     initChatSDK(Constants.domain)
                 }else{
+                    Log.d(TAG, "Timer 关闭")
                     closeTimer()
                 }
             }
-        }, 500,1000)
+        }, 3000,5000)
     }
 
     // 关闭计时器
@@ -472,16 +485,15 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             return
         }
 
-        if (!connected){
-            //Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
-            showTip("SDK尚未连接成功")
-            return
-        }
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+
+        if (!connected){
+            showTip("SDK尚未连接成功")
+        }
     }
 
     /**
@@ -493,15 +505,15 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             return
         }
 
-        if (!connected){
-            Toast.makeText(context, "SDK尚未连接成功", Toast.LENGTH_SHORT).show()
-            return
-        }
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+
+        if (!connected){
+            return
+        }
     }
 
     /**
@@ -519,8 +531,25 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun connected(c: GGateway.SCHi) {
         connected = true;
         println(c.id)
+        showTip("连接成功")
+        Log.i(TAG, "连接成功")
         UserPreferences().putString(PARAM_XTOKEN, c.token)
     }
+
+    override fun systemMsg(msg: Result) {
+        //只需要调试的时候显示系统消息，其他情况不显示，避免频繁的系统提示影响用户体验
+        //if (BuildConfig.DEBUG) {
+        //}
+        if (msg.code > 0 && msg.code < 1010) {
+            connected = false
+            //失去链接，重试连接
+            startTimer()
+        }else{
+            showTip(msg.msg)
+        }
+        Log.i(TAG, msg.msg)
+    }
+
 
     override fun msgDeleted(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
         viewModel.removeMsgItem(payloadId, msg.msgId)
@@ -545,18 +574,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             messageItem.cMsg = msg
             messageItem.isLeft = true
             viewModel.addMsgItem(messageItem, 0)
-        }
-    }
-
-    override fun systemMsg(msg: Result) {
-        //只需要调试的时候显示系统消息，其他情况不显示，避免频繁的系统提示影响用户体验
-        if (BuildConfig.DEBUG) {
-            showTip(msg.msg)
-        }
-        if (msg.code > 0 && msg.code < 1010) {
-            connected = false
-            //失去链接，重试连接
-            startTimer()
         }
     }
 

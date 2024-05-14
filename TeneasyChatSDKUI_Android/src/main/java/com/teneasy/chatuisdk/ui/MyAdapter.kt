@@ -2,11 +2,15 @@ package com.teneasy.chatuisdk.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.databinding.ConsultTypeItemBinding
 import com.teneasy.chatuisdk.databinding.SimpleListItemBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
@@ -15,7 +19,7 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
     private var dataList: ArrayList<Consults> = data
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NormalViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = SimpleListItemBinding.inflate(inflater, parent, false)
+        val binding = ConsultTypeItemBinding.inflate(inflater, parent, false)
         return NormalViewHolder(binding)
     }
 
@@ -28,10 +32,27 @@ class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<M
             bundle.putString(PARAM_DOMAIN, Constants.domain)
             it.findNavController().navigate(R.id.frg_kefu_main, bundle)
         }
-    }
+        //if (data[position].unread?: 0 > 0) {
+            holder.tvRedDotView.setUnreadCount(data[position].unread?: 0)
+            holder.tvRedDotView.visibility = View.VISIBLE
+//        } else {
+//            holder.tvRedDotView.visibility = View.GONE
+//        }
 
-    class NormalViewHolder(binding: SimpleListItemBinding) : RecyclerView.ViewHolder(binding.root) {
+          /*  val url = Constants.baseUrlImage + data.avatar
+            print("avatar:$url")
+            Glide.with(holder.civKefuImage).load(url).dontAnimate()
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .into(holder.civKefuImage)
+
+           */
+        }
+
+    class NormalViewHolder(binding: ConsultTypeItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvTitle = binding.tvTitle
+        val tvRedDotView = binding.redDotView
+       // val civKefuImage = binding.civKefuImage
     }
 
     override fun getItemCount(): Int {
