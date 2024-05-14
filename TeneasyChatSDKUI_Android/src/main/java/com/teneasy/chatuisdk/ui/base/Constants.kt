@@ -23,7 +23,7 @@ class Constants {
          //var originConsultId: Long = 123
         var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
          var CONSULT_ID: Long = 123
-         var xToken = "COYBEAEYASDyASje0-aD9zE.7pv4F2mBEwiQSbNSzTB8nqt9uLHdAGwq_Oz9QjlcQoF2NGihilLq0ZawGv8bDkr8Huq_wsFy2bQWFYCrISqFAw"
+         var xToken = ""
          var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
         var domain = "csapi.hfxg.xyz"  //domain
         val baseUrlApi = "https://" + domain  //用于请求数据，上传图片
