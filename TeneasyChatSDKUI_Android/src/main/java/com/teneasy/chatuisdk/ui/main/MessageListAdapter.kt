@@ -25,6 +25,7 @@ import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.JsonObject
+import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.AutoReply
@@ -47,7 +48,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     var msgList: ArrayList<MessageItem>? = null
     var TYPE_Text : Int = 0
     val TYPE_Image : Int = 1
-    val TYPE_Header : Int = 2
+    val TYPE_Tip: Int = 3
+    val TYPE_Header : Int = 4
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
     private lateinit var qaAdapter: GroupedQAdapter
@@ -66,6 +68,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 parent,
                 false)
             return HeaderViewHolder(binding)
+        } else  if (viewType == TYPE_Tip) {
+            val binding = ItemTipMsgBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false)
+            return TipMsgViewHolder(binding)
         }else {
             val binding = ItemMessageBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -77,14 +85,20 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val newPos = position - 1
         if (holder is HeaderViewHolder) {
            // holder.rcvQa.adapter = qaAdapter
+        }else  if (holder is TipMsgViewHolder) {
+            val item = msgList!![newPos]
+            item.cMsg?.let {
+                val msgDate = Date(it.msgTime.seconds * 1000L)
+                holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n\n" + it.content.data
+            }
         }else if (holder is MsgViewHolder) {
             if (msgList == null) {
                 return
             }
             //因为headerView占了1个位置，所以要减1
-            val newPos = position - 1
             val item = msgList!![newPos]
 
             if (item.cMsg == null) {
@@ -187,6 +201,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         }
 
         val obj = msgList!![position - 1]
+
+        if (obj.isTipMsg){
+            return TYPE_Tip
+        }
         obj.cMsg?.apply {
             return if (this.hasImage()){
                 return TYPE_Image
@@ -328,6 +346,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 false
             })
         }
+    }
+
+    inner class TipMsgViewHolder(binding: ItemTipMsgBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvTitle = binding.tvTitle
     }
 
 }

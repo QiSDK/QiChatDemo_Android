@@ -153,7 +153,7 @@ class KeFuViewModel() : ViewModel() {
     }
 
 
-    fun composeLocalMsg(text: String, isLeft: Boolean) : MessageItem{
+    fun composeLocalMsg(text: String, isLeft: Boolean, isTip: Boolean = false) : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
 
@@ -165,10 +165,13 @@ class KeFuViewModel() : ViewModel() {
 
         cMsg.msgTime = d.build()
         cMContent.data = text
+        cMsg.setContent(cMContent)
 
         var chatModel = MessageItem()
         chatModel.cMsg = cMsg.build()
         chatModel.isLeft = isLeft
+
+        chatModel.isTipMsg = isTip
 
         mlMsgList.value?.add(chatModel)
         mlMsgList.postValue(mlMsgList.value)

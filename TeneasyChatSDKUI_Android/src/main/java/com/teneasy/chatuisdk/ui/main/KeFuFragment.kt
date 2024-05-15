@@ -580,6 +580,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun msgDeleted(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
         viewModel.removeMsgItem(payloadId, msg.msgId)
+        viewModel.composeLocalMsg("对方撤回了一条消息", true, isTip = true)
     }
 
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {

@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <LinearLayout
-        android:layout_width="match_parent"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/civ_kefu_image"
+        android:layout_width="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/com_moren"
+        app:civ_border_color="#80ffffff"
+        app:civ_border_width="1dp"
+        android:visibility="gone"
+        app:civ_border_overlay="true"
+        android:layout_height="50dp" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:text="客服"
+        app:layout_constraintLeft_toRightOf="@id/civ_kefu_image"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="-30dp"
         android:layout_height="wrap_content"
+        android:textColor="@color/purple_900"
+        android:textSize="20sp" />
+
+    <com.teneasy.chatuisdk.ui.RedDotView
+        android:id="@+id/redDotView"
+        app:layout_constraintStart_toEndOf="@id/tv_title"
+        app:layout_constraintTop_toTopOf="@id/tv_title"
+        android:layout_gravity="center"
         android:gravity="center"
-        android:orientation="horizontal">
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/civ_kefu_image"
-            android:visibility="gone"
-            android:layout_width="40dp"
-            android:src="@drawable/com_moren"
-            app:civ_border_color="#80ffffff"
-            app:civ_border_width="1dp"
-            android:layout_marginStart="5dp"
-            app:civ_border_overlay="true"
-            android:layout_height="50dp" />
+        android:layout_width="15dp"
+        android:layout_height="15dp">
+    </com.teneasy.chatuisdk.ui.RedDotView>
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:text="客服"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"
-            android:gravity="center_vertical|center_horizontal"
-            android:textColor="@color/purple_900"
-            android:textSize="20sp"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-            android:minHeight="?android:attr/listPreferredItemHeightSmall" />
 
-        <com.teneasy.chatuisdk.ui.RedDotView
-            android:id="@+id/redDotView"
-            android:layout_marginLeft="10dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </com.teneasy.chatuisdk.ui.RedDotView>
-
-    </LinearLayout>
-</layout>
+</androidx.constraintlayout.widget.ConstraintLayout>

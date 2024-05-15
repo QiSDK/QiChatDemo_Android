@@ -2,6 +2,7 @@ package com.teneasy.chatuisdk.ui
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -27,7 +28,8 @@ class RedDotView @JvmOverloads constructor(
     }
 
     fun setUnreadCount(count: Int) {
-        unreadCount.text = count.toString()
-        //unreadCount.visibility = if (count > 0) VISIBLE else GONE
+//        unreadCount.text = count.toString()
+//        unreadCount.visibility = if (count > 0) VISIBLE else GONE
+        unreadCount.visibility = View.GONE
     }
 }

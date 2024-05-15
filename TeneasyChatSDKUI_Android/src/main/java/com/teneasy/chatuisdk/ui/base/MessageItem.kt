@@ -18,5 +18,6 @@ class MessageItem {//:Serializable
         var payLoadId: Long = 0
         var msgId: Long = 0
         var imgPath: String = ""
+        var isTipMsg: Boolean = false
         //var status : Int = 0
     }
