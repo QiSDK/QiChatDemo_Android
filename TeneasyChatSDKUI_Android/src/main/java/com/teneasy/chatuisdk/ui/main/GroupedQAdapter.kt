@@ -53,7 +53,7 @@ class GroupedQAdapter(
         val bean = data[position]
 
         var tvTitle = holder?.get<TextView>(R.id.tv_Title)
-        tvTitle?.text = bean.question.content.data
+        tvTitle?.text = (position + 1).toString() + ", " + bean.question.content.data
     }
 
     override fun onBindFooterViewHolder(
@@ -66,7 +66,7 @@ class GroupedQAdapter(
     ) {
         val bean = data[position]
         var tvTitle = holder?.get<TextView>(R.id.tv_Title)
-        tvTitle?.text = bean.related?.get(childPosition)?.question?.content?.data ?:""
+        tvTitle?.text = (position + 1).toString() + ", " + bean.related?.get(childPosition)?.question?.content?.data ?:""
     }
 
     /**

@@ -49,7 +49,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     var TYPE_Text : Int = 0
     val TYPE_Image : Int = 1
     val TYPE_Tip: Int = 3
-    val TYPE_Header : Int = 4
+    val TYPE_QA : Int = 4
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
     private lateinit var qaAdapter: GroupedQAdapter
@@ -62,7 +62,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType == TYPE_Header) {
+        if (viewType == TYPE_QA) {
             val binding = ItemHeaderRecyleviewBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
@@ -85,11 +85,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val newPos = position - 1
         if (holder is HeaderViewHolder) {
            // holder.rcvQa.adapter = qaAdapter
         }else  if (holder is TipMsgViewHolder) {
-            val item = msgList!![newPos]
+            val item = msgList!![position]
             item.cMsg?.let {
                 val msgDate = Date(it.msgTime.seconds * 1000L)
                 holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n\n" + it.content.data
@@ -99,7 +98,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 return
             }
             //因为headerView占了1个位置，所以要减1
-            val item = msgList!![newPos]
+            val item = msgList!![position]
 
             if (item.cMsg == null) {
                 return
@@ -112,7 +111,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 localTime = TimeUtil.getTimeStringAutoShort2(msgDate, true)
             }
             if (!item.isLeft) {
-                holder.tvRightMsg.tag = newPos
+                holder.tvRightMsg.tag = position
                 holder.tvRightTime.text = localTime
                 holder.tvRightTime.visibility = View.VISIBLE
                 holder.tvRightMsg.visibility = View.VISIBLE
@@ -147,7 +146,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         .into(holder.ivRightImg)
                 }
             } else {
-                holder.tvLeftMsg.tag = newPos
+                holder.tvLeftMsg.tag = position
                 holder.tvLeftTime.text = localTime
                 holder.tvLeftTime.visibility = View.VISIBLE
                 holder.tvLeftMsg.visibility = View.VISIBLE
@@ -193,17 +192,14 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     override
     fun getItemViewType(position: Int) : Int{
 
-        if (position == 0) {
-            return TYPE_Header
-        }
         if (msgList == null) {
             return TYPE_Text
         }
 
-        val obj = msgList!![position - 1]
+        val obj = msgList!![position]
 
-        if (obj.isTipMsg){
-            return TYPE_Tip
+        if (obj.isQA){
+            return TYPE_QA
         }
         obj.cMsg?.apply {
             return if (this.hasImage()){
@@ -216,7 +212,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override fun getItemCount(): Int {
-        return if (msgList == null) 1 else msgList!!.size + 1
+        return if (msgList == null) 1 else msgList!!.size
     }
 
     inner class HeaderViewHolder(binding: ItemHeaderRecyleviewBinding) : RecyclerView.ViewHolder(binding.root){

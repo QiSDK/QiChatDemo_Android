@@ -19,5 +19,6 @@ class MessageItem {//:Serializable
         var msgId: Long = 0
         var imgPath: String = ""
         var isTipMsg: Boolean = false
+        var isQA: Boolean = false
         //var status : Int = 0
     }

@@ -1,7 +1,6 @@
 package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Context.INPUT_METHOD_SERVICE
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
@@ -34,7 +33,6 @@ import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
-import com.teneasy.sdk.BuildConfig
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -48,7 +46,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -69,7 +66,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var reConnectTimer: Timer? = null
     private var chatLib: ChatLib? = null
     private var connected = false
-    private val TAG = "KeFuFragment"
+    private val TAG = "KefuNchatlib"
     private var sayHello = false
     private var wssBaseUrl = ""
     private var retryTimes = 0
@@ -103,6 +100,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     private fun initChatSDK(baseUrl: String){
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
+        Log.i(TAG, "x-token:" + Constants.xToken)
         chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
@@ -116,7 +114,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onPause() {
         super.onPause()
-        closeTimer()
+        exitChat()
     }
 
     // UI初始化
@@ -166,21 +164,31 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.rcvMsg.adapter = msgAdapter
 
             // 初始化自动回复列表
-            this.rcvAutoReply.layoutManager = LinearLayoutManager(context)
             qaAdapter = GroupedQAdapter(requireContext(), ArrayList(), null)
-            this.rcvAutoReply.adapter = qaAdapter
 
             // 提问列表点击事件
             qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
-                if (qaAdapter.isExpand(groupPosition)) {
-                    qaAdapter.collapseGroup(groupPosition)
-                } else {
-                    qaAdapter.collapseTheResetGroup(groupPosition)
-                    qaAdapter.expandGroup(groupPosition)
-                }
-//                mAdapter?.selectedAuthKind = mVisibleToList.get(groupPosition).kind
-//                mAdapter?.notifyDataChanged()
-//                mMomFeedAuthBean?.kind = mVisibleToList.get(groupPosition).kind
+                /*
+                自动回复 有两种情况：
+                1、一级问题，点击后回复对应的答案；
+                2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
+                */
+                val questionTxt = qaAdapter.data.get(groupPosition).content ?:"null"
+                val answerTxt = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
+
+               if (answerTxt.isEmpty()){
+                   if (qaAdapter.isExpand(groupPosition)) {
+                       qaAdapter.collapseGroup(groupPosition)
+                   } else {
+                       qaAdapter.collapseTheResetGroup(groupPosition)
+                       qaAdapter.expandGroup(groupPosition)
+                   }
+               }else{
+                   // 发送提问消息
+                   sendLocalMsg(questionTxt, false)
+                   // 自动回答
+                   sendLocalMsg(answerTxt)
+               }
             }
 
             // 问题点击事件
@@ -332,7 +340,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 updateWorkInf(workInfo)
                 lifecycleScope.launch {
                     delay(100L)
-                    viewModel.queryAutoReply(Constants.CONSULT_ID)
                     viewModel.queryChatHistory(Constants.CONSULT_ID)
                 }
             //}
@@ -355,16 +362,17 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                        qaList.add(qaItem)
                    }
                }
+               var qaItem = MessageItem()
+               qaItem.isQA = true
+
+               qaList.add(qaItem)
+               //qaItem.cMsg = chatLib?.composeALocalMessage("客服已接入")
+
                viewModel.addAllMsgItem(qaList)
                mIProgressLoader?.dismissLoading()
            }
         }
 
-        /*
-        自动回复 有两种情况：
-1、一级问题，点击后回复对应的答案；
-2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
-         */
         /*viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
 
             it.qa.apply {
@@ -469,14 +477,16 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onDestroy() {
         super.onDestroy()
-      exit()
+      exitChat()
     }
 
-    fun exit(){
+    fun exitChat(){
         closeTimer()
-        if(!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this)
-        }
+        chatLib?.disConnect()
+        chatLib = null
+//        if(!EventBus.getDefault().isRegistered(this)) {
+//            EventBus.getDefault().unregister(this)
+//        }
     }
 
     override fun onCreateViewBinding(

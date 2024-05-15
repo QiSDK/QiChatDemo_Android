@@ -1,17 +1,12 @@
 package com.teneasy.chatuisdk.ui.main;
 
 import android.Manifest
-import android.app.Application
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.tbruyelle.rxpermissions3.RxPermissions
 import com.teneasy.chatuisdk.R
-import com.teneasy.chatuisdk.ui.base.Constants
-import com.xuexiang.xhttp2.XHttpSDK
 
 /**
  * 客户activity。
@@ -47,7 +42,7 @@ class KeFuActivity : AppCompatActivity() {
     override fun onBackPressed() {
         val fragment: KeFuFragment? =
             supportFragmentManager.findFragmentByTag(TAG_FRAGMENT) as KeFuFragment?
-        fragment?.exit()
+        fragment?.exitChat()
         super.onBackPressed()
     }
 }
