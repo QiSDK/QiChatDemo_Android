@@ -183,6 +183,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                        qaAdapter.collapseTheResetGroup(groupPosition)
                        qaAdapter.expandGroup(groupPosition)
                    }
+                   refreshList()
                }else{
                    // 发送提问消息
                    sendLocalMsg(questionTxt, false)
@@ -366,8 +367,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                qaItem.isQA = true
 
                qaList.add(qaItem)
-               //qaItem.cMsg = chatLib?.composeALocalMessage("客服已接入")
+               viewModel.addAllMsgItem(qaList)
 
+                qaItem = MessageItem()
+               qaItem.isTipMsg = true
+
+               qaList.add(qaItem)
                viewModel.addAllMsgItem(qaList)
                mIProgressLoader?.dismissLoading()
            }
@@ -382,35 +387,21 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }*/
     }
 
-    private fun refreshList3(){
-        runOnUiThread {
-            msgAdapter.notifyDataSetChanged()
-
-          /*  binding?.rcvMsg?.layoutManager?.scrollToPosition(msgAdapter.itemCount - 1)
-            //binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
-            binding?.rcvMsg?.post {
-                val params = binding?.rcvMsg?.layoutParams as ViewGroup.MarginLayoutParams
-                params.bottomMargin = Utils().convertDpToPixel(150.0f, requireContext()).toInt()
-                binding?.rcvMsg?.layoutParams = params
-            }
-
-            */
-
-            //binding?.rcvMsg!!.scrollToBottomWithMargin(150)
-        }
-    }
 
     private fun refreshList(){
         msgAdapter.notifyDataSetChanged()
         val layoutManager  = binding!!.rcvMsg.layoutManager as LinearLayoutManager
         layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
-        binding!!.rcvMsg.post {
-            val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
-            if(target != null) {
-                val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 50
-                layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
+        lifecycleScope.launch {
+            binding!!.rcvMsg.post {
+                val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
+                if(target != null) {
+                    val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 50
+                    layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
+                }
             }
         }
+
     }
 
     private fun startTimer() {

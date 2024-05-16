@@ -3,7 +3,7 @@
     android:id="@+id/tv_title"
     android:layout_width="match_parent"
     android:layout_height="80dp"
-    android:text="Title"
+    android:text=""
     android:padding="@dimen/dp_10"
     android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:gravity="center_horizontal"

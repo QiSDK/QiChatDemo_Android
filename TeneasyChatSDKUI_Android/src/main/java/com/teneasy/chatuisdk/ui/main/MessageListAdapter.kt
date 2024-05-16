@@ -198,7 +198,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
         val obj = msgList!![position]
 
-        if (obj.isQA){
+        if (obj.isTipMsg){
+            return TYPE_Tip
+        }
+        else if (obj.isQA){
             return TYPE_QA
         }
         obj.cMsg?.apply {
