@@ -265,6 +265,7 @@ class KeFuViewModel() : ViewModel() {
         param.addProperty("consultId", consultId)
         param.addProperty("chatId", 0)
         param.addProperty("count", 50)
+        param.addProperty("userId", Constants.userId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)

@@ -3,12 +3,13 @@ package com.teneasy.chatuisdk.ui.base
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.google.protobuf.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 class Utils {
 
@@ -53,5 +54,27 @@ class Utils {
 
         }
         return date
+    }
+
+    /**
+     * This method converts dp unit to equivalent pixels, depending on device density.
+     *
+     * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
+     * @param context Context to get resources and device specific display metrics
+     * @return A float value to represent px equivalent to dp depending on device density
+     */
+    fun convertDpToPixel(dp: Float, context: Context): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+    }
+
+    /**
+     * This method converts device specific pixels to density independent pixels.
+     *
+     * @param px A value in px (pixels) unit. Which we need to convert into db
+     * @param context Context to get resources and device specific display metrics
+     * @return A float value to represent dp equivalent to px value
+     */
+    fun convertPixelsToDp(px: Float, context: Context): Float {
+        return px / (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 }

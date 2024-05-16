@@ -32,6 +32,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.base.scrollToBottomWithMargin
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -114,7 +115,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onPause() {
         super.onPause()
-        exitChat()
     }
 
     // UI初始化
@@ -385,32 +385,44 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun refreshList(){
         runOnUiThread {
             msgAdapter.notifyDataSetChanged()
+
+          /*  binding?.rcvMsg?.layoutManager?.scrollToPosition(msgAdapter.itemCount - 1)
+            //binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
+            binding?.rcvMsg?.post {
+                val params = binding?.rcvMsg?.layoutParams as ViewGroup.MarginLayoutParams
+                params.bottomMargin = Utils().convertDpToPixel(150.0f, requireContext()).toInt()
+                binding?.rcvMsg?.layoutParams = params
+            }
+
+            */
             binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
+            //binding?.rcvMsg!!.scrollToBottomWithMargin(150)
         }
     }
 
     private fun startTimer() {
         //closeTimer()
+        if(connected) {
+           return
+        }
+        showTip("正在重新连接...")
+        Log.i(TAG, "正在重新连接...")
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         if(reConnectTimer == null) {
             reConnectTimer = Timer()
-        }
 
-        if(!connected) {
-            showTip("正在重新连接...")
-            Log.i(TAG, "正在重新连接...")
-        }
-        reConnectTimer?.schedule(object : TimerTask() {
-            override fun run() {
-                if (chatLib == null || !connected) {
-                    Log.d(TAG, "SDK 重新初始化")
-                    initChatSDK(Constants.domain)
-                }else{
-                   // closeTimer()
-                    hideTip()
+            reConnectTimer?.schedule(object : TimerTask() {
+                override fun run() {
+                    if (chatLib == null || !connected) {
+                        Log.d(TAG, "SDK 重新初始化")
+                        initChatSDK(Constants.domain)
+                    }else{
+                        // closeTimer()
+                        //hideTip()
+                    }
                 }
-            }
-        }, 3000,5000)
+            }, 3000,5000)
+        }
     }
 
     // 关闭计时器
@@ -577,7 +589,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         //只需要调试的时候显示系统消息，其他情况不显示，避免频繁的系统提示影响用户体验
         //if (BuildConfig.DEBUG) {
         //}
-        if (msg.code > 0 && msg.code < 1010) {
+        if (msg.code >= 1000 && msg.code < 1010) {
             connected = false
             //失去链接，重试连接
             //startTimer()

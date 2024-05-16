@@ -3,7 +3,11 @@ package com.teneasy.chatuisdk.ui.base
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -15,7 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class Extension {
+//class Extension {
 
     // Create an extension function on Context to check for permissions
     fun Context.hasPermission(permission: String): Boolean {
@@ -61,4 +65,25 @@ class Extension {
     fun Activity.showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-}
+
+    fun Int.toDp(metrics: DisplayMetrics): Int {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), metrics).toInt()
+    }
+
+    fun Context.pxToDp(px: Float): Float {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, resources.displayMetrics)
+    }
+
+    // Extension function to scroll to the bottom and add a margin
+    fun RecyclerView.scrollToBottomWithMargin(margin: Int) {
+        val layoutManager = layoutManager
+        val itemCount = adapter?.itemCount ?: 0
+        layoutManager?.scrollToPosition(itemCount - 1)
+        post {
+            val params = layoutParams as ViewGroup.MarginLayoutParams
+            params.bottomMargin = margin
+            layoutParams = params
+        }
+    }
+
+//}
