@@ -48,6 +48,7 @@ class KeFuViewModel() : ViewModel() {
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
     val mHistoryList = MutableLiveData<List<list>?>()
     val Tag = "KeFuFragment"
+    val mlNewWorkAssigned = MutableLiveData<Boolean>()
 
     init {
         mlSendMsg.value = ""
@@ -217,6 +218,29 @@ class KeFuViewModel() : ViewModel() {
                     mlAssignWorker.postValue(res.data)
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
+                    println(e)
+                }
+            }
+        )
+    }
+
+    /**
+     * 跟上个消息比较，如果超过5分钟，重新分配客服
+     * @param consultId
+     */
+    fun assignNewWorker(consultId: Long) {
+        val param = JsonObject()
+        param.addProperty("consultId", consultId)
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.xToken)
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .assignWorker(param),
+            object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
+                override fun onSuccess(res: ReturnData<AssignWorker>) {
+                    mlNewWorkAssigned.postValue(true)
+                } override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    mlNewWorkAssigned.postValue(false)
                     println(e)
                 }
             }

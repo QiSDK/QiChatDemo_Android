@@ -9,6 +9,8 @@ import android.view.inputmethod.InputMethodManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
 
 
 class Utils {
@@ -56,6 +58,26 @@ class Utils {
         return date
     }
 
+    fun differenceInMinutes(date1: Date, date2: Date): Long {
+        val diffInMillis = date2.time - date1.time
+        return TimeUnit.MILLISECONDS.toMinutes(diffInMillis)
+    }
+
+
+    fun isMessageTimeDifferenceValid(lastMsgTime: Date?, sendingMsgTime: Date?, minutesDifference: Int): Boolean {
+        if (lastMsgTime == null || sendingMsgTime == null) {
+            return false
+        }
+
+        // Calculate the time 5 minutes before lastMsgTime
+        val fiveMinutesInMillis = minutesDifference * 60 * 1000
+        val lastMsgTimeMinusFiveMinutes = Date(lastMsgTime.time - fiveMinutesInMillis)
+
+        // Compare the adjusted lastMsgTime with sendingMsgTime
+        return lastMsgTimeMinusFiveMinutes > sendingMsgTime
+    }
+
+
     /**
      * This method converts dp unit to equivalent pixels, depending on device density.
      *
@@ -76,5 +98,11 @@ class Utils {
      */
     fun convertPixelsToDp(px: Float, context: Context): Float {
         return px / (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+    }
+
+    fun timestampToDate(timestamp: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'")
+        val date = Date(timestamp)
+        return sdf.format(date)
     }
 }

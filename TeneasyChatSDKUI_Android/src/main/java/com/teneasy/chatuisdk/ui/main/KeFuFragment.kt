@@ -71,6 +71,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var sayHello = false
     private var wssBaseUrl = ""
     private var retryTimes = 0
+    private var tempContent = ""
+    private var mins = 0
+
+    private var lastMsg: CMessage.Message? = null
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -345,6 +349,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             //}
         }
 
+        viewModel.mlNewWorkAssigned.observe(this@KeFuFragment){
+            if (it){
+                sendMsg(tempContent, true)
+            }
+        }
+
         viewModel.mHistoryList.observe(this@KeFuFragment){
            it?.run {
                var qaList = ArrayList<MessageItem>()
@@ -531,7 +541,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     /**
      * 根据输入框的内容，发送文本消息。
      */
-    fun sendMsg(txt: String) {
+    fun sendMsg(txt: String, force: Boolean = false) {
         if(chatLib == null){
            // Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             showTip("SDK还未初始化")
@@ -540,6 +550,19 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         /*
       todo: 用户发送消息，要先比对上一条时间 ，超过 配置的时间（默认5分钟），就调用 分流接口  v1/api/assign-worker
          */
+        if(!force) {
+            tempContent = txt
+            val lastMsgTime = Date(lastMsg?.msgTime?.seconds?: 0L)
+            val sendingMsgTime = Date(chatLib?.sendingMessage?.msgTime?.seconds?: 0L)
+
+            val diffTime = Utils().isMessageTimeDifferenceValid(lastMsgTime, sendingMsgTime, mins)
+            if (diffTime) {
+                viewModel.assignNewWorker(Constants.CONSULT_ID)
+                return
+            }
+
+        }
+
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
@@ -588,6 +611,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if (!sayHello) {
             viewModel.assignWorker(Constants.CONSULT_ID)
         }
+       mins = c.chatExpireTime.toInt()
     }
 
     override fun systemMsg(msg: Result) {
@@ -615,6 +639,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if(item != null) {
             item.sendStatus = MessageSendState.发送成功
         }
+        lastMsg = msg
         refreshList()
         Log.i(TAG, "收到回执：${msg.content.data}")
         //hideTip()
