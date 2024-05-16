@@ -183,7 +183,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                        qaAdapter.collapseTheResetGroup(groupPosition)
                        qaAdapter.expandGroup(groupPosition)
                    }
-                   refreshList()
                }else{
                    // 发送提问消息
                    sendLocalMsg(questionTxt, false)
@@ -369,9 +368,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                qaList.add(qaItem)
                viewModel.addAllMsgItem(qaList)
 
+               //添加一个空白的，确保列表滚动到最后能看到所有内容
                 qaItem = MessageItem()
                qaItem.isTipMsg = true
-
                qaList.add(qaItem)
                viewModel.addAllMsgItem(qaList)
                mIProgressLoader?.dismissLoading()
