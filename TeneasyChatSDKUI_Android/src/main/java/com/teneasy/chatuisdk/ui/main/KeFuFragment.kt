@@ -382,7 +382,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }*/
     }
 
-    private fun refreshList(){
+    private fun refreshList3(){
         runOnUiThread {
             msgAdapter.notifyDataSetChanged()
 
@@ -395,8 +395,22 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
 
             */
-            binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
+
             //binding?.rcvMsg!!.scrollToBottomWithMargin(150)
+        }
+    }
+
+    private fun refreshList(){
+        msgAdapter.notifyDataSetChanged()
+        val layoutManager  = binding!!.rcvMsg.layoutManager as LinearLayoutManager
+        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
+        binding!!.rcvMsg.post {
+            val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
+            if(target != null) {
+                //val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 50
+                val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 100
+                layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
+            }
         }
     }
 
