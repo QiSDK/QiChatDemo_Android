@@ -10,7 +10,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
-import com.teneasy.chatuisdk.ui.MyAdapter
+import com.teneasy.chatuisdk.ui.SelectConsultTypeAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
@@ -23,7 +23,7 @@ import com.xuexiang.xhttp2.XHttpSDK
 class SelectConsultTypeFragment : Fragment(){
     private val viewModel: SelectConsultTypeViewModel by viewModels()
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: MyAdapter
+    private lateinit var adapter: SelectConsultTypeAdapter
     private var binding: FragmentSelectConsultTypeBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class SelectConsultTypeFragment : Fragment(){
     ): View? {
         binding = FragmentSelectConsultTypeBinding.inflate(inflater, container, false)
         binding?.apply {
-            adapter = MyAdapter(ArrayList())
+            adapter = SelectConsultTypeAdapter(ArrayList())
             recyclerView = this.rvList
             recyclerView.adapter = adapter
             recyclerView.layoutManager = LinearLayoutManager(requireContext())

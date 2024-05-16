@@ -6,16 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.ConsultTypeItemBinding
-import com.teneasy.chatuisdk.databinding.SimpleListItemBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 
-class MyAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<MyAdapter.NormalViewHolder>() {
+class SelectConsultTypeAdapter (private val data: ArrayList<Consults>) : RecyclerView.Adapter<SelectConsultTypeAdapter.NormalViewHolder>() {
     private var dataList: ArrayList<Consults> = data
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NormalViewHolder {
         val inflater = LayoutInflater.from(parent.context)
