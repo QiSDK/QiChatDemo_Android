@@ -407,8 +407,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         binding!!.rcvMsg.post {
             val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
             if(target != null) {
-                //val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 50
-                val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 100
+                val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 50
                 layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
             }
         }
