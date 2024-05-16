@@ -537,7 +537,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             showTip("SDK还未初始化")
             return
         }
-
+        /*
+      todo: 用户发送消息，要先比对上一条时间 ，超过 配置的时间（默认5分钟），就调用 分流接口  v1/api/assign-worker
+         */
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
@@ -553,7 +555,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
-
+        /*
+           todo: 用户发送消息，要先比对上一条时间 ，超过 配置的时间（默认5分钟），就调用 分流接口  v1/api/assign-worker
+              */
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
