@@ -8,8 +8,10 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/tv_title"
         android:text="HP 自动回复引导文案"
         android:textSize="18sp"
+        android:visibility="gone"
         android:textColor="@color/ps_color_black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"></TextView>

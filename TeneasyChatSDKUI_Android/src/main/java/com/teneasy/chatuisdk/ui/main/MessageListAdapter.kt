@@ -5,6 +5,7 @@ package com.teneasy.chatuisdk.ui.main;
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -25,6 +26,7 @@ import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.JsonObject
+import com.teneasy.chatuisdk.databinding.ItemLastLineBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
@@ -50,6 +52,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     val TYPE_Image : Int = 1
     val TYPE_Tip: Int = 3
     val TYPE_QA : Int = 4
+    val TYPE_LastLine : Int = 5
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
     private lateinit var qaAdapter: GroupedQAdapter
@@ -74,6 +77,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 parent,
                 false)
             return TipMsgViewHolder(binding)
+        }else  if (viewType == TYPE_LastLine) {
+            val binding = ItemLastLineBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false)
+            return ItemLastLineViewHolder(binding)
         }else {
             val binding = ItemMessageBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -87,6 +96,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is HeaderViewHolder) {
            // holder.rcvQa.adapter = qaAdapter
+        }else if (holder is ItemLastLineViewHolder) {
+            // holder.rcvQa.adapter = qaAdapter
         }else  if (holder is TipMsgViewHolder) {
             val item = msgList!![position]
             item.cMsg?.let {
@@ -201,6 +212,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         if (obj.isTipMsg){
             return TYPE_Tip
         }
+        else if (obj.isLastLine){
+            return TYPE_LastLine
+        }
         else if (obj.isQA){
             return TYPE_QA
         }
@@ -220,6 +234,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
     inner class HeaderViewHolder(binding: ItemHeaderRecyleviewBinding) : RecyclerView.ViewHolder(binding.root){
         var rcvQa = binding.rcvQa
+        var tvTitle = binding.tvTitle
         init {
             // 初始化自动回复列表
             rcvQa.layoutManager = LinearLayoutManager(act)
@@ -234,8 +249,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .queryAutoReply(param),
                 object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
                     override fun onSuccess(res: ReturnData<AutoReply>) {
+                        if (res.code != 200 || res.data == null || res.data.autoReplyItem == null){
+                            Log.d("AdapterNChatLib", "自动回复为空")
+                        }
                         res.data.autoReplyItem?.qa?.let {
                             qaAdapter.setDataList(it)
+                            tvTitle.visibility = View.VISIBLE
                         }
                     } override fun onError(e: ApiException?) {
                         super.onError(e)
@@ -348,6 +367,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     inner class TipMsgViewHolder(binding: ItemTipMsgBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvTitle = binding.tvTitle
+    }
+
+    inner class ItemLastLineViewHolder(binding: ItemLastLineBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvTitle = binding.tvTitle
     }
 

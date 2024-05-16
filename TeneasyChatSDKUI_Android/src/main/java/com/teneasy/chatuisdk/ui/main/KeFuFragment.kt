@@ -370,7 +370,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
                //添加一个空白的，确保列表滚动到最后能看到所有内容
                 qaItem = MessageItem()
-               qaItem.isTipMsg = true
+               qaItem.isLastLine = true
                qaList.add(qaItem)
                viewModel.addAllMsgItem(qaList)
                mIProgressLoader?.dismissLoading()
@@ -388,19 +388,17 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
     private fun refreshList(){
-        msgAdapter.notifyDataSetChanged()
-        val layoutManager  = binding!!.rcvMsg.layoutManager as LinearLayoutManager
-        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
-        lifecycleScope.launch {
-            binding!!.rcvMsg.post {
-                val target = layoutManager.findViewByPosition(msgAdapter.itemCount - 1)
-                if(target != null) {
-                    val offset = binding!!.rcvMsg.measuredHeight - target.measuredHeight - 50
-                    layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, offset)
-                }
+        runOnUiThread {
+            msgAdapter.notifyDataSetChanged()
+            binding?.let {
+                //it.rcvMsg.scrollToBottomWithMargin(100)
+                it.rcvMsg.scrollToPosition(msgAdapter.itemCount - 1)
             }
         }
-
+        Log.i(TAG, "刷新列表")
+//        val layoutManager  = binding!!.rcvMsg.layoutManager as LinearLayoutManager
+//        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
+//        binding!!.rcvMsg.scrollToBottomWithMargin(100)
     }
 
     private fun startTimer() {
