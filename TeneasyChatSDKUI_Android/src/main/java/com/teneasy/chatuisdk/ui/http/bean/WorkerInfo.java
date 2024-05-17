@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class WorkerInfo implements Serializable {
     private String workerName;
+    private int id;
     private String workerAvatar;
 
     public String getWorkerName() {
@@ -20,5 +21,13 @@ public class WorkerInfo implements Serializable {
 
     public void setWorkerAvatar(String workerAvatar) {
         this.workerAvatar = workerAvatar;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

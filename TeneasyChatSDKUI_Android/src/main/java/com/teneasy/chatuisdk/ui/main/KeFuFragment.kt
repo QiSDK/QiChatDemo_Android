@@ -338,12 +338,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
             //if(it.workerId != 0) {
                 //viewModel.loadWorker(it.workerId)
-                var workInfo = WorkerInfo()
+                val workInfo = WorkerInfo()
                 workInfo.workerName = it.nick
                 workInfo.workerAvatar = it.avatar
+                workInfo.id = it.workerId
                 updateWorkInf(workInfo)
                 lifecycleScope.launch {
-                    delay(100L)
+                    //delay(100L)
                     viewModel.queryChatHistory(Constants.CONSULT_ID)
                 }
             //}
@@ -557,6 +558,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             val diffTime = Utils().isMessageTimeDifferenceValid(lastMsgTime, sendingMsgTime, mins)
             if (diffTime) {
+                Log.i(TAG, "超过配置的时间，调用分流接口")
                 viewModel.assignNewWorker(Constants.CONSULT_ID)
                 return
             }
@@ -615,15 +617,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun systemMsg(msg: Result) {
-        //只需要调试的时候显示系统消息，其他情况不显示，避免频繁的系统提示影响用户体验
-        //if (BuildConfig.DEBUG) {
-        //}
         if (msg.code >= 1000 && msg.code < 1010) {
             connected = false
-            //失去链接，重试连接
-            //startTimer()
         }else{
-                //showTip(msg.msg)
         }
         Log.i(TAG, msg.msg)
     }
@@ -685,7 +681,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     //sendLocalMsg("您好，请问有什么可以帮到您！")
                     sayHello = true
                 }
-
+                Constants.workerId = workerInfo.id
                 showTip("您好，${workerInfo.workerName}客服为您服务！")
                 // 更新头像
                 if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {

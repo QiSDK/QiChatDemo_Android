@@ -243,6 +243,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
             val param = JsonObject()
             param.addProperty("consultId", Constants.CONSULT_ID)
+            param.addProperty("workerId", Constants.workerId)
             val request = XHttp.custom().accessToken(false)
             request.headers("X-Token", Constants.xToken)
             request.call(request.create(MainApi.IMainTask::class.java)

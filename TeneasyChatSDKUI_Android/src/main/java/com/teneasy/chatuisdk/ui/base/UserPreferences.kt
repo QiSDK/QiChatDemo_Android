@@ -8,11 +8,11 @@ class UserPreferences {
         ApplicationExt.context!!.getSharedPreferences("MySharedPreferences", Context.MODE_PRIVATE)
 
     fun getString(key: String, defaultValue: String): String {
-        return sharedPreferences.getString(key, defaultValue) ?: defaultValue
+        return sharedPreferences.getString(key + Constants.userId, defaultValue) ?: defaultValue
     }
 
     fun getInt(key: String, defaultValue: Int): Int {
-        return sharedPreferences.getInt(key, defaultValue)
+        return sharedPreferences.getInt(key + Constants.userId, defaultValue)
     }
 
     fun getBoolean(key: String, defaultValue: Boolean): Boolean {
@@ -32,11 +32,11 @@ class UserPreferences {
     }
 
     fun putString(key: String, value: String) {
-        sharedPreferences.edit().putString(key, value).apply()
+        sharedPreferences.edit().putString(key + Constants.userId, value).apply()
     }
 
     fun putInt(key: String, value: Int) {
-        sharedPreferences.edit().putInt(key, value).apply()
+        sharedPreferences.edit().putInt(key + Constants.userId, value).apply()
     }
 
     fun putBoolean(key: String, value: Boolean) {

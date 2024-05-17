@@ -15,8 +15,6 @@ import com.teneasy.chatuisdk.ui.base.PARAM_CERT
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
 import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
-import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
-import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.base.toIntOrZero
