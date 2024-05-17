@@ -375,14 +375,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                }
                var qaItem = MessageItem()
                qaItem.isQA = true
-
                qaList.add(qaItem)
-               viewModel.addAllMsgItem(qaList)
+               //viewModel.addAllMsgItem(qaList)
 
                //添加一个空白的，确保列表滚动到最后能看到所有内容
                 qaItem = MessageItem()
                qaItem.isLastLine = true
                qaList.add(qaItem)
+
                viewModel.addAllMsgItem(qaList)
                mIProgressLoader?.dismissLoading()
            }
