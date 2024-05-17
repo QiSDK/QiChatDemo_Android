@@ -86,4 +86,11 @@ import androidx.recyclerview.widget.RecyclerView
         }
     }
 
+fun String.toIntOrZero(): Int {
+    return try {
+        this.toInt()
+    } catch (e: NumberFormatException) {
+        0
+    }
+}
 //}

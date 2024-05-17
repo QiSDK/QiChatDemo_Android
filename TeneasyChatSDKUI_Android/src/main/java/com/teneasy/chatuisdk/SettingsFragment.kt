@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.chatuisdk.databinding.FragmentSettingsBinding
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.PARAM_CERT
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
 import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
@@ -18,6 +19,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.base.toIntOrZero
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -69,11 +71,11 @@ var binding: FragmentSettingsBinding? = null
                 Constants.lines = this.etLine.text.toString()
                 Constants.xToken = this.etXToken.text.toString()
                 Constants.cert = this.etWssCert.text.toString()
-                Constants.merchantId =  this.etMerchanId.text.toString().toInt()
-                Constants.userId =  this.etUserId.text.toString().toInt()
 
-                UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
-                UserPreferences().putString(PARAM_DOMAIN, Constants.domain)
+                Constants.merchantId =  this.etMerchanId.text.toString().toIntOrZero()
+                Constants.userId =  this.etUserId.text.toString().toIntOrZero()
+
+                UserPreferences().putString(PARAM_CERT, Constants.cert)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)
