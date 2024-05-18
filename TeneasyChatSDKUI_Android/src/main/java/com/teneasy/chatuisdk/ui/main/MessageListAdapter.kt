@@ -41,7 +41,7 @@ interface MessageItemOperateListener {
     fun onCopy(position: Int)
     fun onReSend(position: Int)
     fun onQuote(position: Int)
-    fun onSendLocalMsg(msg: String, isLeft: Boolean)
+    fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
 }
 /**
  * 聊天界面列表adapter
@@ -271,21 +271,36 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 1、一级问题，点击后回复对应的答案；
                 2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
                 */
-                val questionTxt = qaAdapter.data.get(groupPosition).content ?:""
-                val answerTxt = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
 
-                if (answerTxt.isEmpty()){
+                val questionTxt = qaAdapter.data.get(groupPosition).question.content.data
+
+                val txtAnswer = qaAdapter.data.get(groupPosition).content ?:""
+
+                val multipAnswer = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
+
+                if (!txtAnswer.isEmpty()){
+                    // 发送提问消息
+                    listener?.onSendLocalMsg(questionTxt, false)
+                    // 自动回答
+                    listener?.onSendLocalMsg(txtAnswer, true)
+                }
+                if (!multipAnswer.isEmpty()){
+                    for (a in qaAdapter.data.get(groupPosition).answer){
+                        if (a!!.image != null){
+                            // 发送提问消息
+                            listener?.onSendLocalMsg(questionTxt, false)
+                            // 自动回答
+                            listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
+                        }
+
+                    }
+                }else{
                     if (qaAdapter.isExpand(groupPosition)) {
                         qaAdapter.collapseGroup(groupPosition)
                     } else {
                         qaAdapter.collapseTheResetGroup(groupPosition)
                         qaAdapter.expandGroup(groupPosition)
                     }
-                }else{
-                    // 发送提问消息
-                    listener?.onSendLocalMsg(questionTxt, false)
-                    // 自动回答
-                    listener?.onSendLocalMsg(answerTxt, true)
                 }
             }
 

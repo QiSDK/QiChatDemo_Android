@@ -156,8 +156,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
                 }
 
-                override fun onSendLocalMsg(msg: String, isLeft: Boolean) {
-                   this@KeFuFragment.sendLocalMsg(msg, isLeft)
+                override fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String) {
+
+                    if (msgType == "MSG_TEXT") {
+                        this@KeFuFragment.sendLocalMsg(msg, isLeft)
+                    }else if (msgType == "MSG_IMG") {
+                        this@KeFuFragment.sendLocalImgMsg(msg, isLeft)
+                    }
+
                 }
             } )
             msgAdapter.setList(ArrayList())
@@ -671,6 +677,15 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功
         viewModel.addMsgItem(chatModel, 0)
+    }
+
+    private fun sendLocalImgMsg(imgPath: String, isLeft: Boolean = true){
+        if (chatLib == null){
+            showTip("SDK还未初始化")
+            return
+        }
+
+        viewModel.addMsgItem(viewModel.composeImgMsg(null, isLeft, imgPath), 0)
     }
 
     private fun hidetvQuotedMsg(){

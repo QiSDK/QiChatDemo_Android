@@ -1,5 +1,7 @@
 package com.teneasy.chatuisdk.ui.http.bean
 
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Audio
+
 
 data class AutoReply(
     var autoReplyItem : AutoReplyItem?
@@ -35,7 +37,8 @@ data class AutoReply(
         val autoReplyFlag: Any? = null,
         val msgFmt: String,
         val consultID: String,
-        val content: Content
+        val content: Content,
+        val image: Audio
     )
 
     data class Content (

@@ -94,18 +94,25 @@ class KeFuViewModel() : ViewModel() {
     * @param isLeft
     */
     //撰写一条图片信息
-    fun composeImgMsg(history: list, isLeft: Boolean) : MessageItem{
+    fun composeImgMsg(history: list?, isLeft: Boolean, imgPath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageImage.newBuilder()
 
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
-        cal.time = Utils().convertStrToDate(history.msgTime)
+        if (history?.msgTime != null) {
+            cal.time = Utils().convertStrToDate(history.msgTime)
+        }else{
+            cal.time = Date()
+        }
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
         cMsg.msgTime = d.build()
 
-        if (history.image != null) {
+        if (!imgPath.isEmpty()){
+            cMContent.uri = imgPath
+        }
+        else if (history?.image != null) {
             cMContent.uri = history.image.uri
         }else{
             cMContent.uri = ""
