@@ -177,7 +177,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 1、一级问题，点击后回复对应的答案；
                 2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
                 */
-                val questionTxt = qaAdapter.data.get(groupPosition).content ?:"null"
+                val questionTxt = qaAdapter.data.get(groupPosition).content ?:""
                 val answerTxt = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
 
                if (answerTxt.isEmpty()){
