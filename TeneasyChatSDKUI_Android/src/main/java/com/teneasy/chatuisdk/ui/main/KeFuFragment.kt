@@ -23,6 +23,7 @@ import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
+import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
@@ -169,41 +170,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             // 初始化自动回复列表
             qaAdapter = GroupedQAdapter(requireContext(), ArrayList(), null)
-
-            // 提问列表点击事件
-            qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
-                /*
-                自动回复 有两种情况：
-                1、一级问题，点击后回复对应的答案；
-                2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
-                */
-                val questionTxt = qaAdapter.data.get(groupPosition).content ?:""
-                val answerTxt = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
-
-               if (answerTxt.isEmpty()){
-                   if (qaAdapter.isExpand(groupPosition)) {
-                       qaAdapter.collapseGroup(groupPosition)
-                   } else {
-                       qaAdapter.collapseTheResetGroup(groupPosition)
-                       qaAdapter.expandGroup(groupPosition)
-                   }
-               }else{
-                   // 发送提问消息
-                   sendLocalMsg(questionTxt, false)
-                   // 自动回答
-                   sendLocalMsg(answerTxt)
-               }
-            }
-
-            // 问题点击事件
-            qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
-                val answerTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
-                val questionTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.question?.content?.data ?:""
-                // 发送提问消息
-                sendLocalMsg(questionTxt, false)
-                // 自动回答
-                sendLocalMsg(answerTxt)
-            }
 
             // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
