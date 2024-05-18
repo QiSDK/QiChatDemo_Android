@@ -73,7 +73,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var wssBaseUrl = ""
     private var retryTimes = 0
     private var tempContent = ""
-    private var mins = 0
+    private var sessionTimeout = 0 //in seconds, chatExpireTime
 
     private var lastMsg: CMessage.Message? = null
 
@@ -523,12 +523,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         /*
       todo: 用户发送消息，要先比对上一条时间 ，超过 配置的时间（默认5分钟），就调用 分流接口  v1/api/assign-worker
          */
-        if(!force) {
+        if(!force && lastMsg != null) {
             tempContent = txt
             val lastMsgTime = Date(lastMsg?.msgTime?.seconds?: 0L)
-            val sendingMsgTime = Date(chatLib?.sendingMessage?.msgTime?.seconds?: 0L)
+            val sendingMsgTime = Date(Date().time)
 
-            val diffTime = Utils().isMessageTimeDifferenceValid(lastMsgTime, sendingMsgTime, mins)
+            val diffTime = Utils().sessionTimeout(lastMsgTime, sendingMsgTime, sessionTimeout)
             if (diffTime) {
                 Log.i(TAG, "超过配置的时间，调用分流接口")
                 viewModel.assignNewWorker(Constants.CONSULT_ID)
@@ -536,7 +536,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
 
         }
-
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
@@ -585,7 +584,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if (!sayHello) {
             viewModel.assignWorker(Constants.CONSULT_ID)
         }
-       mins = c.chatExpireTime.toInt()
+       sessionTimeout = c.chatExpireTime.toInt()
     }
 
     override fun systemMsg(msg: Result) {

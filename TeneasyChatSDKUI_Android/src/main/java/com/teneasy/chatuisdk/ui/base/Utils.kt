@@ -77,6 +77,19 @@ class Utils {
         return lastMsgTimeMinusFiveMinutes > sendingMsgTime
     }
 
+    fun sessionTimeout(lastMsgTime: Date?, sendingMsgTime: Date?, secondsDifference: Int): Boolean {
+        if (lastMsgTime == null || sendingMsgTime == null) {
+            return false
+        }
+
+        // Calculate the time 5 minutes before lastMsgTime
+        val fiveMinutesInMillis = secondsDifference * 1000
+        val lastMsgTimeMinusFiveMinutes = Date(lastMsgTime.time - fiveMinutesInMillis)
+
+        // Compare the adjusted lastMsgTime with sendingMsgTime
+        return lastMsgTimeMinusFiveMinutes > sendingMsgTime
+    }
+
 
     /**
      * This method converts dp unit to equivalent pixels, depending on device density.
