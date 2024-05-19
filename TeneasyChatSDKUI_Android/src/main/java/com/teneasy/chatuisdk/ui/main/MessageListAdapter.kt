@@ -287,13 +287,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 val multipAnswer = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
 
-                if (!txtAnswer.isEmpty()){
+                if (txtAnswer.isNotEmpty()){
                     // 发送提问消息
                     listener?.onSendLocalMsg(questionTxt, false)
                     // 自动回答
                     listener?.onSendLocalMsg(txtAnswer, true)
                 }
-                if (!multipAnswer.isEmpty()){
+                 if (multipAnswer.isNotEmpty()){
                     for (a in qaAdapter.data.get(groupPosition).answer){
                         if (a!!.image != null){
                             // 发送提问消息
@@ -315,12 +315,28 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
             // 问题点击事件
             qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
-                val answerTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
                 val questionTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.question?.content?.data ?:""
-                // 发送提问消息
-                listener?.onSendLocalMsg(questionTxt, false)
-                // 自动回答
-                listener?.onSendLocalMsg(answerTxt, true)
+                val txtAnswer = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
+
+                val multipAnswer = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.answer?.joinToString(separator = "\n")  ?:""
+
+                if (txtAnswer.isNotEmpty()){
+                    // 发送提问消息
+                    listener?.onSendLocalMsg(questionTxt, false)
+                    // 自动回答
+                    listener?.onSendLocalMsg(txtAnswer, true)
+                }
+                 if (multipAnswer.isNotEmpty()){
+                    for (a in qaAdapter.data.get(groupPosition).related?.get(childPosition)?.answer ?: ArrayList()){
+                        if (a!!.image != null){
+                            // 发送提问消息
+                            listener?.onSendLocalMsg(questionTxt, false)
+                            // 自动回答
+                            listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
+                        }
+
+                    }
+                }
             }
         }
     }
