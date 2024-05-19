@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -34,6 +36,10 @@ import com.teneasy.chatuisdk.ui.http.bean.AutoReply
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.EventBus
+import kotlin.coroutines.coroutineContext
 
 
 interface MessageItemOperateListener {
@@ -43,6 +49,8 @@ interface MessageItemOperateListener {
     fun onQuote(position: Int)
     fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
 }
+
+data class QADisplayedEvent(val tag: Int)
 /**
  * 聊天界面列表adapter
  */
@@ -256,6 +264,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         res.data.autoReplyItem?.qa?.let {
                             qaAdapter.setDataList(it)
                             tvTitle.visibility = View.VISIBLE
+                            EventBus.getDefault().post(QADisplayedEvent(100))
                         }
                     } override fun onError(e: ApiException?) {
                         super.onError(e)

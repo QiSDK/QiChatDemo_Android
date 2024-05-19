@@ -36,6 +36,7 @@ import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.base.scrollToBottomWithMargin
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
+import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.MessageItem
@@ -48,6 +49,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -96,9 +100,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*if(!EventBus.getDefault().isRegistered(this)) {
+        if(!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
-        }*/
+        }
         requireActivity().title = "客服"
 
         hidetvQuotedMsg()
@@ -367,6 +371,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
 
         }*/
+    }
+
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    fun onQADisplayedEvent(event: QADisplayedEvent) {
+        //mViewModel.cancelMuteTeamMember(event.teamId, event.nimId)
+        refreshList()
     }
 
 
