@@ -417,7 +417,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         //hideTip()
                     }
                 }
-            }, 3000,5000)
+            }, 0,5000)
         }
     }
 
@@ -607,11 +607,17 @@ code: 1002 无效的Token
         if (msg.code >= 1000 && msg.code <= 1010) {
             connected = false
             if (msg.code == 1002){
-                Toast.makeText(context, "无效的Token", Toast.LENGTH_LONG).show()
-                findNavController().popBackStack()
+                runOnUiThread {
+                    Toast.makeText(context, "无效的Token", Toast.LENGTH_LONG).show()
+                }
+                //禁掉重试机制
+                closeTimer()
             }else if (msg.code == 1010){
-                findNavController().popBackStack()
-                Toast.makeText(context, "在别处登录了", Toast.LENGTH_LONG).show()
+                runOnUiThread {
+                    Toast.makeText(context, "在别处登录了", Toast.LENGTH_LONG).show()
+                }
+                //禁掉重试机制，因为继续重试会影响在别处登录
+                closeTimer()
             }
         }else{
         }

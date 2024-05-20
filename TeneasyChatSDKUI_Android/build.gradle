@@ -111,7 +111,7 @@ dependencies {
 
     implementation 'com.github.li-xiaojun:XPopup:2.10.0'
     //implementation project(path: ':teneasyChatSDK_Android')
-    implementation 'com.github.QiSDK:QiChatSDK_Android:1.5.1'
+    implementation 'com.github.QiSDK:QiChatSDK_Android:1.5.2'
 }
 
 // ./gradlew publish
