@@ -32,7 +32,7 @@ class Constants {
         var CONSULT_ID: Long = 1
         var cert = "COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg"
         var merchantId = 225
-        var userId = 777771
+        var userId = 777772
 
      //运行时候生成的
          var xToken = ""
