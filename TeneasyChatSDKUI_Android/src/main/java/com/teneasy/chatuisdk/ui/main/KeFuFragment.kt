@@ -600,8 +600,19 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     override fun systemMsg(msg: Result) {
-        if (msg.code >= 1000 && msg.code < 1010) {
+        /*
+        code: 1010 在别处登录了
+code: 1002 无效的Token
+         */
+        if (msg.code >= 1000 && msg.code <= 1010) {
             connected = false
+            if (msg.code == 1002){
+                Toast.makeText(context, "无效的Token", Toast.LENGTH_LONG).show()
+                findNavController().popBackStack()
+            }else if (msg.code == 1010){
+                findNavController().popBackStack()
+                Toast.makeText(context, "在别处登录了", Toast.LENGTH_LONG).show()
+            }
         }else{
         }
         Log.i(TAG, msg.msg)
