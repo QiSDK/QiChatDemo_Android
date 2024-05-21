@@ -360,8 +360,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                qaList.add(qaItem)
 
                viewModel.addAllMsgItem(qaList)
-               mIProgressLoader?.dismissLoading()
            }
+            mIProgressLoader?.dismissLoading()
         }
 
         /*viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
