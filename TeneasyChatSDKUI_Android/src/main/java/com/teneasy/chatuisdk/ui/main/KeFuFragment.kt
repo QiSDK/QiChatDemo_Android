@@ -23,7 +23,6 @@ import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
-import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
@@ -33,10 +32,8 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
-import com.teneasy.chatuisdk.ui.base.scrollToBottomWithMargin
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
-import com.teneasy.sdk.MessageEventBus
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.MessageItem
@@ -45,7 +42,6 @@ import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -73,7 +69,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var chatLib: ChatLib? = null
     private var connected = false
     private val TAG = "KefuNchatlib"
-    private var sayHello = false
+    //标记是否第一次加载页面
+    private var isFirstLoad = true
     private var wssBaseUrl = ""
     private var retryTimes = 0
     private var tempContent = ""
@@ -307,9 +304,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             msgAdapter.setList(it)
             refreshList()
         }
-        viewModel.mlWorkerInfo.observe(this@KeFuFragment){
-            updateWorkInf(it)
-        }
 
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
             //if(it.workerId != 0) {
@@ -318,6 +312,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 workInfo.workerName = it.nick
                 workInfo.workerAvatar = it.avatar
                 workInfo.id = it.workerId
+                Log.d(TAG, "WorkerId: ${workInfo.id}")
                 updateWorkInf(workInfo)
                 lifecycleScope.launch {
                     //delay(100L)
@@ -334,6 +329,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         viewModel.mHistoryList.observe(this@KeFuFragment){
            it?.run {
+
+               if (!isFirstLoad){
+                   return@run
+               }
                var qaList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
@@ -359,6 +358,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                qaItem.isLastLine = true
                qaList.add(qaItem)
 
+               if(isFirstLoad) {
+                   isFirstLoad = false
+               }
                viewModel.addAllMsgItem(qaList)
            }
             mIProgressLoader?.dismissLoading()
@@ -593,9 +595,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         UserPreferences().putString(PARAM_XTOKEN, c.token)
         Constants.xToken = c.token
-        if (!sayHello) {
+        //if (!isFirstLoad) {
             viewModel.assignWorker(Constants.CONSULT_ID)
-        }
+        //}
        sessionTimeout = c.chatExpireTime.toInt()
     }
 
@@ -657,6 +659,7 @@ code: 1002 无效的Token
         var workInfo = WorkerInfo()
         workInfo.workerName = msg.workerName
         workInfo.workerAvatar = msg.workerAvatar
+        Constants.workerId = msg.workerId
         updateWorkInf(workInfo)
     }
 
@@ -677,10 +680,6 @@ code: 1002 无效的Token
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
-                if(!sayHello) {
-                    //sendLocalMsg("您好，请问有什么可以帮到您！")
-                    sayHello = true
-                }
                 Constants.workerId = workerInfo.id
                 showTip("您好，${workerInfo.workerName}客服为您服务！")
                 // 更新头像

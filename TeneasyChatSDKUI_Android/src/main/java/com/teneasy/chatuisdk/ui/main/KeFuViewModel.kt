@@ -190,7 +190,7 @@ class KeFuViewModel() : ViewModel() {
      * 通过workerId加载客服信息
      * @param workerId
      */
-    fun loadWorker(workerId: Int) {
+   /* fun loadWorker(workerId: Int) {
         val param = JsonObject()
         param.addProperty("workerId", workerId)
         val request = XHttp.custom().accessToken(false)
@@ -207,7 +207,7 @@ class KeFuViewModel() : ViewModel() {
 
             }
         )
-    }
+    }*/
 
     /**
      * 通过选择的consultId分配客服
