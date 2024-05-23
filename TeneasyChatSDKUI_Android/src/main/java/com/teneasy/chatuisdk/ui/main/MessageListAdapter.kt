@@ -110,7 +110,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             val item = msgList!![position]
             item.cMsg?.let {
                 val msgDate = Date(it.msgTime.seconds * 1000L)
-                holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n\n" + it.content.data
+                holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
             }
         }else if (holder is MsgViewHolder) {
             if (msgList == null) {
