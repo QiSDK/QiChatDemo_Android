@@ -15,6 +15,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_CERT
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
 import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
+import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.base.toIntOrZero
@@ -67,7 +68,7 @@ var binding: FragmentSettingsBinding? = null
 
             this.btnSave.setOnClickListener {
                 Constants.lines = this.etLine.text.toString()
-                Constants.xToken = this.etXToken.text.toString()
+                Constants.xToken = ""
                 Constants.cert = this.etWssCert.text.toString()
 
                 Constants.merchantId =  this.etMerchanId.text.toString().toIntOrZero()
@@ -77,6 +78,7 @@ var binding: FragmentSettingsBinding? = null
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)
+                UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
 
                 ToastUtils.showToast(requireContext(), "保存成功")
             }
