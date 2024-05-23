@@ -312,11 +312,19 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 workInfo.workerName = it.nick
                 workInfo.workerAvatar = it.avatar
                 workInfo.id = it.workerId
-                Log.d(TAG, "WorkerId: ${workInfo.id}")
+
+                Log.d(TAG, "Assign WorkerId: ${workInfo.id}")
+
+            if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
+                Constants.workerId = it.workerId
                 updateWorkInf(workInfo)
+            }
                 lifecycleScope.launch {
                     //delay(100L)
-                    viewModel.queryChatHistory(Constants.CONSULT_ID)
+                    if(isFirstLoad) {
+                        isFirstLoad = false
+                        viewModel.queryChatHistory(Constants.CONSULT_ID)
+                    }
                 }
             //}
         }
@@ -329,10 +337,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         viewModel.mHistoryList.observe(this@KeFuFragment){
            it?.run {
-
-               if (!isFirstLoad){
-                   return@run
-               }
                var qaList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
@@ -340,7 +344,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                    if (item.sender == item.chatId){
                        isLeft = false
                    }
-                   if(item.msgFmt == "MSG_TEXT") {
+
+                   if (item.workerChanged != null){
+                       val qaItem =  viewModel.composeTextMsg(item, isLeft)
+                       qaItem.isTipMsg = true
+                       qaList.add(qaItem)
+                   }
+                   else if(item.msgFmt == "MSG_TEXT") {
                        val qaItem =  viewModel.composeTextMsg(item, isLeft)
                        qaList.add(qaItem)
                    }else if(item.msgFmt == "MSG_IMG") {
@@ -358,9 +368,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                qaItem.isLastLine = true
                qaList.add(qaItem)
 
-               if(isFirstLoad) {
-                   isFirstLoad = false
-               }
+
                viewModel.addAllMsgItem(qaList)
            }
             mIProgressLoader?.dismissLoading()
@@ -613,13 +621,13 @@ code: 1002 无效的Token
 //                    Toast.makeText(requireContext(), "无效的Token", Toast.LENGTH_LONG).show()
 //                }
                 //禁掉重试机制
-                closeTimer()
+                //closeTimer()
             }else if (msg.code == 1010){
 //                runOnUiThread {
 //                    Toast.makeText(requireContext(), "在别处登录了", Toast.LENGTH_LONG).show()
 //                }
                 //禁掉重试机制，因为继续重试会影响在别处登录
-                closeTimer()
+                //closeTimer()
             }
         }else{
         }
@@ -646,7 +654,12 @@ code: 1002 无效的Token
     override fun receivedMsg(msg: CMessage.Message) {
         if (msg.consultId != Constants.CONSULT_ID){
             //免用户端在当前会话里显示其他咨询类型客服发来的消息。
-            showTip("其他客服有新消息！")
+            //showTip("其他客服有新消息！")
+            runOnUiThread(
+                Runnable {
+                    Toast.makeText(context, "其他客服有新消息！", Toast.LENGTH_SHORT).show()
+                }
+            )
         }else {
             var messageItem = MessageItem()
             messageItem.cMsg = msg
@@ -659,8 +672,12 @@ code: 1002 无效的Token
         var workInfo = WorkerInfo()
         workInfo.workerName = msg.workerName
         workInfo.workerAvatar = msg.workerAvatar
-        Constants.workerId = msg.workerId
-        updateWorkInf(workInfo)
+        Constants.CONSULT_ID = msg.consultId
+        Log.d(TAG, "workChanged WorkerId: ${workInfo.id}")
+        if (msg.workerId != Constants.workerId){
+            Constants.workerId = msg.workerId
+            updateWorkInf(workInfo)
+        }
     }
 
     private fun showTip(msg: String){
@@ -680,16 +697,20 @@ code: 1002 无效的Token
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
-                Constants.workerId = workerInfo.id
-                showTip("您好，${workerInfo.workerName}客服为您服务！")
+                //showTip("您好，${workerInfo.workerName}为您服务！")
+                if (isFirstLoad){
+                    viewModel.composeLocalMsg("您好，${workerInfo.workerName}为您服务！", true, false)
+                }else{
+                    viewModel.composeLocalMsg("您好，${workerInfo.workerName}为您服务！", false, true)
+                }
                 // 更新头像
                 if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
                     val url = Constants.baseUrlImage + workerInfo.workerAvatar
                     print("avatar:$url")
-                    Glide.with(binding!!.civAuthorImage).load(url).dontAnimate()
+                    Glide.with(it.civAuthorImage).load(url).dontAnimate()
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(binding!!.civAuthorImage)
+                        .into(it.civAuthorImage)
                 }
             }
     }

@@ -130,6 +130,8 @@ class KeFuViewModel() : ViewModel() {
 
 
     fun composeTextMsg(history: list,  isLeft: Boolean) : MessageItem{
+        var chatModel = MessageItem()
+
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
 
@@ -142,6 +144,7 @@ class KeFuViewModel() : ViewModel() {
 
         if (history.workerChanged != null){
             cMContent.data = history.workerChanged.greeting
+            chatModel.isTipMsg = true
         }
         else if (history.content != null) {
             cMContent.data = history.content.data
@@ -150,7 +153,7 @@ class KeFuViewModel() : ViewModel() {
         }
         cMsg.setContent(cMContent)
 
-        var chatModel = MessageItem()
+
         chatModel.cMsg = cMsg.build()
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功
@@ -214,6 +217,7 @@ class KeFuViewModel() : ViewModel() {
      * @param consultId
      */
     fun assignWorker(consultId: Long) {
+        Log.d(Tag, "assignWorker consultId:" + consultId)
         val param = JsonObject()
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
@@ -296,7 +300,7 @@ class KeFuViewModel() : ViewModel() {
         param.addProperty("consultId", consultId)
         param.addProperty("chatId", 0)
         param.addProperty("count", 50)
-        param.addProperty("userId", Constants.userId)
+        //param.addProperty("userId", Constants.userId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
