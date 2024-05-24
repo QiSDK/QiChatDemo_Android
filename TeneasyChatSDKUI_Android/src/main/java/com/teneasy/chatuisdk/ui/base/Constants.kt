@@ -42,7 +42,7 @@ class Constants {
          var xToken = ""
         var domain = "wcsapi.qixin14.xyz"  //domain
         val baseUrlApi = "https://" + domain  //用于请求数据，上传图片
-        val baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
+        const val baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
         var workerId = 0
         var CONSULT_ID: Long = 1
         //val wss_token = "wss_token"

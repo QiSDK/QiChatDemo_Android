@@ -7,6 +7,7 @@ import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -116,12 +117,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun onResume() {
         super.onResume()
         //定时检测链接状态
-        startTimer()
+        //startTimer()
     }
 
     override fun onPause() {
         super.onPause()
-        exitChat()
+
     }
 
     // UI初始化
@@ -296,6 +297,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             this.llClose.setOnClickListener {
                 findNavController().popBackStack()
             }
+
+            this.root.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    Utils().closeSoftKeyboard(v)
+                }
+                true
+            }
         }
     }
 
@@ -428,7 +436,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         //hideTip()
                     }
                 }
-            }, 0,3000)
+            }, 3000, 3000)
         }
     }
 
@@ -487,6 +495,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                             // 上传失败
                             Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
                         }
+                        //Utils().closeSoftKeyboard(view)
                     }
                 })
 
@@ -678,7 +687,9 @@ code: 1002 无效的Token
         Log.d(TAG, "workChanged WorkerId: ${workInfo.id}")
         if (msg.workerId != Constants.workerId){
             Constants.workerId = msg.workerId
-            updateWorkInf(workInfo)
+            runOnUiThread {
+                updateWorkInf(workInfo)
+            }
         }
     }
 
@@ -708,8 +719,9 @@ code: 1002 无效的Token
                 // 更新头像
                 if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
                     val url = Constants.baseUrlImage + workerInfo.workerAvatar
-                    print("avatar:$url")
-                    Glide.with(it.civAuthorImage).load(url).dontAnimate()
+                    print("workerAvatar:$url \n")
+                    Glide.with(it.civAuthorImage).load(url)
+                        .dontAnimate()
                         .skipMemoryCache(true)
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .into(it.civAuthorImage)
