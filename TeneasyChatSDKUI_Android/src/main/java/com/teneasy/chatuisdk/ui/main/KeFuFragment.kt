@@ -37,6 +37,7 @@ import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
+import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
@@ -346,7 +347,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         viewModel.mHistoryList.observe(this@KeFuFragment){
            it?.run {
-               var qaList = ArrayList<MessageItem>()
+               var historyList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
                    var isLeft = true
@@ -355,44 +356,42 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                    }
 
                    if (item.workerChanged != null){
-                       val qaItem =  viewModel.composeTextMsg(item, isLeft)
-                       qaItem.isTipMsg = true
-                       qaList.add(qaItem)
+                       val historyItem =  viewModel.composeTextMsg(item, isLeft)
+                       historyItem.cellType = CellType.TYPE_Tip
+                       historyList.add(historyItem)
+                   }
+                   else if (item.msgFmt == "MSG_VIDEO"){
+                       val historyItem =  viewModel.composeVideoMsg(item, isLeft)
+                       historyItem.cellType = CellType.TYPE_VIDEO
+                       historyList.add(historyItem)
                    }
                    else if(item.msgFmt == "MSG_TEXT") {
-                       val qaItem =  viewModel.composeTextMsg(item, isLeft)
-                       qaList.add(qaItem)
+                       val historyItem =  viewModel.composeTextMsg(item, isLeft)
+                       historyList.add(historyItem)
                    }else if(item.msgFmt == "MSG_IMG") {
-                       val qaItem = viewModel.composeImgMsg(item, isLeft)
-                       qaList.add(qaItem)
+                       val historyItem = viewModel.composeImgMsg(item, isLeft)
+                       historyItem.cellType = CellType.TYPE_Image
+                       historyList.add(historyItem)
                    }
                }
+
+               //添加自动回复Cell
                var qaItem = MessageItem()
-               qaItem.isQA = true
-               qaList.add(qaItem)
+               qaItem.cellType = CellType.TYPE_QA
+               historyList.add(qaItem)
                //viewModel.addAllMsgItem(qaList)
 
-               //添加一个空白的，确保列表滚动到最后能看到所有内容
+               //添加一个空白Cell，确保列表滚动到最后能看到所有内容
                 qaItem = MessageItem()
-               qaItem.isLastLine = true
-               qaList.add(qaItem)
+               qaItem.cellType = CellType.TYPE_LastLine
+               historyList.add(qaItem)
 
 
-               viewModel.addAllMsgItem(qaList)
+               viewModel.addAllMsgItem(historyList)
            }
             mIProgressLoader?.dismissLoading()
         }
-
-        /*viewModel.mlAutoReplyItem.observe(this@KeFuFragment){
-
-            it.qa.apply {
-                qaAdapter.setDataList(this)
-            }
-
-        }*/
     }
-
-
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     fun onQADisplayedEvent(event: QADisplayedEvent) {

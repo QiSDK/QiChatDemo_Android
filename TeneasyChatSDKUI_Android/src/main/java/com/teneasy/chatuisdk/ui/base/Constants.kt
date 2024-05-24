@@ -12,13 +12,6 @@ const val PARAM_DOMAIN = "wssBaseUrl"
 
 class Constants {
 
-    //开发环境
-
-    //线上环境
-    //  val baseUrlImage = "https://images2acc.wwc09.com" //用于拼接图片地址
-    //  val baseUrlApi = "https://csapi.ertw.xyz"//用于请求数据，上传图片
-    //测试环境
-
     companion object {
      //这部分是在设置里面获取的
         var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
@@ -53,21 +46,5 @@ class Constants {
 
     1.无法接受起聊发送过来的视频，显示空消息
 
-
-3.包含文字和图片的自动回复选项，用户视角会发送两次同样的信息
-
-2.安卓停留在对话框，对话被转接后，客服头像不同步更新
-
-
-6.切换咨询类型并发送消息给客服后，原类型的客服发送消息，在切换回原类型下无法接收客服消息
-
-
-
-
-
-
-
-4.转接tips以消息的方式呈现
-5.初次打招呼消息重复
      */
 }

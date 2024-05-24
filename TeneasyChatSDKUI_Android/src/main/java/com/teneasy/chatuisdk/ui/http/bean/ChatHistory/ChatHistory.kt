@@ -31,12 +31,12 @@ data class list (
   val audio: Audio?,
   val video: Audio?,
   val geo: Geo,
-  val file: File,
+  val file: File?,
   val workerTrans: WorkerTrans,
   val blacklistApply: Blacklist,
   val blacklistConfirm: Blacklist,
   val autoReply: AutoReply,
-  val workerChanged: WorkerChanged
+  val workerChanged: WorkerChanged?
 )
 
 data class Audio (

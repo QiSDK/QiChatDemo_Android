@@ -8,6 +8,15 @@ enum class MessageSendState {
         发送中, 发送成功, 发送失败, 未知
 }
 
+enum class CellType(val value: Int) {
+        TYPE_Text(0),
+        TYPE_Image(1),
+        TYPE_Tip(2),
+        TYPE_QA(3),
+        TYPE_VIDEO(4),
+        TYPE_LastLine(5);
+}
+
 class MessageItem {//:Serializable
         var id: String = ""
         var isLeft : Boolean = false
@@ -18,8 +27,5 @@ class MessageItem {//:Serializable
         var payLoadId: Long = 0
         var msgId: Long = 0
         var imgPath: String = ""
-        var isTipMsg: Boolean = false
-        var isQA: Boolean = false
-        var isLastLine: Boolean = false
-        //var status : Int = 0
+        var cellType: CellType = CellType.TYPE_Text
     }

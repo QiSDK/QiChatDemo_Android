@@ -18,6 +18,7 @@ import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.list
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.TimeUtil
+import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
@@ -63,6 +64,10 @@ class KeFuViewModel() : ViewModel() {
     fun addMsgItem(newItem: MessageItem, payLoadId: Long) {
         newItem.payLoadId = payLoadId
         mlMsgList.value?.add(newItem)
+
+        if (newItem.cMsg?.video != null){
+            newItem.cellType = CellType.TYPE_VIDEO
+        }
         mlMsgList.postValue(mlMsgList.value)
     }
 
@@ -88,8 +93,7 @@ class KeFuViewModel() : ViewModel() {
     }
 
     /**
-    * 通过指定的图片地址，创建图片消息实体。一般用于UI层对用户显示的自定义消息（该方法并未调用socket发送消息）。
-    * 如需发送至后端，需获取返回的消息实体，再调用发送方法
+    * 通过指定的图片地址，创建图片消息实体。（该方法并未调用chatLib发送消息）。
     * @param imgPath
     * @param isLeft
     */
@@ -121,6 +125,7 @@ class KeFuViewModel() : ViewModel() {
 
         var chatModel = MessageItem()
         chatModel.cMsg = cMsg.build()
+        chatModel.cellType = CellType.TYPE_Image
         //chatModel.imgPath = imgPath
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功
@@ -128,6 +133,45 @@ class KeFuViewModel() : ViewModel() {
         return chatModel
     }
 
+    /**
+     * 通过视频地址，创建图片消息实体。（该方法并未调用chatLib发送消息）。
+     * @param imgPath
+     * @param isLeft
+     */
+    //撰写一条图片信息
+    fun composeVideoMsg(history: list?, isLeft: Boolean, videoPath: String = "") : MessageItem{
+        var cMsg = CMessage.Message.newBuilder()
+        var cMContent = CMessage.MessageVideo.newBuilder()
+
+        var d = Timestamp.newBuilder()
+        val cal = Calendar.getInstance()
+        if (history?.msgTime != null) {
+            cal.time = Utils().convertStrToDate(history.msgTime)
+        }else{
+            cal.time = Date()
+        }
+        val millis = cal.timeInMillis
+        d.seconds = (millis * 0.001).toLong()
+        cMsg.msgTime = d.build()
+
+        if (!videoPath.isEmpty()){
+            cMContent.uri = videoPath
+        }
+        else if (history?.video != null) {
+            cMContent.uri = history.video.uri
+        }else{
+            cMContent.uri = ""
+        }
+        cMsg.setVideo(cMContent)
+
+        var chatModel = MessageItem()
+        chatModel.cMsg = cMsg.build()
+        //chatModel.imgPath = imgPath
+        chatModel.isLeft = isLeft
+        chatModel.sendStatus = MessageSendState.发送成功
+
+        return chatModel
+    }
 
     fun composeTextMsg(history: list,  isLeft: Boolean) : MessageItem{
         var chatModel = MessageItem()
@@ -144,7 +188,7 @@ class KeFuViewModel() : ViewModel() {
 
         if (history.workerChanged != null){
             cMContent.data = history.workerChanged.greeting
-            chatModel.isTipMsg = true
+            chatModel.cellType = CellType.TYPE_Tip
         }
         else if (history.content != null) {
             cMContent.data = history.content.data
@@ -182,7 +226,9 @@ class KeFuViewModel() : ViewModel() {
         chatModel.cMsg = cMsg.build()
         chatModel.isLeft = isLeft
 
-        chatModel.isTipMsg = isTip
+        if (isTip) {
+            chatModel.cellType = CellType.TYPE_Tip
+        }
 
         mlMsgList.value?.add(chatModel)
         mlMsgList.postValue(mlMsgList.value)
@@ -300,7 +346,7 @@ class KeFuViewModel() : ViewModel() {
         param.addProperty("consultId", consultId)
         param.addProperty("chatId", 0)
         param.addProperty("count", 50)
-        //param.addProperty("userId", Constants.userId)
+        param.addProperty("userId", Constants.userId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)

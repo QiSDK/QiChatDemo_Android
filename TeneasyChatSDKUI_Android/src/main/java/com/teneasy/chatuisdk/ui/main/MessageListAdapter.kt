@@ -5,6 +5,7 @@ package com.teneasy.chatuisdk.ui.main;
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.media.browse.MediaBrowser
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -30,16 +32,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.databinding.ItemLastLineBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
+import com.teneasy.chatuisdk.databinding.ItemVideoPlayerBinding
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.AutoReply
+import com.teneasy.sdk.ui.CellType
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import kotlin.coroutines.coroutineContext
+import android.net.Uri
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.source.MediaSource
 
 
 interface MessageItemOperateListener {
@@ -56,11 +60,6 @@ data class QADisplayedEvent(val tag: Int)
  */
 class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var msgList: ArrayList<MessageItem>? = null
-    var TYPE_Text : Int = 0
-    val TYPE_Image : Int = 1
-    val TYPE_Tip: Int = 3
-    val TYPE_QA : Int = 4
-    val TYPE_LastLine : Int = 5
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
     private lateinit var qaAdapter: GroupedQAdapter
@@ -73,24 +72,30 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType == TYPE_QA) {
+        if (viewType == CellType.TYPE_QA.value) {
             val binding = ItemHeaderRecyleviewBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false)
             return HeaderViewHolder(binding)
-        } else  if (viewType == TYPE_Tip) {
+        } else  if (viewType == CellType.TYPE_Tip.value) {
             val binding = ItemTipMsgBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false)
             return TipMsgViewHolder(binding)
-        }else  if (viewType == TYPE_LastLine) {
+        }else  if (viewType == CellType.TYPE_LastLine.value) {
             val binding = ItemLastLineBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false)
             return ItemLastLineViewHolder(binding)
+        }else  if (viewType == CellType.TYPE_VIDEO.value) {
+            val binding = ItemVideoPlayerBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false)
+            return ItemVideoViewHolder(binding)
         }else {
             val binding = ItemMessageBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -102,20 +107,44 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is HeaderViewHolder) {
-           // holder.rcvQa.adapter = qaAdapter
-        }else if (holder is ItemLastLineViewHolder) {
-            // holder.rcvQa.adapter = qaAdapter
-        }else  if (holder is TipMsgViewHolder) {
+        if (msgList == null) {
+            return
+        }
+        if (holder is ItemLastLineViewHolder) {
+            holder.tvTitle.text = ""
+        }
+       else if (holder is ItemVideoViewHolder) {
+            holder.tvTitle.text = ""
+            val item = msgList!![position]
+            item.cMsg?.let {
+                val msgDate = Date(it.msgTime.seconds * 1000L)
+                holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
+
+                val videoUrl = Constants.baseUrlImage + item.cMsg?.video?.uri?: ""
+
+                val mediaItem = MediaItem.Builder().setMediaId(it.msgId.toString()).setTag(it.msgId).setUri(videoUrl).build()
+
+                val player = ExoPlayer.Builder(act).build()
+                holder.playerView.player = player
+                // Build the media item.
+                //val mediaItem = MediaBrowser.MediaItem.
+// Set the media item to be played.
+                player.setMediaItem(mediaItem)
+// Prepare the player.
+                player.prepare()
+// Start the playback.
+                player.pause()
+            }
+
+
+        }
+        else if (holder is TipMsgViewHolder) {
             val item = msgList!![position]
             item.cMsg?.let {
                 val msgDate = Date(it.msgTime.seconds * 1000L)
                 holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
             }
         }else if (holder is MsgViewHolder) {
-            if (msgList == null) {
-                return
-            }
             //因为headerView占了1个位置，所以要减1
             val item = msgList!![position]
 
@@ -145,7 +174,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 } else
                     holder.ivSendStatus.visibility = View.GONE
 
-                if (getItemViewType(position) == TYPE_Text) {
+                if (getItemViewType(position) == CellType.TYPE_Text.value) {
                     holder.tvRightMsg.visibility = View.VISIBLE
                     holder.ivRightImg.visibility = View.GONE
                     holder.tvRightMsg.text = item.cMsg!!.content.data
@@ -175,7 +204,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.tvRightMsg.visibility = View.GONE
                 holder.lySend.visibility = View.GONE
 
-                if (getItemViewType(position) == TYPE_Text) {
+                if (getItemViewType(position) == CellType.TYPE_Text.value) {
                     holder.tvLeftMsg.visibility = View.VISIBLE
                     holder.ivLeftImg.visibility = View.GONE
                     holder.tvLeftMsg.text = item.cMsg!!.content.data
@@ -209,31 +238,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     }
 
     override
-    fun getItemViewType(position: Int) : Int{
-
-        if (msgList == null) {
-            return TYPE_Text
+    fun getItemViewType(position: Int) : Int {
+        msgList?.let {
+          return  it.get(position).cellType.value
         }
-
-        val obj = msgList!![position]
-
-        if (obj.isTipMsg){
-            return TYPE_Tip
-        }
-        else if (obj.isLastLine){
-            return TYPE_LastLine
-        }
-        else if (obj.isQA){
-            return TYPE_QA
-        }
-        obj.cMsg?.apply {
-            return if (this.hasImage()){
-                return TYPE_Image
-            } else {
-                return TYPE_Text
-            }
-        }
-        return TYPE_Text
+        return 0
     }
 
     override fun getItemCount(): Int {
@@ -422,6 +431,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
     inner class ItemLastLineViewHolder(binding: ItemLastLineBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvTitle = binding.tvTitle
+    }
+
+    inner class ItemVideoViewHolder(binding: ItemVideoPlayerBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvTitle = binding.tvTitle
+        val playerView = binding.playerView
     }
 
 }
