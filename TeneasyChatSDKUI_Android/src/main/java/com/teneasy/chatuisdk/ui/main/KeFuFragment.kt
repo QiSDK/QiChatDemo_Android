@@ -427,7 +427,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         //hideTip()
                     }
                 }
-            }, 0,5000)
+            }, 0,3000)
         }
     }
 
