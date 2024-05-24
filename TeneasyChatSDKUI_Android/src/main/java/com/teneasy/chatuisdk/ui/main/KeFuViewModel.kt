@@ -65,7 +65,7 @@ class KeFuViewModel() : ViewModel() {
         newItem.payLoadId = payLoadId
         mlMsgList.value?.add(newItem)
 
-        if (newItem.cMsg?.video != null){
+        if (newItem.cMsg?.video != null && newItem.cMsg!!.video.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_VIDEO
         }
         mlMsgList.postValue(mlMsgList.value)

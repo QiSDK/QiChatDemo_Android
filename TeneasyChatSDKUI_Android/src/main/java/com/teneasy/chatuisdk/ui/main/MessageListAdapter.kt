@@ -122,7 +122,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 val videoUrl = Constants.baseUrlImage + item.cMsg?.video?.uri?: ""
 
-                val mediaItem = MediaItem.Builder().setMediaId(it.msgId.toString()).setTag(it.msgId).setUri(videoUrl).build()
+                val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
 
                 val player = ExoPlayer.Builder(act).build()
                 holder.playerView.player = player
