@@ -121,6 +121,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onPause() {
         super.onPause()
+        exitChat()
     }
 
     // UI初始化
@@ -500,6 +501,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     fun exitChat(){
         closeTimer()
+        Constants.workerId = 0
         chatLib?.disConnect()
         chatLib = null
 //        if(!EventBus.getDefault().isRegistered(this)) {
