@@ -117,7 +117,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     override fun onResume() {
         super.onResume()
         //定时检测链接状态
-        //startTimer()
+        startTimer()
     }
 
     override fun onPause() {
@@ -420,12 +420,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         if(connected) {
            return
         }
-        showTip("正在重新连接...")
-        Log.i(TAG, "正在重新连接...")
+        if (!isFirstLoad) {
+            showTip("正在重新连接...")
+            Log.i(TAG, "正在重新连接...")
+        }
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         if(reConnectTimer == null) {
             reConnectTimer = Timer()
-
             reConnectTimer?.schedule(object : TimerTask() {
                 override fun run() {
                     if (chatLib == null || !connected) {
