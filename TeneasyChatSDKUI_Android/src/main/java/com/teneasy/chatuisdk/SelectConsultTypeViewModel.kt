@@ -36,7 +36,11 @@ class SelectConsultTypeViewModel : ViewModel() {
         val param = JsonObject()
         val request = XHttp.custom().accessToken(false)
         //这里需要用cert
-        request.headers("X-Token", Constants.cert)
+        if (Constants.xToken.length > 0){
+            request.headers("X-Token", Constants.xToken)
+        }else {
+            request.headers("X-Token", Constants.cert)
+        }
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryEntrance(param),
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
