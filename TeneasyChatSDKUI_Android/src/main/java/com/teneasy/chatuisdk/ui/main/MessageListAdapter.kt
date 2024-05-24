@@ -287,21 +287,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 val multipAnswer = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
 
+                // 发送提问消息
+                listener?.onSendLocalMsg(questionTxt, false)
                 if (txtAnswer.isNotEmpty()){
-                    // 发送提问消息
-                    listener?.onSendLocalMsg(questionTxt, false)
                     // 自动回答
                     listener?.onSendLocalMsg(txtAnswer, true)
                 }
                  if (multipAnswer.isNotEmpty()){
                     for (a in qaAdapter.data.get(groupPosition).answer){
                         if (a!!.image != null){
-                            // 发送提问消息
-                            listener?.onSendLocalMsg(questionTxt, false)
                             // 自动回答
                             listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
                         }
-
                     }
                 }else{
                     if (qaAdapter.isExpand(groupPosition)) {
@@ -319,18 +316,15 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val txtAnswer = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
 
                 val multipAnswer = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.answer?.joinToString(separator = "\n")  ?:""
-
+                // 发送提问消息
+                listener?.onSendLocalMsg(questionTxt, false)
                 if (txtAnswer.isNotEmpty()){
-                    // 发送提问消息
-                    listener?.onSendLocalMsg(questionTxt, false)
                     // 自动回答
                     listener?.onSendLocalMsg(txtAnswer, true)
                 }
                  if (multipAnswer.isNotEmpty()){
                     for (a in qaAdapter.data.get(groupPosition).related?.get(childPosition)?.answer ?: ArrayList()){
                         if (a!!.image != null){
-                            // 发送提问消息
-                            listener?.onSendLocalMsg(questionTxt, false)
                             // 自动回答
                             listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
                         }

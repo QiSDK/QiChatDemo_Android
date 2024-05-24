@@ -21,15 +21,15 @@ class Constants {
 
     companion object {
      //这部分是在设置里面获取的
-        var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
-        var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
-        var merchantId = 230
-        var userId = 666663//1125324
+//        var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
+//        var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
+//        var merchantId = 230
+//        var userId = 666663//1125324
 
-       /* var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
+       var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
         var cert = "COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg"
         var merchantId = 225
-        var userId = 777772 */
+        var userId = 777772
 
         /*雷哥的测试环境*/
 //var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
@@ -54,8 +54,10 @@ class Constants {
     1.无法接受起聊发送过来的视频，显示空消息
 
 
-2.安卓停留在对话框，对话被转接后，客服头像不同步更新
 3.包含文字和图片的自动回复选项，用户视角会发送两次同样的信息
+
+2.安卓停留在对话框，对话被转接后，客服头像不同步更新
+
 
 6.切换咨询类型并发送消息给客服后，原类型的客服发送消息，在切换回原类型下无法接收客服消息
 
