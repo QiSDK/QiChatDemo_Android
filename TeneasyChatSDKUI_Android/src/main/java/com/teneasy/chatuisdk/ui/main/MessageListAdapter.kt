@@ -119,24 +119,17 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             item.cMsg?.let {
                 val msgDate = Date(it.msgTime.seconds * 1000L)
                 holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
-
                 val videoUrl = Constants.baseUrlImage + item.cMsg?.video?.uri?: ""
-
-                val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
-
+                val mediaItem = MediaItem.fromUri(videoUrl)
+                //val mediaItem2 = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
                 val player = ExoPlayer.Builder(act).build()
                 holder.playerView.player = player
-                // Build the media item.
-                //val mediaItem = MediaBrowser.MediaItem.
-// Set the media item to be played.
                 player.setMediaItem(mediaItem)
-// Prepare the player.
+                // Prepare the player.
                 player.prepare()
-// Start the playback.
+                // Start the playback.
                 player.pause()
             }
-
-
         }
         else if (holder is TipMsgViewHolder) {
             val item = msgList!![position]

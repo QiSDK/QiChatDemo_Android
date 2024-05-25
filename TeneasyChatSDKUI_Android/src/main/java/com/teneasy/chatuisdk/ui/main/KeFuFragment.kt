@@ -415,7 +415,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun startTimer() {
-        //closeTimer()
         if(connected) {
            return
         }
@@ -429,14 +428,19 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             reConnectTimer?.schedule(object : TimerTask() {
                 override fun run() {
                     if (chatLib == null || !connected) {
-                        Log.d(TAG, "SDK 重新初始化")
-                        initChatSDK(Constants.domain)
+                        if (chatLib == null) {
+                            Log.d(TAG, "SDK 重新初始化")
+                            initChatSDK(Constants.domain)
+                        }else{
+                            Log.d(TAG, "SDK 重新连接")
+                            chatLib?.reConnect()
+                        }
                     }else{
                         // closeTimer()
                         //hideTip()
                     }
                 }
-            }, 3000, 3000)
+            }, 3000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
         }
     }
 
@@ -513,9 +517,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         Constants.workerId = 0
         chatLib?.disConnect()
         chatLib = null
-//        if(!EventBus.getDefault().isRegistered(this)) {
-//            EventBus.getDefault().unregister(this)
-//        }
     }
 
     override fun onCreateViewBinding(
@@ -594,18 +595,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
     }
 
-    /**
-     * 需要每60秒调用一次这个函数，确保socket的活动状态。
-     */
-    fun sendHeartBeat() {
-        chatLib?.sendHeartBeat()
-        println("确保通信在活跃状态")
-    }
-
-    fun onDestory() {
-        chatLib?.disConnect()
-    }
-
     override fun connected(c: GGateway.SCHi) {
         connected = true;
         println(c.id)
@@ -642,6 +631,7 @@ code: 1002 无效的Token
             }
         }else{
         }
+        showTip("")
         Log.i(TAG, msg.msg)
     }
 
