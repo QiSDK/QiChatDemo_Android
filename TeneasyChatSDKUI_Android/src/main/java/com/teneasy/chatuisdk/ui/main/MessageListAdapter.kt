@@ -135,9 +135,14 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 player.pause()
             }
             if (item.isLeft){
-                val params =  holder.tvTitle.layoutParams as LinearLayout.LayoutParams
+                var params =  holder.tvTitle.layoutParams as LinearLayout.LayoutParams
                 params.gravity = Gravity.START
                 holder.tvTitle.layoutParams = params
+
+
+                 params =  holder.playerView.layoutParams as LinearLayout.LayoutParams
+                params.gravity = Gravity.START
+                holder.playerView.layoutParams = params
             }
         }
         else if (holder is TipMsgViewHolder) {
