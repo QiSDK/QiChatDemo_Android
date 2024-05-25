@@ -506,8 +506,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         val body = response.body
                         if(response.code == 200 && body != null) {
                             val path = response.body!!.string()
-                            // 发送图片
-                            sendImgMsg(path)//Constants.baseUrlImage +
+                            if (path.contains(".png") || path.contains(".jpg") || path.contains(".jpge")){
+                                // 发送图片
+                                sendImgMsg(path)//Constants.baseUrlImage +
+                            }else{
+                                sendVideoMsg(path)//Constants.baseUrlImage +
+                            }
                         } else {
                             // 上传失败
                             //Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
@@ -602,6 +606,18 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             return
         }
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
+        var messageItem = MessageItem()
+        messageItem.cMsg = chatLib?.sendingMessage
+        messageItem.isLeft = false
+        viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+    }
+
+    fun sendVideoMsg(url: String) {
+        if(chatLib == null){
+            Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
+            return
+        }
+        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_VIDEO, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false

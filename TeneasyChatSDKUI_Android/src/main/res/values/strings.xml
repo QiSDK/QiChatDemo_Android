@@ -3,7 +3,7 @@
 
     <array name="bottom_menu">
         <item>从相册选择</item>
-        <item>拍照</item>
+        <item>拍摄</item>
         <item>取消</item>
     </array>
     <string name="str_inputquestion">请输入想咨询的问题</string>

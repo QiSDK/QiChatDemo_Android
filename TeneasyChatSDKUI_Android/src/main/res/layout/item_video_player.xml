@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="left"
+    android:gravity="end"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/tv_Title"
         android:text="dd"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="20dp"
         android:layout_margin="5dp"
         ></TextView>
@@ -16,7 +16,7 @@
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="230dp"
-        android:layout_height="150dp"
+        android:layout_height="wrap_content"
       />
 
     <!--   app:show_buffering="when_playing"

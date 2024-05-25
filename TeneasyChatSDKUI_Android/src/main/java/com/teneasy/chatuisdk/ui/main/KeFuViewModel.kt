@@ -67,6 +67,8 @@ class KeFuViewModel() : ViewModel() {
 
         if (newItem.cMsg?.video != null && newItem.cMsg!!.video.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_VIDEO
+        }else if  (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
+            newItem.cellType = CellType.TYPE_Image
         }
         mlMsgList.postValue(mlMsgList.value)
     }

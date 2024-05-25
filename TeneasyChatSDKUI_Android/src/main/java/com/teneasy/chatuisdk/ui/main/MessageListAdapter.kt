@@ -42,7 +42,9 @@ import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
 import org.greenrobot.eventbus.EventBus
 import android.net.Uri
+import android.view.Gravity
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.source.MediaSource
 import com.lxj.xpopup.util.SmartGlideImageLoader
@@ -122,8 +124,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val msgDate = Date(it.msgTime.seconds * 1000L)
                 holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
                 val videoUrl = Constants.baseUrlImage + item.cMsg?.video?.uri?: ""
-                val mediaItem = MediaItem.fromUri(videoUrl)
-                //val mediaItem2 = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
+                //val mediaItem = MediaItem.fromUri(videoUrl)
+                val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
                 val player = ExoPlayer.Builder(act).build()
                 holder.playerView.player = player
                 player.setMediaItem(mediaItem)
@@ -131,6 +133,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 player.prepare()
                 // Start the playback.
                 player.pause()
+            }
+            if (item.isLeft){
+                val params =  holder.tvTitle.layoutParams as LinearLayout.LayoutParams
+                params.gravity = Gravity.START
+                holder.tvTitle.layoutParams = params
             }
         }
         else if (holder is TipMsgViewHolder) {
@@ -437,6 +444,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     inner class ItemVideoViewHolder(binding: ItemVideoPlayerBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvTitle = binding.tvTitle
         val playerView = binding.playerView
+        val root = binding.root
     }
 
     fun showBigImage(imageView: ImageView, url: String){
