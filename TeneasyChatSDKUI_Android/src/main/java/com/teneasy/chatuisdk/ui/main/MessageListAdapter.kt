@@ -42,8 +42,10 @@ import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
 import org.greenrobot.eventbus.EventBus
 import android.net.Uri
+import android.widget.ImageView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.source.MediaSource
+import com.lxj.xpopup.util.SmartGlideImageLoader
 
 
 interface MessageItemOperateListener {
@@ -174,11 +176,14 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 } else {
                     holder.tvRightMsg.visibility = View.GONE
                     holder.ivRightImg.visibility = View.VISIBLE
+                    holder.ivRightImg.setOnClickListener {
+                        showBigImage(it as ImageView, Constants.baseUrlImage + item.cMsg!!.image.uri)
+                    }
 //                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 //                    .into(holder.ivRightImg)
-
+                    Log.d("AdapterNChatLib", "imageUrl:" + Constants.baseUrlImage + item.cMsg!!.image.uri)
                     Glide.with(act)
                         .asBitmap()
                         .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
@@ -204,6 +209,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 } else {
                     holder.tvLeftMsg.visibility = View.GONE
                     holder.ivLeftImg.visibility = View.VISIBLE
+                    holder.ivLeftImg.setOnClickListener {
+                        showBigImage(it as ImageView, Constants.baseUrlImage + item.cMsg!!.image.uri)
+                    }
 //                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -429,6 +437,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     inner class ItemVideoViewHolder(binding: ItemVideoPlayerBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvTitle = binding.tvTitle
         val playerView = binding.playerView
+    }
+
+    fun showBigImage(imageView: ImageView, url: String){
+        // 单张图片场景
+        XPopup.Builder(act)
+            .asImageViewer(imageView, url, SmartGlideImageLoader())
+            .show()
     }
 
 }

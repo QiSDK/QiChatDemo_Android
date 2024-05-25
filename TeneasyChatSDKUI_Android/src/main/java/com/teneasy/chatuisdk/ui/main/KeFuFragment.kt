@@ -33,6 +33,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.base.showToast
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -386,7 +387,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                qaItem.cellType = CellType.TYPE_LastLine
                historyList.add(qaItem)
 
-
                viewModel.addAllMsgItem(historyList)
            }
             mIProgressLoader?.dismissLoading()
@@ -395,10 +395,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     fun onQADisplayedEvent(event: QADisplayedEvent) {
-        //mViewModel.cancelMuteTeamMember(event.teamId, event.nimId)
         refreshList()
     }
-
 
     private fun refreshList(){
         runOnUiThread {
@@ -464,16 +462,30 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     /**
      * 上传图片。上传成功后，会直接调用socket进行消息发送。
      *  @param filePath
+     *  // 文件类型类型 0 ～ 4
+     * enum AssetKind {
+     *   ASSET_KIND_NONE = 0;
+     *   // 商户公共文件
+     *   ASSET_KIND_PUBLIC = 1;
+     *   // 商户私有文件
+     *   ASSET_KIND_PRIVATE = 2;
+     *   // 头像
+     *   ASSET_KIND_AVATAR = 3;
+     *   // 会话私有文件
+     *   ASSET_KIND_SESSION = 4;
+     * }
      */
     fun uploadImg(filePath: String) {
         // 多文件上传Builder,用以匹配后台Springboot MultipartFile
+        mIProgressLoader?.updateMessage("上传中。。。")
+        mIProgressLoader?.showLoading()
         val file = File(filePath)
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("myFile", file.name,  RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file))
-                    .addFormDataPart("type", "1")
+                    .addFormDataPart("type", "4")
                     .build()
 
                 val request2 = Request.Builder().url(Constants.baseUrlApi + "/v1/assets/upload/")
@@ -486,18 +498,22 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     override fun onFailure(call: Call, e: IOException) {
                         // 上传失败
                         mIProgressLoader?.dismissLoading()
+                        Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
                     }
 
                     override fun onResponse(call: Call, response: Response) {
                         mIProgressLoader?.dismissLoading()
                         val body = response.body
-                        if(body != null) {
+                        if(response.code == 200 && body != null) {
                             val path = response.body!!.string()
                             // 发送图片
                             sendImgMsg(path)//Constants.baseUrlImage +
                         } else {
                             // 上传失败
-                            Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
+                            //Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
+                           runOnUiThread {
+                               showToast("上传失败")
+                           }
                         }
                         //Utils().closeSoftKeyboard(view)
                     }
@@ -531,14 +547,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private fun showCamera(resultCallbackListener: OnResultCallbackListener<LocalMedia>
     ) {
         PictureSelector.create(KeFuFragment@this)
-            .openCamera(SelectMimeType.ofImage())
+            .openCamera(SelectMimeType.TYPE_ALL)
             .forResult(resultCallbackListener)
     }
 
     // 选择图片
     private fun showSelectPic(resultCallbackListener: OnResultCallbackListener<LocalMedia>) {
         PictureSelector.create(KeFuFragment@this)
-            .openGallery(SelectMimeType.ofImage())
+            .openGallery(SelectMimeType.TYPE_ALL)
             .setImageEngine(GlideEngine.createGlideEngine())
             .setMaxSelectNum(1)
             .isDisplayCamera(false)
@@ -585,9 +601,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
-        /*
-           todo: 用户发送消息，要先比对上一条时间 ，超过 配置的时间（默认5分钟），就调用 分流接口  v1/api/assign-worker
-              */
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
