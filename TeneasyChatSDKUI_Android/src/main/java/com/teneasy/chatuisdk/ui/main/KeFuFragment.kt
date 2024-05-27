@@ -62,22 +62,26 @@ import kotlin.collections.ArrayList
  */
 class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDelegate {
 
+    //消息列表的Adapter
     private lateinit var msgAdapter: MessageListAdapter
-    private lateinit var qaAdapter: GroupedQAdapter
+    //聊天页面的ViewModel
     private lateinit var viewModel: KeFuViewModel
-
+    //加载进度框
     private var mIProgressLoader: IProgressLoader? = null
-
+    //设置一个timer, 每隔几秒检查连接状态
     private var reConnectTimer: Timer? = null
+    //聊天SDK库
     private var chatLib: ChatLib? = null
-    private var connected = false
+    //联结状态标志
+    private var isConnected = false
+    //自定义日志Tag
     private val TAG = "KefuNchatlib"
-    //标记是否第一次加载页面
+    //是否第一次加载页面的标志，历史记录和打招呼只需要页面第一次加载的时候显示
     private var isFirstLoad = true
-    private var wssBaseUrl = ""
-    private var retryTimes = 0
+
+
     private var tempContent = ""
-    private var sessionTimeout = 0 //in seconds, chatExpireTime
+    private var chatExpireTime = 0 //in seconds, chatExpireTime
 
     private var lastMsg: CMessage.Message? = null
 
@@ -86,15 +90,23 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         super.onCreate(savedInstanceState)
         viewModel = KeFuViewModel()
 
-        arguments?.let {
-            wssBaseUrl = it.getString(PARAM_DOMAIN) ?: ""
-            initChatSDK(wssBaseUrl)
+        //检查内存变量的域名还存在不
+        if (Constants.domain.isEmpty()){
+            //域名为空就从Preferences读取
+            UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         }
+        //初始化SDK
+        initChatSDK(Constants.domain)
 
+        //硬返回按钮点点击之后
        requireActivity().onBackPressedDispatcher.addCallback(this) {
+           //断开聊天，停止定时器等
+            exitChat()
+           //返回到上个页面
             findNavController().popBackStack()
         }
 
+        //初始化进度条
         mIProgressLoader = getProgressLoader()
     }
 
@@ -104,10 +116,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             EventBus.getDefault().register(this)
         }
         requireActivity().title = "客服"
-
         hidetvQuotedMsg()
     }
 
+    //初始化聊天SDK
     private fun initChatSDK(baseUrl: String){
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         Log.i(TAG, "x-token:" + Constants.xToken)
@@ -124,7 +136,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     override fun onPause() {
         super.onPause()
-
     }
 
     // UI初始化
@@ -137,6 +148,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             // 初始化聊天消息列表
             msgAdapter = MessageListAdapter(requireContext(), object : MessageItemOperateListener {
+                //长按消息，删除消息的功能，按实际需求，可能不需要
                 override fun onDelete(position: Int) {
                    val messageItem = msgAdapter.msgList?.get(position)
                     messageItem?.let {
@@ -144,23 +156,33 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         viewModel.removeMsgItem(it)
                     }
                 }
-
+                //长按消息，复制文本内容
                 override fun onCopy(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)
                     val text = messageItem?.cMsg?.content?.data?:""
                     Utils().copyText(text, requireContext())
                 }
 
+                //重发发送失败的消息
                 override fun onReSend(position: Int) {
-
+                    //chatLib.resendMSg(msg, 0)
                 }
 
+                //长按消息，引用消息并回复
                 override fun onQuote(position: Int) {
                     binding?.tvQuotedMsg?.visibility = View.VISIBLE
                     binding?.tvQuotedMsg?.tag = position
-                    showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
+                    val msg = msgAdapter.msgList?.get(position)?.cMsg
+                    if ((msg?.image?.uri?: "").isEmpty()){
+                        showQuotedMsg("回复：图片")
+                    }else if ((msg?.video?.uri?: "").isEmpty()){
+                        showQuotedMsg("回复：视频")
+                    }else {
+                        showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
+                    }
                 }
 
+                //这里实现自动回复的功能，属于本地消息
                 override fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String) {
 
                     if (msgType == "MSG_TEXT") {
@@ -171,16 +193,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
                 }
             } )
+            //初始化一个空的列表给adapter
             msgAdapter.setList(ArrayList())
 
+            //设置recycleView的LayoutManager
             val layoutManager = LinearLayoutManager(context)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
-            //layoutManager.stackFromEnd = false
             this.rcvMsg.layoutManager = layoutManager
             this.rcvMsg.adapter = msgAdapter
-
-            // 初始化自动回复列表
-            qaAdapter = GroupedQAdapter(requireContext(), ArrayList(), null)
 
             // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
@@ -191,7 +211,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             // 聊天界面输入框，输入事件。实现文本输入和表情输入的UI切换功能
             this.etMsg.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    // TODO Auto-generated method stub
                     // 输入框有内容的时候，显示发送按钮，隐藏图片选择按钮
                     viewModel.mlBtnSendVis.value = s != null && s.isNotEmpty()
                 }
@@ -292,11 +311,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
             this.tvTips.visibility = View.GONE
-          //  initData()
             initObserver()
-            //viewModel.assignWorker(Constants.CONSULT_ID)
-            //viewModel.queryAutoReply(Constants.CONSULT_ID)
             this.llClose.setOnClickListener {
+                exitChat()
                 findNavController().popBackStack()
             }
 
@@ -317,8 +334,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
 
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
-            //if(it.workerId != 0) {
-                //viewModel.loadWorker(it.workerId)
                 val workInfo = WorkerInfo()
                 workInfo.workerName = it.nick
                 workInfo.workerAvatar = it.avatar
@@ -398,6 +413,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         refreshList()
     }
 
+    //刷新列表，确保每次有新消息都刷新并滚动到底部
     private fun refreshList(){
         runOnUiThread {
             msgAdapter.notifyDataSetChanged()
@@ -407,13 +423,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
         }
         Log.i(TAG, "刷新列表")
-//        val layoutManager  = binding!!.rcvMsg.layoutManager as LinearLayoutManager
-//        layoutManager.scrollToPositionWithOffset(msgAdapter.itemCount - 1, 0)
-//        binding!!.rcvMsg.scrollToBottomWithMargin(100)
     }
 
+    //开一个定时器每隔几秒检查连接状态
     private fun startTimer() {
-        if(connected) {
+        if(isConnected) {
            return
         }
         if (!isFirstLoad) {
@@ -425,7 +439,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             reConnectTimer = Timer()
             reConnectTimer?.schedule(object : TimerTask() {
                 override fun run() {
-                    if (chatLib == null || !connected) {
+                    if (chatLib == null || !isConnected) {
                         if (chatLib == null) {
                             Log.d(TAG, "SDK 重新初始化")
                             initChatSDK(Constants.domain)
@@ -433,18 +447,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                             Log.d(TAG, "SDK 重新连接")
                             chatLib?.reConnect()
                         }
-                    }else{
-                        // closeTimer()
-                        //hideTip()
                     }
                 }
             }, 3000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
         }
     }
 
-    // 关闭计时器
+    // 关闭连接状态定时器
     private fun closeTimer() {
-        //Log.d(TAG, "Timer 关闭")
         if(reConnectTimer != null) {
             reConnectTimer?.cancel()
             reConnectTimer = null
@@ -475,8 +485,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
      *   ASSET_KIND_SESSION = 4;
      * }
      */
+    //这个函数可以上传图片和视频
     fun uploadImg(filePath: String) {
-        // 多文件上传Builder,用以匹配后台Springboot MultipartFile
         mIProgressLoader?.updateMessage("上传中。。。")
         mIProgressLoader?.showLoading()
         val file = File(filePath)
@@ -527,11 +537,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }).start()
     }
 
+    //页面销毁前销毁聊天
     override fun onDestroy() {
+        exitChat()
         super.onDestroy()
-      exitChat()
     }
 
+    //释放聊天相关库和变量
     fun exitChat(){
         closeTimer()
         Constants.workerId = 0
@@ -567,22 +579,23 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
     /**
      * 根据输入框的内容，发送文本消息。
+     * 一般来讲，每发消息就需要跟当前时间做比较，除非设置force = true
      */
     fun sendMsg(txt: String, force: Boolean = false) {
         if(chatLib == null){
-           // Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             showTip("SDK还未初始化")
             return
         }
-        /*
-      todo: 用户发送消息，要先比对上一条时间 ，超过 配置的时间（默认5分钟），就调用 分流接口  v1/api/assign-worker
+         /*
+            用户发送消息，要先比对上一条时间 ，超过配置的时间就分配新客服
          */
         if(!force && lastMsg != null) {
-            tempContent = txt
+            //tempContent = txt
             val lastMsgTime = Date(lastMsg?.msgTime?.seconds?: 0L)
             val sendingMsgTime = Date(Date().time)
 
-            val diffTime = Utils().sessionTimeout(lastMsgTime, sendingMsgTime, sessionTimeout)
+            val diffTime = Utils().sessionTimeout(lastMsgTime, sendingMsgTime, chatExpireTime)
             if (diffTime) {
                 Log.i(TAG, "超过配置的时间，调用分流接口")
                 viewModel.assignNewWorker(Constants.CONSULT_ID)
@@ -606,7 +619,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             return
         }
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
-        var messageItem = MessageItem()
+        val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
@@ -618,14 +631,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             return
         }
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_VIDEO, Constants.CONSULT_ID)
-        var messageItem = MessageItem()
+        val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
     }
 
     override fun connected(c: GGateway.SCHi) {
-        connected = true;
+        isConnected = true;
         println(c.id)
         showTip("连接成功")
         Log.i(TAG, "连接成功")
@@ -635,7 +648,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         //if (!isFirstLoad) {
             viewModel.assignWorker(Constants.CONSULT_ID)
         //}
-       sessionTimeout = c.chatExpireTime.toInt()
+       chatExpireTime = c.chatExpireTime.toInt()
     }
 
     override fun systemMsg(msg: Result) {
@@ -644,7 +657,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 code: 1002 无效的Token
          */
         if (msg.code >= 1000 && msg.code <= 1010) {
-            connected = false
+            isConnected = false
             if (msg.code == 1002){
 //                runOnUiThread {
 //                    Toast.makeText(requireContext(), "无效的Token", Toast.LENGTH_LONG).show()
@@ -660,16 +673,18 @@ code: 1002 无效的Token
             }
         }else{
         }
-        showTip("")
+        //按实际需要，显示错误提示，也可以不显示
+        //showTip(msg.msg)
         Log.i(TAG, msg.msg)
     }
 
-
+    //对方删除了消息，会回调这个函数
     override fun msgDeleted(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
         viewModel.removeMsgItem(payloadId, msg.msgId)
         viewModel.composeLocalMsg("对方撤回了一条消息", true, isTip = true)
     }
 
+    //消息发送出去，收到回执才算成功，并需要改变消息的状态
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
         val item = viewModel.mlMsgList.value?.find { it.payLoadId == payloadId }
         if(item != null) {
@@ -683,7 +698,7 @@ code: 1002 无效的Token
 
     override fun receivedMsg(msg: CMessage.Message) {
         if (msg.consultId != Constants.CONSULT_ID){
-            //免用户端在当前会话里显示其他咨询类型客服发来的消息。
+            //当用户端在当前会话，但是其他咨询类型客服发来了消息，给予提醒。
             //showTip("其他客服有新消息！")
             runOnUiThread(
                 Runnable {
@@ -691,13 +706,15 @@ code: 1002 无效的Token
                 }
             )
         }else {
-            var messageItem = MessageItem()
+            //把收到的消息插入到列表
+            val messageItem = MessageItem()
             messageItem.cMsg = msg
             messageItem.isLeft = true
             viewModel.addMsgItem(messageItem, 0)
         }
     }
 
+    //客服更换了，需要更换客服信息
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
         var workInfo = WorkerInfo()
         workInfo.workerName = msg.workerName
@@ -726,6 +743,7 @@ code: 1002 无效的Token
         }
     }
 
+    //更新客服信息
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"

@@ -33,7 +33,8 @@ class Constants {
 
      //运行时候生成的
          var xToken = ""
-        var domain = "wcsapi.qixin14.xyz"  //domain
+        //聊天SDK所需要的域名，例如www.abc.com，没有https前缀
+        var domain = ""  //domain
         val baseUrlApi = "https://" + domain  //用于请求数据，上传图片
         const val baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
         var workerId = 0

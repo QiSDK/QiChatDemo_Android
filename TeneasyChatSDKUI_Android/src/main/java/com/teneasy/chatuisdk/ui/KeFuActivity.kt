@@ -20,10 +20,7 @@ class KeFuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kefu)
 
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-
+        //获取相机的权限
         rxPermissions = RxPermissions(this)
         rxPermissions!!
             .request(Manifest.permission.CAMERA)
