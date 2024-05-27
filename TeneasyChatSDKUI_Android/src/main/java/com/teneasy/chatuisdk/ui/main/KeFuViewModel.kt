@@ -102,6 +102,7 @@ class KeFuViewModel() : ViewModel() {
     //撰写一条图片信息
     fun composeImgMsg(history: list?, isLeft: Boolean, imgPath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
+        //cMsg.consultId = history?.consultID ?: Constants.CONSULT_ID
         var cMContent = CMessage.MessageImage.newBuilder()
 
         var d = Timestamp.newBuilder()
@@ -118,11 +119,7 @@ class KeFuViewModel() : ViewModel() {
         if (!imgPath.isEmpty()){
             cMContent.uri = imgPath
         }
-        else if (history?.image != null) {
-            cMContent.uri = history.image.uri
-        }else{
-            cMContent.uri = ""
-        }
+        cMContent.uri = history?.image?.uri ?: ""
         cMsg.setImage(cMContent)
 
         var chatModel = MessageItem()
