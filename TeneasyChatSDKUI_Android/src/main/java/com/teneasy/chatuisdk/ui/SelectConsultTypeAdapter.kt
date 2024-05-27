@@ -8,6 +8,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.SelectConsultTypeViewModel
 import com.teneasy.chatuisdk.databinding.ConsultTypeItemBinding
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
@@ -28,6 +29,10 @@ class SelectConsultTypeAdapter (private val data: ArrayList<Consults>) : Recycle
             var bundle = Bundle()
             bundle.putString(PARAM_DOMAIN, Constants.domain)
             it.findNavController().navigate(R.id.frg_kefu_main, bundle)
+
+            //未读数清0
+            val viewModel = SelectConsultTypeViewModel()
+            viewModel.markRead()
         }
         if (data[position].unread?: 0 > 0) {
             holder.tvRedDotView.setUnreadCount(data[position].unread?: 0)

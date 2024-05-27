@@ -45,7 +45,8 @@ public class MainApi {
         @POST("v1/api/message/sync")
         Observable<ReturnData<ChatHistory>> queryChatHistory(@Body JsonObject param);
 
-
+        @POST("v1/api/chat/mark-read")
+        Observable<ReturnData<Object>> markRead(@Body JsonObject param);
 
         @Multipart
         @POST("/v1/assets/upload/")
