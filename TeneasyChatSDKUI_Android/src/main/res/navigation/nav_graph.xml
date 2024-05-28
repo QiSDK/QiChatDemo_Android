@@ -20,6 +20,11 @@
         android:label="KeFu" />
 
     <fragment
+        android:id="@+id/frg_kefu_video_full"
+        android:name="com.teneasy.chatuisdk.videoFullFragment"
+        android:label="video_full" />
+
+    <fragment
         android:id="@+id/frg_settings"
         android:name="com.teneasy.chatuisdk.SettingsFragment"
         android:label="KeFu" />

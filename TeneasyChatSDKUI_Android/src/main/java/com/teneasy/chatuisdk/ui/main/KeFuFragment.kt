@@ -24,6 +24,7 @@ import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
+import com.teneasy.chatuisdk.ARG_VIDEOURL
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
@@ -166,6 +167,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 //重发发送失败的消息
                 override fun onReSend(position: Int) {
                     //chatLib.resendMSg(msg, 0)
+                }
+
+                override fun onPlayVideo(url: String) {
+                    val bundle = Bundle()
+                    bundle.putString(ARG_VIDEOURL, url)
+                    findNavController().navigate(R.id.frg_kefu_video_full, bundle)
                 }
 
                 //长按消息，引用消息并回复
@@ -327,7 +334,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun initObserver(){
-        mIProgressLoader?.showLoading()
         viewModel.mlMsgList.observe(this@KeFuFragment) {
             msgAdapter.setList(it)
             refreshList()
@@ -637,20 +643,23 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
     }
 
+    //聊天sdk连接成功的回调
     override fun connected(c: GGateway.SCHi) {
+        //把连接状态放到当前页面
         isConnected = true;
         println(c.id)
         showTip("连接成功")
         Log.i(TAG, "连接成功")
-
         UserPreferences().putString(PARAM_XTOKEN, c.token)
         Constants.xToken = c.token
-        //if (!isFirstLoad) {
-            viewModel.assignWorker(Constants.CONSULT_ID)
-        //}
+        if (!isFirstLoad) {
+            mIProgressLoader?.showLoading()
+        }
+        viewModel.assignWorker(Constants.CONSULT_ID)
        chatExpireTime = c.chatExpireTime.toInt()
     }
 
+    //聊天sdk里面有什么异常，会从这个回调告诉
     override fun systemMsg(msg: Result) {
         /*
         code: 1010 在别处登录了
@@ -675,6 +684,7 @@ code: 1002 无效的Token
         }
         //按实际需要，显示错误提示，也可以不显示
         //showTip(msg.msg)
+        showTip("连接成功")
         Log.i(TAG, msg.msg)
     }
 

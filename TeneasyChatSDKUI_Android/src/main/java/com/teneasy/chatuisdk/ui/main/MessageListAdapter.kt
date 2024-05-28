@@ -42,12 +42,22 @@ import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
 import org.greenrobot.eventbus.EventBus
 import android.net.Uri
+import android.os.Bundle
 import android.view.Gravity
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.annotation.OptIn
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.Constraints
+import androidx.core.view.updateLayoutParams
 import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.common.util.UnstableApi
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.util.SmartGlideImageLoader
+import com.teneasy.chatuisdk.ARG_VIDEOURL
+import com.teneasy.chatuisdk.R
 
 
 interface MessageItemOperateListener {
@@ -56,6 +66,7 @@ interface MessageItemOperateListener {
     fun onReSend(position: Int)
     fun onQuote(position: Int)
     fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
+    fun onPlayVideo(url: String)
 }
 
 data class QADisplayedEvent(val tag: Int)
@@ -110,6 +121,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         }
     }
 
+    @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (msgList == null) {
             return
@@ -128,21 +140,28 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
                 val player = ExoPlayer.Builder(act).build()
                 holder.playerView.player = player
+                holder.playerView.hideController()
+
                 player.setMediaItem(mediaItem)
                 // Prepare the player.
                 player.prepare()
                 // Start the playback.
                 player.pause()
+
+                holder.iv_play.setOnClickListener {
+                    listener?.onPlayVideo(videoUrl)
+                }
             }
             if (item.isLeft){
-                var params =  holder.tvTitle.layoutParams as LinearLayout.LayoutParams
-                params.gravity = Gravity.START
-                holder.tvTitle.layoutParams = params
+                holder.tvTitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    startToStart =  ConstraintLayout.LayoutParams.UNSET
+                    endToEnd = holder.root.id
+                }
 
-
-                 params =  holder.playerView.layoutParams as LinearLayout.LayoutParams
-                params.gravity = Gravity.START
-                holder.playerView.layoutParams = params
+                holder.playerView.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    startToStart =  ConstraintLayout.LayoutParams.UNSET
+                    endToEnd = holder.root.id
+                }
             }
         }
         else if (holder is TipMsgViewHolder) {
@@ -449,7 +468,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     inner class ItemVideoViewHolder(binding: ItemVideoPlayerBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvTitle = binding.tvTitle
         val playerView = binding.playerView
-        val root = binding.root
+        var iv_play = binding.ivPlay
+        val root = binding.csParent
     }
 
     fun showBigImage(imageView: ImageView, url: String){
