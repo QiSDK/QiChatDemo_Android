@@ -24,10 +24,11 @@ import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
-import com.teneasy.chatuisdk.ARG_VIDEOURL
+import com.lxj.xpopup.XPopup
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
+import com.teneasy.chatuisdk.ui.VideoPlayView
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
@@ -170,9 +171,15 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 }
 
                 override fun onPlayVideo(url: String) {
-                    val bundle = Bundle()
-                    bundle.putString(ARG_VIDEOURL, url)
-                    findNavController().navigate(R.id.frg_kefu_video_full, bundle)
+                    //val bundle = Bundle()
+                    //bundle.putString(ARG_VIDEOURL, url)
+                    //findNavController().navigate(R.id.frg_kefu_video_full, bundle)
+
+
+                    // 单张图片场景
+                    XPopup.Builder(requireContext())
+                        .asCustom(VideoPlayView(requireContext(), url))
+                        .show()
                 }
 
                 //长按消息，引用消息并回复

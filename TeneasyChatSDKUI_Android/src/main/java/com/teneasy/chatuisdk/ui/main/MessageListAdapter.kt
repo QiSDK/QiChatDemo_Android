@@ -52,12 +52,7 @@ import androidx.constraintlayout.widget.Constraints
 import androidx.core.view.updateLayoutParams
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.util.SmartGlideImageLoader
-import com.teneasy.chatuisdk.ARG_VIDEOURL
-import com.teneasy.chatuisdk.R
 
 
 interface MessageItemOperateListener {
