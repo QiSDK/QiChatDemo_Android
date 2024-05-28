@@ -40,7 +40,7 @@
                 android:id="@+id/tv_title"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="客服"
+                android:text="连接客服中..."
                 android:layout_weight="1"
                 android:textSize="20sp"
                 android:textStyle="bold"

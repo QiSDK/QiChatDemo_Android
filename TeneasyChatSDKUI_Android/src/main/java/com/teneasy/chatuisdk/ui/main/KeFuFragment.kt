@@ -691,7 +691,6 @@ code: 1002 无效的Token
         }
         //按实际需要，显示错误提示，也可以不显示
         //showTip(msg.msg)
-        showTip("连接成功")
         Log.i(TAG, msg.msg)
     }
 
