@@ -27,7 +27,7 @@ class SelectConsultTypeFragment : Fragment(){
     private var binding: FragmentSelectConsultTypeBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //初始化配置
+        //读取从设置页面设置的值
         Utils().readConfig()
     }
 
@@ -59,11 +59,8 @@ class SelectConsultTypeFragment : Fragment(){
 
     override fun onResume() {
         super.onResume()
-
-        //binding?.tvLine?.text = "当前线路："
-        //binding?.tvEmpty?.text = "连接客服中，请稍后..."
-
-        //检测线路地址，以逗号分开
+        //检测线路地址，以逗号分开；放在onResume来确保每次到这个页面都会检测一次
+        //初始化检测库，商户号必须正确，不然会导致线路检测失败
         val lineLib = LineDetectLib(Constants.lines,  object :
             LineDetectDelegate {
             override fun useTheLine(line: String) {
@@ -71,9 +68,9 @@ class SelectConsultTypeFragment : Fragment(){
                 UserPreferences().putString(line, PARAM_DOMAIN)
                 //设置网络请求的全局基础地址
                 XHttpSDK.setBaseUrl(Constants.baseUrlApi())
-                //initChatSDK(line)
                 activity?.runOnUiThread {
                     binding?.tvLine?.text = "当前线路：" + line
+                    //获取线路之后，获取咨询类型列表
                     viewModel.queryEntrance()
                 }
             }
@@ -84,6 +81,7 @@ class SelectConsultTypeFragment : Fragment(){
                 }
             }
         }, Constants.merchantId) //123是商户号
+        //调用检测函数
         lineLib.getLine()
     }
 }

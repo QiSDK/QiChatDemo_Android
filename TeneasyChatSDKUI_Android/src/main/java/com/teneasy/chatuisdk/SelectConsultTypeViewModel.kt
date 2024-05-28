@@ -13,27 +13,9 @@ import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
 
 class SelectConsultTypeViewModel : ViewModel() {
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    fun startLoading() {
-        _isLoading.value = true
-    }
-
-    fun stopLoading() {
-        _isLoading.value = false
-    }
      var consultList = MutableLiveData<ArrayList<Consults>>()
-//    val consultList: LiveData<ArrayList<Consults>>
-//        get() = _consultList
-//
-//    fun setData(data: ArrayList<Consults>) {
-//        _consultList.value = data
-//    }
-
-    //query-entrance
+    //获取咨询类型列表
     fun queryEntrance() {
-        startLoading()
         val param = JsonObject()
         val request = XHttp.custom().accessToken(false)
         //这里需要用cert
@@ -57,6 +39,7 @@ class SelectConsultTypeViewModel : ViewModel() {
             })
     }
 
+    //获取咨询列表之后调用，清除未读数
     fun markRead() {
        // startLoading()
         val request = XHttp.custom().accessToken(false)
