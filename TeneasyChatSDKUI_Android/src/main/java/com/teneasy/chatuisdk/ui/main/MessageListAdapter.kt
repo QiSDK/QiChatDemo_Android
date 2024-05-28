@@ -147,7 +147,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     listener?.onPlayVideo(videoUrl)
                 }
             }
-            if (item.isLeft){
+            if (!item.isLeft){
                 holder.tvTitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
                     startToStart =  ConstraintLayout.LayoutParams.UNSET
                     endToEnd = holder.root.id

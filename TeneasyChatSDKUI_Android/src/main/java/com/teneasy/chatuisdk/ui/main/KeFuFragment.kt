@@ -712,9 +712,10 @@ code: 1002 无效的Token
         //hideTip()
     }
 
+    //收到对方消息
     override fun receivedMsg(msg: CMessage.Message) {
+        //当用户端在当前会话，但是其他咨询类型客服发来了消息，给予提醒。
         if (msg.consultId != Constants.CONSULT_ID){
-            //当用户端在当前会话，但是其他咨询类型客服发来了消息，给予提醒。
             //showTip("其他客服有新消息！")
             runOnUiThread(
                 Runnable {
