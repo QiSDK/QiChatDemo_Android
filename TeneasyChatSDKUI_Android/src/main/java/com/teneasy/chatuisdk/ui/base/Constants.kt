@@ -35,11 +35,16 @@ class Constants {
          var xToken = ""
         //聊天SDK所需要的域名，例如www.abc.com，没有https前缀
         var domain = ""  //domain
-        val baseUrlApi = "https://" + domain  //用于请求数据，上传图片
+        //val baseUrlApi = "https://" + domain  //用于请求数据，上传图片
         const val baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
         var workerId = 0
         var CONSULT_ID: Long = 1
         //val wss_token = "wss_token"
+
+        fun baseUrlApi() : String {
+            val baseUrlApi = "https://" + domain
+            return baseUrlApi
+        }
     }
 
     /*

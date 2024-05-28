@@ -70,7 +70,7 @@ class SelectConsultTypeFragment : Fragment(){
                 Constants.domain = line
                 UserPreferences().putString(line, PARAM_DOMAIN)
                 //设置网络请求的全局基础地址
-                XHttpSDK.setBaseUrl(Constants.baseUrlApi)
+                XHttpSDK.setBaseUrl(Constants.baseUrlApi())
                 //initChatSDK(line)
                 activity?.runOnUiThread {
                     binding?.tvLine?.text = "当前线路：" + line

@@ -498,7 +498,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     .addFormDataPart("type", "4")
                     .build()
 
-                val request2 = Request.Builder().url(Constants.baseUrlApi + "/v1/assets/upload/")
+                val request2 = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload/")
                     .addHeader("X-Token", Constants.xToken)
                     .post(multipartBody).build()
 
