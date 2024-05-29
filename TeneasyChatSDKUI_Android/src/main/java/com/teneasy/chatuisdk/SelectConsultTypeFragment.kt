@@ -59,6 +59,13 @@ class SelectConsultTypeFragment : Fragment(){
 
     override fun onResume() {
         super.onResume()
+
+        if (Constants.lines.isEmpty() || Constants.cert.isEmpty() || Constants.baseUrlImage.isEmpty() || Constants.merchantId == 0 || Constants.userId == 0){
+            binding?.tvLine?.text = "* 请在设置页面设置好参数 *";
+            binding?.tvEmpty?.text = ""
+            return
+        }
+
         //检测线路地址，以逗号分开；放在onResume来确保每次到这个页面都会检测一次
         //初始化检测库，商户号必须正确，不然会导致线路检测失败
         val lineLib = LineDetectLib(Constants.lines,  object :

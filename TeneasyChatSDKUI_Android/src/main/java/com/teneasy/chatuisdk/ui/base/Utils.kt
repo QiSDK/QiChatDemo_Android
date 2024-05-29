@@ -35,6 +35,7 @@ class Utils {
         Constants.merchantId = UserPreferences().getInt(PARAM_MERCHANT_ID, Constants.merchantId)
         Constants.lines = UserPreferences().getString(PARAM_LINES, Constants.lines)
         Constants.cert = UserPreferences().getString(PARAM_CERT, Constants.cert)
+        Constants.baseUrlImage = UserPreferences().getString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
     }
 
          fun closeSoftKeyboard(view: View?) {

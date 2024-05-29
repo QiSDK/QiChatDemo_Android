@@ -30,9 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <EditText android:id="@+id/et_XToken"
-        android:hint="输入X-Token"
-        android:visibility="gone"
+    <EditText android:id="@+id/et_BaseImgUrl"
+        android:hint="请输入UrlImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

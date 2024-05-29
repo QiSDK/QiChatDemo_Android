@@ -7,17 +7,33 @@ const val PARAM_CERT = "CERT"
 const val PARAM_MERCHANT_ID = "MERCHANT_ID"
 const val PARAM_XTOKEN = "HTTPTOKEN"
 const val PARAM_LINES = "LINES"
-
 const val PARAM_DOMAIN = "wssBaseUrl"
+const val PARAM_IMAGEBASEURL = "baseUrlImage"
+
+////这几个是需要在设置里面配置
+//var lines = ""
+//var cert = ""
+//var merchantId: Int = 0
+//var userId: Int32 = 0//1125324
+//var baseUrlImage = "" //用于拼接图片地址
 
 class Constants {
 
     companion object {
+        //这部分是在设置里面获取的
+        var lines = ""
+        var cert = ""
+        var merchantId = 0
+        var userId = 0//1125324
+        var baseUrlImage = "" //用于拼接图片地址
+
      //这部分是在设置里面获取的
-        var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
+        /*var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
         var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
         var merchantId = 230
         var userId = 666662//1125324
+        var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
+        */
 
 //       var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz,https://wcsapi.qixin14.xyz"
 //        var cert = "COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg"
@@ -35,10 +51,8 @@ class Constants {
          var xToken = ""
         //聊天SDK所需要的域名，例如www.abc.com，没有https前缀
         var domain = ""  //domain
-        //val baseUrlApi = "https://" + domain  //用于请求数据，上传图片
-        const val baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
         var workerId = 0
-        var CONSULT_ID: Long = 1
+        var CONSULT_ID: Long = 0
         //val wss_token = "wss_token"
 
         fun baseUrlApi() : String {
