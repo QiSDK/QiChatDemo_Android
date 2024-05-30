@@ -3,10 +3,12 @@ package com.teneasy.chatuisdk.ui.main
 import android.content.Context
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter
 import com.donkingliang.groupedadapter.holder.BaseViewHolder
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.SimpleListItemBinding
+import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.QA
 import com.teneasy.chatuisdk.ui.http.bean.Question
 
@@ -53,6 +55,9 @@ class GroupedQAdapter(
         val bean = data[position]
 
         var tvTitle = holder?.get<TextView>(R.id.tv_Title)
+        if (bean.clicked){
+            tvTitle?.setTextColor(ContextCompat.getColor(context, com.luck.picture.lib.R.color.ps_color_light_grey))
+        }
         tvTitle?.text = (position + 1).toString() + ", " + bean.question.content.data
     }
 
@@ -66,6 +71,9 @@ class GroupedQAdapter(
     ) {
         val bean = data[position]
         var tvTitle = holder?.get<TextView>(R.id.tv_Title)
+        if (bean.related?.get(childPosition)?.clicked?:false){
+            tvTitle?.setTextColor(ContextCompat.getColor(context, com.luck.picture.lib.R.color.ps_color_light_grey))
+        }
         tvTitle?.text = (childPosition + 1).toString() + ", " + bean.related?.get(childPosition)?.question?.content?.data ?:""
     }
 

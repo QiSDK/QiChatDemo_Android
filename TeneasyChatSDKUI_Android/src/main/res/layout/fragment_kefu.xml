@@ -90,6 +90,16 @@
             android:layout_width="0dp"
             android:layout_height="30dp">   </TextView>
 
+        <ImageView
+            android:id="@+id/iv_Close"
+            app:layout_constraintLeft_toRightOf="@id/tv_QuotedMsg"
+            app:layout_constraintTop_toTopOf="@id/tv_QuotedMsg"
+            android:layout_marginStart="-10dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/close"
+            ></ImageView>
+
         <EditText
             android:id="@+id/et_msg"
             android:layout_width="0dp"

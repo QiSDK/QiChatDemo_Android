@@ -21,6 +21,7 @@ data class AutoReply(
         val id: Long,
         val question: Question,
         val content: String,
+        var clicked: Boolean = false,
         val answer: List<Question?>,
         val related: List<QA>? = null,
         var isExpand: Boolean

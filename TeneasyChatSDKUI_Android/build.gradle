@@ -112,7 +112,7 @@ dependencies {
 
     implementation 'com.github.li-xiaojun:XPopup:2.10.0'
     //implementation project(path: ':teneasyChatSDK_Android')
-    implementation 'com.github.QiSDK:QiChatSDK_Android:1.5.3'
+    implementation 'com.github.QiSDK:QiChatSDK_Android:1.5.5'
 
     implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
@@ -125,7 +125,7 @@ afterEvaluate {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.tianxuefeng'
+                groupId = 'com.github.QiSDK'
                 artifactId = 'teneasy-chatsdkui'
                 version = '1.3.0'
             }

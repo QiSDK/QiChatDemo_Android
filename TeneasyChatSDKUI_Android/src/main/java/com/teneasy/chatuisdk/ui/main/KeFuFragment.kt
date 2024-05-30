@@ -119,12 +119,16 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
         requireActivity().title = "客服"
         hidetvQuotedMsg()
+
+        binding?.ivClose?.setOnClickListener {
+            hidetvQuotedMsg()
+        }
     }
 
     //初始化聊天SDK
     private fun initChatSDK(baseUrl: String){
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
-        Log.i(TAG, "x-token:" + Constants.xToken)
+        Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
         chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
         chatLib?.makeConnect()
@@ -187,9 +191,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     binding?.tvQuotedMsg?.visibility = View.VISIBLE
                     binding?.tvQuotedMsg?.tag = position
                     val msg = msgAdapter.msgList?.get(position)?.cMsg
-                    if ((msg?.image?.uri?: "").isEmpty()){
+                    if ((msg?.image?.uri?: "").isNotEmpty()){
                         showQuotedMsg("回复：图片")
-                    }else if ((msg?.video?.uri?: "").isEmpty()){
+                    }else if ((msg?.video?.uri?: "").isNotEmpty()){
                         showQuotedMsg("回复：视频")
                     }else {
                         showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
@@ -348,14 +352,18 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         viewModel.mlAssignWorker.observe(this@KeFuFragment){
                 val workInfo = WorkerInfo()
+            if (it == null){
+                Log.d(TAG, "assignWorker 失败: null")
+                return@observe
+            }
                 workInfo.workerName = it.nick
                 workInfo.workerAvatar = it.avatar
-                workInfo.id = it.workerId
+                workInfo.id = it.workerId ?: 0
 
-                Log.d(TAG, "Assign WorkerId: ${workInfo.id}")
+                Log.d(TAG, "assignWorker Id: ${workInfo.id}")
 
             if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
-                Constants.workerId = it.workerId
+                Constants.workerId = workInfo.id
                 updateWorkInf(workInfo)
             }
                 lifecycleScope.launch {
@@ -382,6 +390,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                    var isLeft = true
                    if (item.sender == item.chatId){
                        isLeft = false
+                   }
+
+                   if (item.msgOp == "MSG_OP_DELETE"){
+                       continue
                    }
 
                    if (item.workerChanged != null){
@@ -453,13 +465,18 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             reConnectTimer?.schedule(object : TimerTask() {
                 override fun run() {
                     if (chatLib == null || !isConnected) {
+                        Log.d(TAG, "SDK 重新初始化")
+                        runOnUiThread {
+                            initChatSDK(Constants.domain)
+                        }
+                        /*
                         if (chatLib == null) {
                             Log.d(TAG, "SDK 重新初始化")
                             initChatSDK(Constants.domain)
                         }else{
                             Log.d(TAG, "SDK 重新连接")
                             chatLib?.reConnect()
-                        }
+                        }*/
                     }
                 }
             }, 3000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
@@ -691,6 +708,11 @@ code: 1002 无效的Token
         }
         //按实际需要，显示错误提示，也可以不显示
         //showTip(msg.msg)
+        //if (BuildConfig){
+          //  showTip(msg.msg)
+//        }else {
+//            showTip("")
+//        }
         Log.i(TAG, msg.msg)
     }
 

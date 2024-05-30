@@ -181,6 +181,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             }
             if (!item.isLeft) {
                 holder.tvRightMsg.tag = position
+                holder.ivRightImg.tag = position
                 holder.tvRightTime.text = localTime
                 holder.tvRightTime.visibility = View.VISIBLE
                 holder.tvRightMsg.visibility = View.VISIBLE
@@ -219,6 +220,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 }
             } else {
                 holder.tvLeftMsg.tag = position
+                holder.ivLeftImg.tag = position
                 holder.tvLeftTime.text = localTime
                 holder.tvLeftTime.visibility = View.VISIBLE
                 holder.tvLeftMsg.visibility = View.VISIBLE
@@ -317,57 +319,80 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
                 */
 
-                val questionTxt = qaAdapter.data.get(groupPosition).question.content.data
+                var QA = qaAdapter.data.get(groupPosition)
 
-                val txtAnswer = qaAdapter.data.get(groupPosition).content ?:""
-
-                val multipAnswer = qaAdapter.data.get(groupPosition).answer.joinToString(separator = "\n")  ?:""
-
-                // 发送提问消息
-                listener?.onSendLocalMsg(questionTxt, false)
-                if (txtAnswer.isNotEmpty()){
-                    // 自动回答
-                    listener?.onSendLocalMsg(txtAnswer, true)
-                }
-                 if (multipAnswer.isNotEmpty()){
-                    for (a in qaAdapter.data.get(groupPosition).answer){
-                        if (a!!.image != null){
-                            // 自动回答
-                            listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
-                        }
+                QA?.apply {
+                    if (this.clicked ?: true) {
+                        return@setOnHeaderClickListener
                     }
-                }else{
-                    if (qaAdapter.isExpand(groupPosition)) {
-                        qaAdapter.collapseGroup(groupPosition)
+
+                    val questionTxt = this.question?.content?.data ?: ""
+                    val txtAnswer = this.content ?: "null"
+
+                    val multipAnswer = this.answer?.joinToString(separator = "\n") ?: ""
+                    if (txtAnswer.isNotEmpty()) {
+                        // 发送提问消息
+                        listener?.onSendLocalMsg(questionTxt, false)
+                        // 自动回答
+                        listener?.onSendLocalMsg(txtAnswer, true)
+                        QA.clicked = true;
+                        qaAdapter.notifyDataChanged()
+                    }
+                    if (multipAnswer.isNotEmpty()) {
+                        listener?.onSendLocalMsg(questionTxt, false)
+                        for (a in this.answer) {
+                            if (a!!.image != null) {
+                                // 自动回答
+                                listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
+                            }
+                        }
+                        QA.clicked = true;
+                        qaAdapter.notifyDataChanged()
                     } else {
-                        qaAdapter.collapseTheResetGroup(groupPosition)
-                        qaAdapter.expandGroup(groupPosition)
+                        if (qaAdapter.isExpand(groupPosition)) {
+                            qaAdapter.collapseGroup(groupPosition)
+                        } else {
+                            qaAdapter.collapseTheResetGroup(groupPosition)
+                            qaAdapter.expandGroup(groupPosition)
+                        }
                     }
                 }
             }
 
             // 问题点击事件
             qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
-                val questionTxt = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.question?.content?.data ?:""
-                val txtAnswer = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.content ?:"null"
 
-                val multipAnswer = qaAdapter.data.get(groupPosition).related?.get(childPosition)?.answer?.joinToString(separator = "\n")  ?:""
-                // 发送提问消息
-                listener?.onSendLocalMsg(questionTxt, false)
-                if (txtAnswer.isNotEmpty()){
-                    // 自动回答
-                    listener?.onSendLocalMsg(txtAnswer, true)
-                }
-                 if (multipAnswer.isNotEmpty()){
-                    for (a in qaAdapter.data.get(groupPosition).related?.get(childPosition)?.answer ?: ArrayList()){
-                        if (a!!.image != null){
-                            // 自动回答
-                            listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
+                var QA = qaAdapter.data.get(groupPosition).related?.get(childPosition)
+                QA?.apply {
+                    if (this.clicked?:true){
+                        return@setOnChildClickListener
+                    }
+
+                    val questionTxt = this.question?.content?.data ?:""
+                    val txtAnswer = this.content ?:"null"
+
+                    val multipAnswer = this.answer?.joinToString(separator = "\n")  ?:""
+                    // 发送提问消息
+                    if (txtAnswer.isNotEmpty()){
+                        listener?.onSendLocalMsg(questionTxt, false)
+                        // 自动回答
+                        listener?.onSendLocalMsg(txtAnswer, true)
+                        QA.clicked = true;
+                        qaAdapter.notifyDataChanged()
+                    }
+                    if (multipAnswer.isNotEmpty()){
+                        listener?.onSendLocalMsg(questionTxt, false)
+                        for (a in this.answer){
+                            if (a!!.image != null){
+                                // 自动回答
+                                listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
+                            }
                         }
-
+                        QA.clicked = true;
+                        qaAdapter.notifyDataChanged()
                     }
                 }
-            }
+                }
         }
     }
     inner class MsgViewHolder(binding: ItemMessageBinding) : RecyclerView.ViewHolder(binding.root){
@@ -415,8 +440,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             })
 
             val builder2: XPopup.Builder = XPopup.Builder(act)
-                .watchView(tvRightMsg)
-            tvRightMsg.setOnLongClickListener(OnLongClickListener {
+                .watchView(ivLeftImg)
+            ivLeftImg.setOnLongClickListener(OnLongClickListener {
                 builder2.asAttachList(
                     //"撤回", "编辑" 前端App不需要
                     arrayOf<String>("复制","回复"), null,
@@ -443,6 +468,72 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                                 println("编辑")
                                 listener?.onReSend(it.tag as Int)
                             }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+
+            // 必须在事件发生前，调用这个方法来监视View的触摸
+            val builder3: XPopup.Builder = XPopup.Builder(act)
+                .watchView(tvRightMsg)
+            tvRightMsg.setOnLongClickListener(OnLongClickListener {
+                builder3.asAttachList(
+                    //"删除"前端App不需要
+                    arrayOf<String>("复制","回复"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    //置顶
+                                    println("复制")
+                                    listener?.onCopy(it.tag as Int)
+                                }
+
+                                1 -> {
+                                    //复制
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
+                                }
+                                2 -> {
+                                    //删除
+                                    println("删除")
+                                    listener?.onDelete(it.tag as Int)
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+
+            // 必须在事件发生前，调用这个方法来监视View的触摸
+            val builder4: XPopup.Builder = XPopup.Builder(act)
+                .watchView(ivRightImg)
+            ivRightImg.setOnLongClickListener(OnLongClickListener {
+                builder4.asAttachList(
+                    //"删除"前端App不需要
+                    arrayOf<String>("复制","回复"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    //置顶
+                                    println("复制")
+                                    listener?.onCopy(it.tag as Int)
+                                }
+
+                                1 -> {
+                                    //复制
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
+                                }
+                                2 -> {
+                                    //删除
+                                    println("删除")
+                                    listener?.onDelete(it.tag as Int)
+                                }
                             }
                         }
                     })

@@ -118,8 +118,9 @@ class KeFuViewModel() : ViewModel() {
 
         if (!imgPath.isEmpty()){
             cMContent.uri = imgPath
+        }else {
+            cMContent.uri = history?.image?.uri ?: ""
         }
-        cMContent.uri = history?.image?.uri ?: ""
         cMsg.setImage(cMContent)
 
         var chatModel = MessageItem()

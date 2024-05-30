@@ -24,6 +24,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug{
+            buildConfigField("boolean", "IS_DEBUG", "true")
+            debuggable = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
    /* compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -39,9 +44,10 @@ android {
     kotlinOptions {
         jvmTarget = 17
     }
-//    buildFeatures {
-//        viewBinding true
-//    }
+    buildFeatures {
+       // viewBinding true
+        buildConfig = true
+    }
 //    viewBinding {
 //        true
 //    }
