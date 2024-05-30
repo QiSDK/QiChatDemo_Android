@@ -17,8 +17,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.databinding.ItemHeaderRecyleviewBinding
@@ -53,6 +51,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import com.lxj.xpopup.util.SmartGlideImageLoader
+import com.teneasy.chatuisdk.ui.BigImageView
+import com.teneasy.chatuisdk.ui.VideoPlayView
 
 
 interface MessageItemOperateListener {
@@ -62,6 +62,7 @@ interface MessageItemOperateListener {
     fun onQuote(position: Int)
     fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
     fun onPlayVideo(url: String)
+    fun onPlayImage(url: String)
 }
 
 data class QADisplayedEvent(val tag: Int)
@@ -135,6 +136,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
                 val player = ExoPlayer.Builder(act).build()
                 holder.playerView.player = player
+                holder.playerView.tag = position
                 holder.playerView.hideController()
 
                 player.setMediaItem(mediaItem)
@@ -212,9 +214,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 //                    .into(holder.ivRightImg)
                     Log.d("AdapterNChatLib", "imageUrl:" + Constants.baseUrlImage + item.cMsg!!.image.uri)
                     Glide.with(act)
-                        .asBitmap()
+                        //.asBitmap()
                         .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
-                        //.skipMemoryCache(true)
+                        .skipMemoryCache(true)
+                        .override(600,400)
+                        //.centerCrop()
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .into(holder.ivRightImg)
                 }
@@ -240,27 +244,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.ivLeftImg.setOnClickListener {
                         showBigImage(it as ImageView, Constants.baseUrlImage + item.cMsg!!.image.uri)
                     }
-//                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
-//                    .skipMemoryCache(true)
-//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-//                    .into(holder.ivLeftImg)
-                    Glide.with(act)
-                        .asBitmap()
-                        .load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
-                        .skipMemoryCache(true)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(object : CustomTarget<Bitmap>() {
-                            override fun onResourceReady(
-                                resource: Bitmap, transition: Transition<in Bitmap>?
-                            ) {
-                                holder.ivLeftImg.setImageBitmap(resource)
-//                            resource.width
-//                            holder.ivLeftImg.width
-//                            holder.ivLeftImg.measuredHeight
-                            }
 
-                            override fun onLoadCleared(placeholder: Drawable?) {}
-                        })
+                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .into(holder.ivLeftImg)
+
                 }
             }
         }
@@ -556,13 +545,46 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         val playerView = binding.playerView
         var iv_play = binding.ivPlay
         val root = binding.csParent
+
+        init {
+            // 必须在事件发生前，调用这个方法来监视View的触摸
+            val builder: XPopup.Builder = XPopup.Builder(act)
+                .watchView(playerView)
+            playerView.setOnLongClickListener(OnLongClickListener {
+                builder.asAttachList(
+                    //"删除"前端App不需要
+                    arrayOf<String>("复制", "回复"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    //置顶
+                                    println("复制")
+                                    listener?.onCopy(it.tag as Int)
+                                }
+
+                                1 -> {
+                                    //复制
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
+                                }
+
+                                2 -> {
+                                    //删除
+                                    println("删除")
+                                    listener?.onDelete(it.tag as Int)
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+        }
     }
 
     fun showBigImage(imageView: ImageView, url: String){
-        // 单张图片场景
-        XPopup.Builder(act)
-            .asImageViewer(imageView, url, SmartGlideImageLoader())
-            .show()
+        listener?.onPlayImage(url)
     }
 
 }

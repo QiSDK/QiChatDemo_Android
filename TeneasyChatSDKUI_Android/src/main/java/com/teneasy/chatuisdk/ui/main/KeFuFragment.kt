@@ -1,13 +1,13 @@
 package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -24,10 +24,12 @@ import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
+import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.XPopup
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
+import com.teneasy.chatuisdk.ui.BigImageView
 import com.teneasy.chatuisdk.ui.VideoPlayView
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlideEngine
@@ -56,7 +58,7 @@ import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -183,6 +185,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     // 单张图片场景
                     XPopup.Builder(requireContext())
                         .asCustom(VideoPlayView(requireContext(), url))
+                        .show()
+                }
+
+                override fun onPlayImage(url: String) {
+                    XPopup.Builder(requireContext())
+                        .asCustom(BigImageView(requireContext(), url))
                         .show()
                 }
 
@@ -335,12 +343,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 findNavController().popBackStack()
             }
 
-            this.root.setOnTouchListener { v, event ->
+           /* this.root.setOnTouchListener { v, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     Utils().closeSoftKeyboard(v)
                 }
                 true
-            }
+            }*/
         }
     }
 
@@ -466,9 +474,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 override fun run() {
                     if (chatLib == null || !isConnected) {
                         Log.d(TAG, "SDK 重新初始化")
-                        runOnUiThread {
+                        //runOnUiThread {
                             initChatSDK(Constants.domain)
-                        }
+                       // }
                         /*
                         if (chatLib == null) {
                             Log.d(TAG, "SDK 重新初始化")
@@ -519,7 +527,43 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     fun uploadImg(filePath: String) {
         mIProgressLoader?.updateMessage("上传中。。。")
         mIProgressLoader?.showLoading()
-        val file = File(filePath)
+        var file = File(filePath)
+
+        if (!file.exists()){
+            ToastUtils.showToast(requireContext(), "文件不存在")
+            mIProgressLoader?.dismissLoading()
+            return
+        }
+
+        if ((filePath.contains(".png") || filePath.contains(".jpg"))){
+            // Step 1: Load the image
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+            // Step 2: Compress the image
+            val compressedData = Utils().compressBitmap(bitmap)
+
+            var extenion = file.absoluteFile.extension
+            var newFilePath = file.absolutePath.replace("." + extenion,"") + Date().time + "." + extenion
+            var newFile = File(newFilePath)
+            // Step 3: Save the compressed image to a file
+            Utils().saveCompressedBitmapToFile(compressedData, newFile)
+            file = newFile
+            if (!file.exists()){
+                toast("文件压缩失败！")
+            }
+
+            if (file.length() > 20 * 1024 * 1024){
+                ToastUtils.showToast(requireContext(), "图片限制20M")
+                mIProgressLoader?.dismissLoading()
+                return
+            }
+        }else{
+            if (file.length() > 300 * 1000 * 1000){
+                ToastUtils.showToast(requireContext(), "视频/文件限制300M")
+                mIProgressLoader?.dismissLoading()
+                return
+            }
+        }
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()
@@ -532,13 +576,17 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     .addHeader("X-Token", Constants.xToken)
                     .post(multipartBody).build()
 
-                val okHttpClient = OkHttpClient()
+
+                val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(5, TimeUnit.MINUTES)
+                    .readTimeout(5, TimeUnit.MINUTES)
+                    .build()
                 val call = okHttpClient.newCall(request2)
                 call.enqueue(object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
                         // 上传失败
-                        mIProgressLoader?.dismissLoading()
-                        Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
+                        toast("上传失败" + e.localizedMessage)
                     }
 
                     override fun onResponse(call: Call, response: Response) {
@@ -546,18 +594,21 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         val body = response.body
                         if(response.code == 200 && body != null) {
                             val path = response.body!!.string()
-                            if (path.contains(".png") || path.contains(".jpg") || path.contains(".jpge")){
-                                // 发送图片
-                                sendImgMsg(path)//Constants.baseUrlImage +
+                            if (path.length < 100) {
+                                if (path.contains(".png") || path.contains(".jpg") || path.contains(
+                                        ".jpge"
+                                    )
+                                ) {
+                                    // 发送图片
+                                    sendImgMsg(path)//Constants.baseUrlImage +
+                                } else {
+                                    sendVideoMsg(path)//Constants.baseUrlImage +
+                                }
                             }else{
-                                sendVideoMsg(path)//Constants.baseUrlImage +
+                                toast("上传失败，服务器返回无效路径")
                             }
                         } else {
-                            // 上传失败
-                            //Toast.makeText(context, "上传失败", Toast.LENGTH_LONG).show()
-                           runOnUiThread {
-                               showToast("上传失败")
-                           }
+                            toast("上传失败 Code:" + response.code)
                         }
                         //Utils().closeSoftKeyboard(view)
                     }
@@ -565,6 +616,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             }
         }).start()
+    }
+
+    fun toast(string: String){
+        runOnUiThread {
+            showToast(string);
+            Log.e(TAG, string)
+            mIProgressLoader?.dismissLoading()
+        }
     }
 
     //页面销毁前销毁聊天
@@ -579,6 +638,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         Constants.workerId = 0
         chatLib?.disConnect()
         chatLib = null
+        Log.i(TAG, "销毁聊天")
     }
 
     override fun onCreateViewBinding(
@@ -676,9 +736,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         Log.i(TAG, "连接成功")
         UserPreferences().putString(PARAM_XTOKEN, c.token)
         Constants.xToken = c.token
-        if (!isFirstLoad) {
-            mIProgressLoader?.showLoading()
-        }
         viewModel.assignWorker(Constants.CONSULT_ID)
        chatExpireTime = c.chatExpireTime.toInt()
     }
@@ -711,7 +768,7 @@ code: 1002 无效的Token
         //if (BuildConfig){
           //  showTip(msg.msg)
 //        }else {
-//            showTip("")
+            showTip("")
 //        }
         Log.i(TAG, msg.msg)
     }

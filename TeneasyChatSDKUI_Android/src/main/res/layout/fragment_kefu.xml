@@ -82,7 +82,7 @@
             android:id="@+id/tv_QuotedMsg"
             app:layout_constraintLeft_toLeftOf="@id/et_msg"
             app:layout_constraintBottom_toTopOf="@id/et_msg"
-            app:layout_constraintRight_toRightOf="@id/btn_send_img"
+            app:layout_constraintRight_toRightOf="@id/et_msg"
             android:background="@color/_xpopup_light_color"
             android:text="引用"
             android:paddingLeft="@dimen/dp_10"
