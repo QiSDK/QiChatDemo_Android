@@ -217,7 +217,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         //.asBitmap()
                         .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
                         .skipMemoryCache(true)
-                        .override(600,400)
+                        //.override(600,400)
                         //.centerCrop()
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .into(holder.ivRightImg)
@@ -288,7 +288,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         if (res.code != 200 || res.data == null || res.data.autoReplyItem == null){
                             Log.d("AdapterNChatLib", "自动回复为空")
                         }
-                        res.data.autoReplyItem?.qa?.let {
+                            tvTitle.text = res.data.autoReplyItem?.title
+                            res.data.autoReplyItem?.qa?.let {
                             qaAdapter.setDataList(it)
                             tvTitle.visibility = View.VISIBLE
                             EventBus.getDefault().post(QADisplayedEvent(100))
@@ -433,7 +434,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             ivLeftImg.setOnLongClickListener(OnLongClickListener {
                 builder2.asAttachList(
                     //"撤回", "编辑" 前端App不需要
-                    arrayOf<String>("复制","回复"), null,
+                    arrayOf<String>("回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
@@ -503,7 +504,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             ivRightImg.setOnLongClickListener(OnLongClickListener {
                 builder4.asAttachList(
                     //"删除"前端App不需要
-                    arrayOf<String>("复制","回复"), null,
+                    arrayOf<String>("回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
@@ -553,7 +554,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             playerView.setOnLongClickListener(OnLongClickListener {
                 builder.asAttachList(
                     //"删除"前端App不需要
-                    arrayOf<String>("复制", "回复"), null,
+                    arrayOf<String>("回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {

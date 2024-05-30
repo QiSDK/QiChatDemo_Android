@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/tv_title"
-        android:text="HP 自动回复引导文案"
+        android:text="未设置"
         android:textSize="18sp"
         android:visibility="gone"
         android:textColor="@color/ps_color_black"

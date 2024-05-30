@@ -27,9 +27,9 @@ class BigImageView(context: Context, url: String): CenterPopupView (context){
         super.onCreate()
 
         val ivBig = findViewById<AppCompatImageView>(R.id.ivBig)
-                        Glide.with(context).load(url).dontAnimate()
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(ivBig)
+        Glide.with(context).load(url).dontAnimate()
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .into(ivBig)
     }
 
 }
