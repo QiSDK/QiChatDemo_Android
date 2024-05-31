@@ -3,17 +3,16 @@ package com.teneasy.chatuisdk.ui.base
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Environment
+import android.net.Uri
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -137,56 +136,19 @@ class Utils {
         return sdf.format(date)
     }
 
-    fun saveBitmapToFile(file: File): File {
-        try {
-            // BitmapFactory options to downsize the image
-
-            val o = BitmapFactory.Options()
-            o.inJustDecodeBounds = true
-            o.inSampleSize = 6
-
-            // factor of downsizing the image
-            var inputStream: FileInputStream = FileInputStream(file)
-            //Bitmap selectedBitmap = null;
-            BitmapFactory.decodeStream(inputStream, null, o)
-            inputStream.close()
-
-            // The new size we want to scale to
-            val REQUIRED_SIZE = 75
-
-            // Find the correct scale value. It should be the power of 2.
-            var scale = 1
-            while (o.outWidth / scale / 2 >= REQUIRED_SIZE &&
-                o.outHeight / scale / 2 >= REQUIRED_SIZE
-            ) {
-                scale *= 2
-            }
-
-            val o2 = BitmapFactory.Options()
-            o2.inSampleSize = scale
-            inputStream = FileInputStream(file)
-
-            val selectedBitmap = BitmapFactory.decodeStream(inputStream, null, o2)
-            inputStream.close()
-
-            // here i override the original image file
-            file.createNewFile()
-            val outputStream: FileOutputStream = FileOutputStream(file)
-
-            selectedBitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-
-            return file
-        } catch (e: java.lang.Exception) {
-            //Log.e("", e.message + " 压缩文件失败")
-        }
-        return  File("ddd")
-    }
-
     fun getBitmapFromFile(imageFile: File): Bitmap {
         return BitmapFactory.decodeFile(imageFile.absolutePath)
     }
 
-    fun compressBitmap(bitmap: Bitmap, quality: Int = 50): ByteArray {
+    fun saveImageToGallery(context: Context, f: File) {
+        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_STARTED)
+        //val f = File(photoPath)
+        val contentUri = Uri.fromFile(f)
+        mediaScanIntent.setData(contentUri)
+        context.sendBroadcast(mediaScanIntent)
+    }
+
+    fun compressBitmap(bitmap: Bitmap, quality: Int = 70): ByteArray {
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
         return outputStream.toByteArray()

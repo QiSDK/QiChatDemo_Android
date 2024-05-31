@@ -215,6 +215,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
                 override fun onPlayImage(url: String) {
                     XPopup.Builder(requireContext())
+
                         .asCustom(BigImageView(requireContext(), url))
                         .show()
                 }

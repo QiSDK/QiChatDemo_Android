@@ -23,7 +23,7 @@ class KeFuActivity : AppCompatActivity() {
         //获取相机的权限
         rxPermissions = RxPermissions(this)
         rxPermissions!!
-            .request(Manifest.permission.CAMERA)
+            .request(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             .subscribe { granted ->
                 if (granted) { // Always true pre-M
                     // I can control the camera now
