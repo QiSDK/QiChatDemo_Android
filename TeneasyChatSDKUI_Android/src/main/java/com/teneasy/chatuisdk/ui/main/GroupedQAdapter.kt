@@ -74,7 +74,7 @@ class GroupedQAdapter(
         if (bean.related?.get(childPosition)?.clicked?:false){
             tvTitle?.setTextColor(ContextCompat.getColor(context, com.luck.picture.lib.R.color.ps_color_light_grey))
         }
-        tvTitle?.text = (childPosition + 1).toString() + ", " + bean.related?.get(childPosition)?.question?.content?.data ?:""
+        tvTitle?.text = (childPosition + 1).toString() + ") " + bean.related?.get(childPosition)?.question?.content?.data ?:""
     }
 
     /**

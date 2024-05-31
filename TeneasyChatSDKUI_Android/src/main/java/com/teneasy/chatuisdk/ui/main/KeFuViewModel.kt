@@ -44,7 +44,7 @@ class KeFuViewModel() : ViewModel() {
 
     val mlMsgList = MutableLiveData<ArrayList<MessageItem>?>()
     val mlWorkerInfo = MutableLiveData<WorkerInfo>()
-    val mlAutoReplyItem = MutableLiveData<AutoReplyItem>()
+    val mlAutoReplyItem = MutableLiveData<AutoReplyItem?>()
     val mlAssignWorker = MutableLiveData<AssignWorker>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
     val mHistoryList = MutableLiveData<List<list>?>()
@@ -69,29 +69,29 @@ class KeFuViewModel() : ViewModel() {
         }else if  (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_Image
         }else{
-            if (newItem.cMsg?.replyMsgId != null){
+            if (newItem.cMsg?.replyMsgId != null && newItem.cMsg?.replyMsgId!! > 0){
                 var replyMsg = mlMsgList.value?.find { it.cMsg?.msgId == newItem.cMsg?.replyMsgId }
-                var replyStr = "[回复]："
+                var replyStr = "回复："
                 if (replyMsg != null){
                     newItem.cellType = replyMsg.cellType
                     if (replyMsg.cellType == CellType.TYPE_Text){
                         replyStr += replyMsg.cMsg?.content?.data
                     }else if (replyMsg.cellType == CellType.TYPE_Image){
-                        replyStr += "图片"
+                        replyStr += "[图片]"
                     }else if (replyMsg.cellType == CellType.TYPE_VIDEO){
-                        replyStr += "视频"
+                        replyStr += "[视频]"
                     }
                 }
-                val txt = newItem.cMsg?.content?.data + replyStr
+                val txt = newItem.cMsg?.content?.data + "\n" + replyStr
                 var newMsg = composeLocalMsg(txt, true)
                 mlMsgList.value?.add(newMsg)
                 return
             }else{
                 newItem.cellType = CellType.TYPE_Text
             }
-            mlMsgList.value?.add(newItem)
         }
 
+        mlMsgList.value?.add(newItem)
 
         mlMsgList.postValue(mlMsgList.value)
     }
@@ -331,19 +331,23 @@ class KeFuViewModel() : ViewModel() {
      * 通过选择的consultId获取自动回复
      * @param consultId
      */
-    fun queryAutoReply(consultId: Long) {
+    fun queryAutoReply(consultId: Long, workerId: Int) {
         val param = JsonObject()
-        param.addProperty("consultId", Constants.CONSULT_ID)
-        param.addProperty("workerId", Constants.workerId)
+        param.addProperty("consultId", consultId)
+        param.addProperty("workerId", workerId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryAutoReply(param),
             object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
                 override fun onSuccess(res: ReturnData<AutoReply>) {
-                    res.data.autoReplyItem?.let {
-                        mlAutoReplyItem.postValue(it)
-                    }
+                        if (res.code != 0 || res.data == null || res.data.autoReplyItem == null){
+                            Log.d("AdapterNChatLib", "自动回复为空")
+                        }else {
+                            res.data.autoReplyItem?.let {
+                                mlAutoReplyItem.postValue(it)
+                            }
+                        }
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)

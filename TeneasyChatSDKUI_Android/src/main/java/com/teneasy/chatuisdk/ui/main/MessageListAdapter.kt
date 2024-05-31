@@ -54,13 +54,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     var msgList: ArrayList<MessageItem>? = null
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
-    var autoReplyItem: AutoReplyItem? = null
+    private var autoReplyItem: AutoReplyItem? = null
 //    fun getList(): ArrayList<MessageItem>? {
 //        return msgList
 //    }
 
     fun setList(list: ArrayList<MessageItem>?) {
         this.msgList = list//ArrayList(list)
+    }
+
+    fun setAutoReply(auto: AutoReplyItem) {
+        this.autoReplyItem = auto
+        //notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -109,13 +114,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         else if (holder is QAViewHolder) {
             if (autoReplyItem != null){
                 holder.tvTitle.text = autoReplyItem?.title
-
                 autoReplyItem?.qa?.let {
                     holder.qaAdapter.setDataList(it)
+                    //holder.qaAdapter.expandGroup(0)
                     holder.tvTitle.visibility = View.VISIBLE
                 }
             }
-            holder.tvTitle.text = ""
         }
        else if (holder is ItemVideoViewHolder) {
             holder.tvTitle.text = ""
@@ -239,7 +243,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         showBigImage(it as ImageView, Constants.baseUrlImage + item.cMsg!!.image.uri)
                     }
 
-                Glide.with(act).load(item.cMsg!!.image.uri).dontAnimate()
+                Glide.with(act).load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
                     .skipMemoryCache(true)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .into(holder.ivLeftImg)
@@ -435,15 +439,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
                                 0 -> {
-                                    //置顶
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
                                 }
 
                                 1 -> {
-                                    //复制
-                                    println("回复")
-                                    listener?.onQuote(it.tag as Int)
+                                    println("复制")
+                                    listener?.onCopy(it.tag as Int)
                                 }
                                 2 -> {
                                     //删除
@@ -505,15 +507,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
                                 0 -> {
-                                    //置顶
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
                                 }
 
                                 1 -> {
-                                    //复制
-                                    println("回复")
-                                    listener?.onQuote(it.tag as Int)
+                                    println("复制")
+                                    listener?.onCopy(it.tag as Int)
                                 }
                                 2 -> {
                                     //删除
@@ -555,15 +555,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
                                 0 -> {
-                                    //置顶
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
                                 }
 
                                 1 -> {
-                                    //复制
-                                    println("回复")
-                                    listener?.onQuote(it.tag as Int)
+                                    println("复制")
+                                    listener?.onCopy(it.tag as Int)
                                 }
 
                                 2 -> {

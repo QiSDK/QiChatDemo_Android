@@ -49,7 +49,9 @@ import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.EventBus
@@ -59,6 +61,7 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 /**
@@ -88,6 +91,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     private var chatExpireTime = 0 //in seconds, chatExpireTime
 
     private var lastMsg: CMessage.Message? = null
+    private var workInfo = WorkerInfo()
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,10 +105,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
         //初始化SDK
         initChatSDK(Constants.domain)
-
-        viewModel.mlAutoReplyItem.observe(viewLifecycleOwner, {
-
-        })
 
         //硬返回按钮点点击之后
        requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -125,6 +125,27 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
         requireActivity().title = "客服"
         hidetvQuotedMsg()
+
+        viewModel.mlAutoReplyItem.observe(viewLifecycleOwner, {
+            if (it?.qa?.size?:0 > 0){
+                msgAdapter.setAutoReply(it!!)
+            }
+
+            var list = ArrayList<MessageItem>()
+            //添加自动回复Cell
+            var qaItem = MessageItem()
+            qaItem.cellType = CellType.TYPE_QA
+            list.add(qaItem)
+            //viewModel.addAllMsgItem(qaList)
+
+            //添加一个空白Cell，确保列表滚动到最后能看到所有内容
+            qaItem = MessageItem()
+            qaItem.cellType = CellType.TYPE_LastLine
+            list.add(qaItem)
+
+            viewModel.addAllMsgItem(list)
+
+        })
 
         binding?.ivClose?.setOnClickListener {
             hidetvQuotedMsg()
@@ -342,6 +363,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
             this.tvTips.visibility = View.GONE
             initObserver()
+
             this.llClose.setOnClickListener {
                 exitChat()
                 findNavController().popBackStack()
@@ -363,7 +385,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
 
         viewModel.mlAssignWorker.observe(viewLifecycleOwner){
-                val workInfo = WorkerInfo()
             if (it == null){
                 Log.d(TAG, "assignWorker 失败: null")
                 return@observe
@@ -375,16 +396,17 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 Log.d(TAG, "assignWorker Id: ${workInfo.id}")
 
             if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
-                Constants.workerId = workInfo.id
-                updateWorkInf(workInfo)
-            }
-                lifecycleScope.launch {
+                this.lifecycleScope.launch {
                     //delay(100L)
                     if(isFirstLoad) {
                         isFirstLoad = false
                         viewModel.queryChatHistory(Constants.CONSULT_ID)
                     }
                 }
+                Constants.workerId = workInfo.id
+                updateWorkInf(workInfo)
+            }
+
             //}
         }
 
@@ -396,6 +418,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         viewModel.mHistoryList.observe(viewLifecycleOwner){
            it?.run {
+               //BuildHistory
                var historyList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
@@ -428,18 +451,17 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                    }
                }
 
-               //添加自动回复Cell
-               var qaItem = MessageItem()
-               qaItem.cellType = CellType.TYPE_QA
-               historyList.add(qaItem)
-               //viewModel.addAllMsgItem(qaList)
-
-               //添加一个空白Cell，确保列表滚动到最后能看到所有内容
-                qaItem = MessageItem()
-               qaItem.cellType = CellType.TYPE_LastLine
-               historyList.add(qaItem)
-
+               viewModel.mlMsgList.value?.clear()
                viewModel.addAllMsgItem(historyList)
+
+               if (isFirstLoad){
+                   viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", true, false)
+               }else{
+                   viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", false, true)
+               }
+               if (viewModel.mlAutoReplyItem.value == null){
+                       viewModel.queryAutoReply(Constants.CONSULT_ID, Constants.workerId)
+               }
            }
             mIProgressLoader?.dismissLoading()
         }
@@ -737,7 +759,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         isConnected = true;
         println(c.id)
         showTip("连接成功")
-        Log.i(TAG, "连接成功")
+        Log.i(TAG, "连接成功, xToekn:" + c.token)
         UserPreferences().putString(PARAM_XTOKEN, c.token)
         Constants.xToken = c.token
         viewModel.assignWorker(Constants.CONSULT_ID)
@@ -816,13 +838,16 @@ code: 1002 无效的Token
 
     //客服更换了，需要更换客服信息
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
-        var workInfo = WorkerInfo()
+         workInfo = WorkerInfo()
         workInfo.workerName = msg.workerName
         workInfo.workerAvatar = msg.workerAvatar
         Constants.CONSULT_ID = msg.consultId
         Log.d(TAG, "workChanged WorkerId: ${workInfo.id}")
         if (msg.workerId != Constants.workerId){
             Constants.workerId = msg.workerId
+            this.lifecycleScope.launch {
+                    viewModel.queryChatHistory(Constants.CONSULT_ID)
+            }
             runOnUiThread {
                 updateWorkInf(workInfo)
             }
@@ -848,11 +873,11 @@ code: 1002 无效的Token
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
                 //showTip("您好，${workerInfo.workerName}为您服务！")
-                if (isFirstLoad){
+                /*if (isFirstLoad){
                     viewModel.composeLocalMsg("您好，${workerInfo.workerName}为您服务！", true, false)
                 }else{
                     viewModel.composeLocalMsg("您好，${workerInfo.workerName}为您服务！", false, true)
-                }
+                }*/
                 // 更新头像
                 if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
                     val url = Constants.baseUrlImage + workerInfo.workerAvatar
