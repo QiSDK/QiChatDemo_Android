@@ -75,7 +75,9 @@ class KeFuViewModel() : ViewModel() {
                 if (replyMsg != null){
                     newItem.cellType = replyMsg.cellType
                     if (replyMsg.cellType == CellType.TYPE_Text){
-                        replyStr += replyMsg.cMsg?.content?.data
+                        var txt = replyMsg.cMsg?.content?.data?:" "
+                        txt = txt.split("回复：")[0]
+                        replyStr += txt.trim()
                     }else if (replyMsg.cellType == CellType.TYPE_Image){
                         replyStr += "[图片]"
                     }else if (replyMsg.cellType == CellType.TYPE_VIDEO){
@@ -245,7 +247,7 @@ class KeFuViewModel() : ViewModel() {
 
         cMsg.msgId = msgId
         cMsg.msgTime = d.build()
-        cMContent.data = text
+        cMContent.data = text.trim()
         cMsg.setContent(cMContent)
 
         var chatModel = MessageItem()

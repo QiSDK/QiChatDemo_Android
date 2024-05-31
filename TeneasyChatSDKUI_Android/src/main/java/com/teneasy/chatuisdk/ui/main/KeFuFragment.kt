@@ -289,7 +289,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         if(binding?.tvQuotedMsg?.text.toString().isNotEmpty()){
                             txt = txt + "\n" + binding?.tvQuotedMsg?.text.toString()
                         }
-                        sendMsg(txt)
+                        sendMsg(txt.trim())
                         hidetvQuotedMsg()
                         binding?.etMsg?.text?.clear()
                     }
