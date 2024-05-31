@@ -812,6 +812,7 @@ code: 1002 无效的Token
         val item = viewModel.mlMsgList.value?.find { it.payLoadId == payloadId }
         if(item != null) {
             item.sendStatus = MessageSendState.发送成功
+            item.msgId = msgId
         }
         lastMsg = msg
         refreshList()

@@ -70,7 +70,7 @@ class KeFuViewModel() : ViewModel() {
             newItem.cellType = CellType.TYPE_Image
         }else{
             if (newItem.cMsg?.replyMsgId != null && newItem.cMsg?.replyMsgId!! > 0){
-                var replyMsg = mlMsgList.value?.find { it.cMsg?.msgId == newItem.cMsg?.replyMsgId }
+                var replyMsg = mlMsgList.value?.find { it.cMsg?.msgId == newItem.cMsg?.replyMsgId || it.msgId == newItem.cMsg?.replyMsgId }
                 var replyStr = "回复："
                 if (replyMsg != null){
                     newItem.cellType = replyMsg.cellType
@@ -83,8 +83,7 @@ class KeFuViewModel() : ViewModel() {
                     }
                 }
                 val txt = newItem.cMsg?.content?.data + "\n" + replyStr
-                var newMsg = composeLocalMsg(txt, true)
-                mlMsgList.value?.add(newMsg)
+                composeLocalMsg(txt, true, false, newItem.cMsg?.msgId?:0)
                 return
             }else{
                 newItem.cellType = CellType.TYPE_Text
@@ -146,6 +145,8 @@ class KeFuViewModel() : ViewModel() {
         }
         cMsg.setImage(cMContent)
 
+        cMsg.msgId = (history?.msgId?: "0").toLong()
+
         var chatModel = MessageItem()
         chatModel.cMsg = cMsg.build()
         chatModel.cellType = CellType.TYPE_Image
@@ -176,6 +177,8 @@ class KeFuViewModel() : ViewModel() {
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
         cMsg.msgTime = d.build()
+
+        cMsg.msgId = (history?.msgId?: "0").toLong()
 
         if (!videoPath.isEmpty()){
             cMContent.uri = videoPath
@@ -219,8 +222,7 @@ class KeFuViewModel() : ViewModel() {
             cMContent.data = "历史消息"
         }
         cMsg.setContent(cMContent)
-
-
+        cMsg.msgId = (history.msgId?: "0").toLong()
         chatModel.cMsg = cMsg.build()
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功
@@ -231,7 +233,7 @@ class KeFuViewModel() : ViewModel() {
     }
 
 
-    fun composeLocalMsg(text: String, isLeft: Boolean, isTip: Boolean = false) : MessageItem{
+    fun composeLocalMsg(text: String, isLeft: Boolean, isTip: Boolean = false, msgId: Long = 0) : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
 
@@ -241,6 +243,7 @@ class KeFuViewModel() : ViewModel() {
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
 
+        cMsg.msgId = msgId
         cMsg.msgTime = d.build()
         cMContent.data = text
         cMsg.setContent(cMContent)
