@@ -229,7 +229,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     }else if ((msg?.video?.uri?: "").isNotEmpty()){
                         showQuotedMsg("回复：视频")
                     }else {
-                        showQuotedMsg("回复：" + msgAdapter.msgList?.get(position)?.cMsg?.content?.data)
+                        var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data?:" "
+                        txt = txt.split("回复：")[0]
+                        showQuotedMsg("回复：" + txt)
                     }
                 }
 
@@ -604,7 +606,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
 
                 val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(50, TimeUnit.SECONDS)
                     .writeTimeout(5, TimeUnit.MINUTES)
                     .readTimeout(5, TimeUnit.MINUTES)
                     .build()

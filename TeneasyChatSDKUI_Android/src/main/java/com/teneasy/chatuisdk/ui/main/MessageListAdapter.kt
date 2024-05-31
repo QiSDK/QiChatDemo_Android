@@ -276,31 +276,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             qaAdapter = GroupedQAdapter(act, ArrayList(), null)
             rcvQa.adapter = qaAdapter
 
-         /*   val param = JsonObject()
-            param.addProperty("consultId", Constants.CONSULT_ID)
-            param.addProperty("workerId", Constants.workerId)
-            val request = XHttp.custom().accessToken(false)
-            request.headers("X-Token", Constants.xToken)
-            request.call(request.create(MainApi.IMainTask::class.java)
-                .queryAutoReply(param),
-                object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
-                    override fun onSuccess(res: ReturnData<AutoReply>) {
-                        if (res.code != 200 || res.data == null || res.data.autoReplyItem == null){
-                            Log.d("AdapterNChatLib", "自动回复为空")
-                        }
-                            tvTitle.text = res.data.autoReplyItem?.title
-                            res.data.autoReplyItem?.qa?.let {
-                            qaAdapter.setDataList(it)
-                            tvTitle.visibility = View.VISIBLE
-                            EventBus.getDefault().post(QADisplayedEvent(100))
-                        }
-                    } override fun onError(e: ApiException?) {
-                        super.onError(e)
-                        println(e)
-                    }
-                }
-            )*/
-
             // 提问列表点击事件
             qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->
                 /*
@@ -310,7 +285,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 */
 
                 var QA = qaAdapter.data.get(groupPosition)
-
                 QA?.apply {
                     if (this.clicked ?: true) {
                         return@setOnHeaderClickListener
