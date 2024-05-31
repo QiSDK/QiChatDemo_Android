@@ -63,13 +63,36 @@ class KeFuViewModel() : ViewModel() {
 
     fun addMsgItem(newItem: MessageItem, payLoadId: Long) {
         newItem.payLoadId = payLoadId
-        mlMsgList.value?.add(newItem)
 
         if (newItem.cMsg?.video != null && newItem.cMsg!!.video.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_VIDEO
         }else if  (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_Image
+        }else{
+            if (newItem.cMsg?.replyMsgId != null){
+                var replyMsg = mlMsgList.value?.find { it.cMsg?.msgId == newItem.cMsg?.replyMsgId }
+                var replyStr = "[回复]："
+                if (replyMsg != null){
+                    newItem.cellType = replyMsg.cellType
+                    if (replyMsg.cellType == CellType.TYPE_Text){
+                        replyStr += replyMsg.cMsg?.content?.data
+                    }else if (replyMsg.cellType == CellType.TYPE_Image){
+                        replyStr += "图片"
+                    }else if (replyMsg.cellType == CellType.TYPE_VIDEO){
+                        replyStr += "视频"
+                    }
+                }
+                val txt = newItem.cMsg?.content?.data + replyStr
+                var newMsg = composeLocalMsg(txt, true)
+                mlMsgList.value?.add(newMsg)
+                return
+            }else{
+                newItem.cellType = CellType.TYPE_Text
+            }
+            mlMsgList.value?.add(newItem)
         }
+
+
         mlMsgList.postValue(mlMsgList.value)
     }
 
@@ -310,7 +333,8 @@ class KeFuViewModel() : ViewModel() {
      */
     fun queryAutoReply(consultId: Long) {
         val param = JsonObject()
-        param.addProperty("consultId", consultId)
+        param.addProperty("consultId", Constants.CONSULT_ID)
+        param.addProperty("workerId", Constants.workerId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.call(request.create(MainApi.IMainTask::class.java)

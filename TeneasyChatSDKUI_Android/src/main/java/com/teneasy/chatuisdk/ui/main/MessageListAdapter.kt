@@ -3,16 +3,11 @@ package com.teneasy.chatuisdk.ui.main;
 //import com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.media.browse.MediaBrowser
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -27,32 +22,18 @@ import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import java.util.*
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.databinding.ItemLastLineBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.databinding.ItemVideoPlayerBinding
-import com.teneasy.chatuisdk.ui.http.MainApi
-import com.teneasy.chatuisdk.ui.http.ReturnData
-import com.teneasy.chatuisdk.ui.http.bean.AutoReply
 import com.teneasy.sdk.ui.CellType
-import com.xuexiang.xhttp2.XHttp
-import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
-import com.xuexiang.xhttp2.exception.ApiException
-import org.greenrobot.eventbus.EventBus
-import android.net.Uri
-import android.os.Bundle
-import android.view.Gravity
 import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.annotation.OptIn
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.Constraints
 import androidx.core.view.updateLayoutParams
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import com.lxj.xpopup.util.SmartGlideImageLoader
-import com.teneasy.chatuisdk.ui.BigImageView
-import com.teneasy.chatuisdk.ui.VideoPlayView
+import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
+import com.teneasy.chatuisdk.ui.http.bean.QA
 
 
 interface MessageItemOperateListener {
@@ -73,7 +54,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     var msgList: ArrayList<MessageItem>? = null
     val act: Context = myContext
     private var listener: MessageItemOperateListener? = listener
-    private lateinit var qaAdapter: GroupedQAdapter
+    var autoReplyItem: AutoReplyItem? = null
 //    fun getList(): ArrayList<MessageItem>? {
 //        return msgList
 //    }
@@ -88,7 +69,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 LayoutInflater.from(parent.context),
                 parent,
                 false)
-            return HeaderViewHolder(binding)
+            return QAViewHolder(binding)
         } else  if (viewType == CellType.TYPE_Tip.value) {
             val binding = ItemTipMsgBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -123,6 +104,17 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             return
         }
         if (holder is ItemLastLineViewHolder) {
+            holder.tvTitle.text = ""
+        }
+        else if (holder is QAViewHolder) {
+            if (autoReplyItem != null){
+                holder.tvTitle.text = autoReplyItem?.title
+
+                autoReplyItem?.qa?.let {
+                    holder.qaAdapter.setDataList(it)
+                    holder.tvTitle.visibility = View.VISIBLE
+                }
+            }
             holder.tvTitle.text = ""
         }
        else if (holder is ItemVideoViewHolder) {
@@ -167,7 +159,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val msgDate = Date(it.msgTime.seconds * 1000L)
                 holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
             }
-        }else if (holder is MsgViewHolder) {
+        }
+        else if (holder is MsgViewHolder) {
             //因为headerView占了1个位置，所以要减1
             val item = msgList!![position]
 
@@ -202,6 +195,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.tvRightMsg.visibility = View.VISIBLE
                     holder.ivRightImg.visibility = View.GONE
                     holder.tvRightMsg.text = item.cMsg!!.content.data
+
                 } else {
                     holder.tvRightMsg.visibility = View.GONE
                     holder.ivRightImg.visibility = View.VISIBLE
@@ -267,16 +261,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         return if (msgList == null) 1 else msgList!!.size
     }
 
-    inner class HeaderViewHolder(binding: ItemHeaderRecyleviewBinding) : RecyclerView.ViewHolder(binding.root){
+    inner class QAViewHolder(binding: ItemHeaderRecyleviewBinding) : RecyclerView.ViewHolder(binding.root){
         var rcvQa = binding.rcvQa
         var tvTitle = binding.tvTitle
+        var qaAdapter: GroupedQAdapter
+
         init {
             // 初始化自动回复列表
             rcvQa.layoutManager = LinearLayoutManager(act)
             qaAdapter = GroupedQAdapter(act, ArrayList(), null)
             rcvQa.adapter = qaAdapter
 
-            val param = JsonObject()
+         /*   val param = JsonObject()
             param.addProperty("consultId", Constants.CONSULT_ID)
             param.addProperty("workerId", Constants.workerId)
             val request = XHttp.custom().accessToken(false)
@@ -299,7 +295,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         println(e)
                     }
                 }
-            )
+            )*/
 
             // 提问列表点击事件
             qaAdapter.setOnHeaderClickListener { _, _, groupPosition ->

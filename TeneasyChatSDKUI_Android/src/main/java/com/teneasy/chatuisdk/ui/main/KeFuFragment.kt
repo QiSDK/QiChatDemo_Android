@@ -102,6 +102,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         //初始化SDK
         initChatSDK(Constants.domain)
 
+        viewModel.mlAutoReplyItem.observe(viewLifecycleOwner, {
+
+        })
+
         //硬返回按钮点点击之后
        requireActivity().onBackPressedDispatcher.addCallback(this) {
            //断开聊天，停止定时器等
@@ -353,12 +357,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     }
 
     private fun initObserver(){
-        viewModel.mlMsgList.observe(this@KeFuFragment) {
+        viewModel.mlMsgList.observe(viewLifecycleOwner) {
             msgAdapter.setList(it)
             refreshList()
         }
 
-        viewModel.mlAssignWorker.observe(this@KeFuFragment){
+        viewModel.mlAssignWorker.observe(viewLifecycleOwner){
                 val workInfo = WorkerInfo()
             if (it == null){
                 Log.d(TAG, "assignWorker 失败: null")
@@ -384,13 +388,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             //}
         }
 
-        viewModel.mlNewWorkAssigned.observe(this@KeFuFragment){
+        viewModel.mlNewWorkAssigned.observe(viewLifecycleOwner){
             if (it){
                 sendMsg(tempContent, true)
             }
         }
 
-        viewModel.mHistoryList.observe(this@KeFuFragment){
+        viewModel.mHistoryList.observe(viewLifecycleOwner){
            it?.run {
                var historyList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
