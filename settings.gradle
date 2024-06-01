@@ -3,11 +3,13 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        jcenter()
+
         maven {
             url "https://jitpack.io"
             credentials { username authToken }
         }
+
+        maven { url "https://www.jitpack.io" }
 //        maven {
 //            name = "teneasySDK"
 //            url = uri("https://maven.pkg.github.com/tianxuefeng/TeneasyChatSdkDemo")
@@ -23,11 +25,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter()
+
         maven {
             url "https://jitpack.io"
             credentials { username authToken }
         }
+        maven { url "https://www.jitpack.io" }
 //        maven {
 //            url = uri("https://maven.pkg.github.com/tianxuefeng/TeneasyChatSdkDemo")
 //            credentials {

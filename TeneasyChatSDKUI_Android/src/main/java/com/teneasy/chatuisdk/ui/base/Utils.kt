@@ -148,7 +148,7 @@ class Utils {
         context.sendBroadcast(mediaScanIntent)
     }
 
-    fun compressBitmap(bitmap: Bitmap, quality: Int = 70): ByteArray {
+    fun compressBitmap(bitmap: Bitmap, quality: Int = 50): ByteArray {
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
         return outputStream.toByteArray()

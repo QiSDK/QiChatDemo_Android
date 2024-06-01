@@ -565,12 +565,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         }
 
         if ((filePath.contains(".png") || filePath.contains(".jpg"))){
-            // Step 1: Load the image
+            //图片压缩
+           // Step 1: Load the image
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-
             // Step 2: Compress the image
-            val compressedData = Utils().compressBitmap(bitmap)
-
+            val compressedData = Utils().compressBitmap(bitmap, 50)
             var extenion = file.absoluteFile.extension
             var newFilePath = file.absolutePath.replace("." + extenion,"") + Date().time + "." + extenion
             var newFile = File(newFilePath)
