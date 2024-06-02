@@ -15,6 +15,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -163,5 +165,9 @@ class Utils {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+
+    fun encodeFilePath(filePath: String): String {
+        return URLEncoder.encode(filePath, StandardCharsets.UTF_8.toString())
     }
 }

@@ -301,9 +301,11 @@ class KeFuViewModel() : ViewModel() {
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
                 override fun onSuccess(res: ReturnData<AssignWorker>) {
                     mlAssignWorker.postValue(res.data)
+                    print(res.data)
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)
+                    Log.d(Tag, "assignWorker error")
                 }
             }
         )

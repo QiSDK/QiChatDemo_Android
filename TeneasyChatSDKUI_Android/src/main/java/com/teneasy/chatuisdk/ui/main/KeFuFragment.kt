@@ -556,6 +556,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
     fun uploadImg(filePath: String) {
         mIProgressLoader?.updateMessage("上传中。。。")
         mIProgressLoader?.showLoading()
+
+        //val filePath = Utils().encodeFilePath(mediaPath)
         var file = File(filePath)
 
         if (!file.exists()){
@@ -575,9 +577,10 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             var newFile = File(newFilePath)
             // Step 3: Save the compressed image to a file
             Utils().saveCompressedBitmapToFile(compressedData, newFile)
-            file = newFile
-            if (!file.exists()){
-                toast("文件压缩失败！")
+            if (newFile.exists()){
+                file = newFile
+            }else{
+                 //toast("压缩失败")
             }
 
             if (file.length() > 20 * 1024 * 1024){
@@ -777,26 +780,26 @@ code: 1002 无效的Token
         if (msg.code >= 1000 && msg.code <= 1010) {
             isConnected = false
             if (msg.code == 1002){
-//                runOnUiThread {
-//                    Toast.makeText(requireContext(), "无效的Token", Toast.LENGTH_LONG).show()
-//                }
-                //禁掉重试机制
-                //closeTimer()
+                //showTip("无效的Token")
+                toast("无效的Token")
             }else if (msg.code == 1010){
-//                runOnUiThread {
-//                    Toast.makeText(requireContext(), "在别处登录了", Toast.LENGTH_LONG).show()
-//                }
-                //禁掉重试机制，因为继续重试会影响在别处登录
-                //closeTimer()
+                //showTip("在别处登录了")
+                toast("在别处登录了")
+            }
+            //禁掉重试机制
+            runOnUiThread{
+                exitChat()
+                //返回到上个页面
+                findNavController().popBackStack()
             }
         }else{
+            showTip("")
         }
         //按实际需要，显示错误提示，也可以不显示
         //showTip(msg.msg)
         //if (BuildConfig){
           //  showTip(msg.msg)
 //        }else {
-            showTip("")
 //        }
         Log.i(TAG, msg.msg)
     }
