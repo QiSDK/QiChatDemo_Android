@@ -1,5 +1,6 @@
 package com.teneasy.chatuisdk.ui.main;
 
+import AppConfig
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -100,8 +101,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
 
         //检查内存变量的域名还存在不
         if (Constants.domain.isEmpty()){
-            //域名为空就从Preferences读取
-            UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
+            Utils().readConfig()
         }
         //初始化SDK
         initChatSDK(Constants.domain)
