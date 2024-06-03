@@ -1,6 +1,5 @@
 package com.teneasy.chatuisdk.ui.main;
 
-import AppConfig
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -20,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
@@ -50,9 +50,7 @@ import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.EventBus
@@ -287,11 +285,21 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         Utils().closeSoftKeyboard(v)
                     }else{
                         var txt = this.text.toString()
-                        if(binding?.tvQuotedMsg?.text.toString().isNotEmpty()){
-                            txt = txt + "\n" + binding?.tvQuotedMsg?.text.toString()
+//                        if(binding?.tvQuotedMsg?.text.toString().isNotEmpty()){
+//                            txt = txt + "\n" + binding?.tvQuotedMsg?.text.toString()
+//                        }
+
+                        var replayMsgId = 0L
+                        //这里的msgId是从列表的model里面拿，不是从消息体
+                        if (((binding?.tvQuotedMsg?.tag?:0) as Int) >= 0 ){
+                            viewModel.mlMsgList.value?.get((binding?.tvQuotedMsg?.tag?:0) as Int)?.msgId?.let {
+                                replayMsgId = it;
+                            }
                         }
-                        sendMsg(txt.trim())
+                        sendMsg(txt.trim(), false, replayMsgId)
+
                         hidetvQuotedMsg()
+
                         binding?.etMsg?.text?.clear()
                     }
                 }
@@ -437,18 +445,22 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                    if (item.workerChanged != null){
                        val historyItem =  viewModel.composeTextMsg(item, isLeft)
                        historyItem.cellType = CellType.TYPE_Tip
+                       historyItem.msgId = (item.msgId?: "0").toLong()
                        historyList.add(historyItem)
                    }
                    else if (item.msgFmt == "MSG_VIDEO"){
                        val historyItem =  viewModel.composeVideoMsg(item, isLeft)
                        historyItem.cellType = CellType.TYPE_VIDEO
+                       historyItem.msgId = (item.msgId?: "0").toLong()
                        historyList.add(historyItem)
                    }
                    else if(item.msgFmt == "MSG_TEXT") {
                        val historyItem =  viewModel.composeTextMsg(item, isLeft)
+                       historyItem.msgId = (item.msgId?: "0").toLong()
                        historyList.add(historyItem)
                    }else if(item.msgFmt == "MSG_IMG") {
                        val historyItem = viewModel.composeImgMsg(item, isLeft)
+                       historyItem.msgId = (item.msgId?: "0").toLong()
                        historyItem.cellType = CellType.TYPE_Image
                        historyList.add(historyItem)
                    }
@@ -565,8 +577,8 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             mIProgressLoader?.dismissLoading()
             return
         }
-
-        if ((filePath.contains(".png") || filePath.contains(".jpg"))){
+// (.tif, .tiff) · Bitmap (.bmp) · JPEG (.jpg, .jpeg) · GIF (.gif) · PNG (.png)
+        if ((filePath.contains(".png") || filePath.contains(".jpg") || filePath.contains(".jpeg"))){
             //图片压缩
            // Step 1: Load the image
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
@@ -627,7 +639,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                             val path = response.body!!.string()
                             if (path.length < 100) {
                                 if (path.contains(".png") || path.contains(".jpg") || path.contains(
-                                        ".jpge"
+                                        ".jpeg"
                                     )
                                 ) {
                                     // 发送图片
@@ -635,8 +647,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                                 } else {
                                     sendVideoMsg(path)//Constants.baseUrlImage +
                                 }
-                            }else{
-                                toast("上传失败，服务器返回无效路径")
+                            } else {
+                                if (path.contains("无效")){
+                                    toast("无效的文件类型")
+                                }else {
+                                    toast("上传失败，服务器返回无效路径")
+                                }
                             }
                         } else {
                             toast("上传失败 Code:" + response.code)
@@ -702,7 +718,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
      * 根据输入框的内容，发送文本消息。
      * 一般来讲，每发消息就需要跟当前时间做比较，除非设置force = true
      */
-    fun sendMsg(txt: String, force: Boolean = false) {
+    fun sendMsg(txt: String, force: Boolean = false, replyMsgId: Long = 0) {
         if(chatLib == null){
             // Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             showTip("SDK还未初始化")
@@ -724,7 +740,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             }
 
         }
-        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID)
+        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId)
         var messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
@@ -777,12 +793,14 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
         code: 1010 在别处登录了
 code: 1002 无效的Token
          */
-        if (msg.code >= 1000 && msg.code <= 1010) {
+        if (msg.code in 1000..1010) {
             isConnected = false
+        }
+        if (msg.code == 1002 || msg.code == 1010) {
             if (msg.code == 1002){
                 //showTip("无效的Token")
                 toast("无效的Token")
-            }else if (msg.code == 1010){
+            }else {
                 //showTip("在别处登录了")
                 toast("在别处登录了")
             }
@@ -795,12 +813,6 @@ code: 1002 无效的Token
         }else{
             showTip("")
         }
-        //按实际需要，显示错误提示，也可以不显示
-        //showTip(msg.msg)
-        //if (BuildConfig){
-          //  showTip(msg.msg)
-//        }else {
-//        }
         Log.i(TAG, msg.msg)
     }
 
@@ -812,15 +824,27 @@ code: 1002 无效的Token
 
     //消息发送出去，收到回执才算成功，并需要改变消息的状态
     override fun msgReceipt(msg: CMessage.Message, payloadId: Long, msgId: Long, errMsg: String) {
-        val item = viewModel.mlMsgList.value?.find { it.payLoadId == payloadId }
-        if(item != null) {
+        val index = viewModel.mlMsgList.value?.indexOfFirst { it.payLoadId == payloadId }
+        if (index != null && index != -1) {
+            var item = viewModel.mlMsgList.value!![index];
+            if (msg.replyMsgId > 0){
+                val referMsg = viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg.replyMsgId }
+                if (referMsg != null) {
+                    handleReply(referMsg.cMsg!!, item, msgId)
+                }
+            }else{
+                item.cMsg = msg
+            }
+            lastMsg = msg
             item.sendStatus = MessageSendState.发送成功
+            //由于消息体是只读的，所以把msgId分配给model，便于从列表里面找记录
+            //切记，这里的msgId不是从消息体里面来的，而是从这个函数的第三个参数来的
             item.msgId = msgId
+            viewModel.mlMsgList.value?.set(index, item)
         }
-        lastMsg = msg
+
         refreshList()
         Log.i(TAG, "收到回执：${msg.content.data}")
-        //hideTip()
     }
 
     //收到对方消息
@@ -834,9 +858,20 @@ code: 1002 无效的Token
                 }
             )
         }else {
+
             //把收到的消息插入到列表
             val messageItem = MessageItem()
             messageItem.cMsg = msg
+
+            if (msg.replyMsgId > 0) {
+                val referMsg = viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg.replyMsgId }
+                if (referMsg != null) {
+                    handleReply(referMsg.cMsg!!, messageItem, msg.msgId)
+                }
+            }
+
+            //切记，在这也付值msgId，便于从列表里面找记录
+            messageItem.msgId = msg.msgId
             messageItem.isLeft = true
             viewModel.addMsgItem(messageItem, 0)
         }
@@ -921,10 +956,46 @@ code: 1002 无效的Token
     private fun hidetvQuotedMsg(){
         binding?.tvQuotedMsg?.visibility = View.GONE
         binding?.tvQuotedMsg?.text = ""
+        //切记在这需要把tag置为-1
+        binding?.tvQuotedMsg?.tag = -1
     }
 
     private fun showQuotedMsg(txt: String){
         binding?.tvQuotedMsg?.visibility = View.VISIBLE
         binding?.tvQuotedMsg?.text = txt
+    }
+
+    fun handleReply(referMsg: CMessage.Message, model: MessageItem, newMsgId: Long){
+        val txt = referMsg.content?.data?.split("回复：")?.get(0) ?: ""
+
+        var referText = "回复：$txt"
+        if (!(referMsg.video?.uri ?: "").isEmpty()) {
+            referText = "回复：[视频]"
+        } else if (!(referMsg.image?.uri ?: "").isEmpty()) {
+            referText = "回复：[图片]"
+        }
+        val newText = "${model.cMsg?.content?.data}\n$referText"
+        model.cMsg = composATextMessage(newText.trim(), newMsgId)
+    }
+
+    fun composATextMessage(textMsg: String, msgId: Long) : CMessage.Message{
+        //第一层
+        var cMsg = CMessage.Message.newBuilder()
+        //第二层
+        var cMContent = CMessage.MessageContent.newBuilder()
+
+        var d = Timestamp.newBuilder()
+        val cal = Calendar.getInstance()
+        cal.time = Date()
+        val millis = cal.timeInMillis
+        d.seconds = (millis * 0.001).toLong()
+
+        //d.t = msgDate.time
+        cMsg.msgId = msgId
+        cMsg.msgTime = d.build()
+        cMContent.data = textMsg
+        cMsg.setContent(cMContent)
+
+        return cMsg.build()
     }
 }

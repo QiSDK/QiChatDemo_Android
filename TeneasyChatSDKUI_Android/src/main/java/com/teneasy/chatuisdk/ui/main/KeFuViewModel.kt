@@ -69,7 +69,16 @@ class KeFuViewModel() : ViewModel() {
         }else if  (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_Image
         }else{
-            if (newItem.cMsg?.replyMsgId != null && newItem.cMsg?.replyMsgId!! > 0){
+            //对方已经编辑信息，做对应个更新
+            if (newItem.cMsg?.msgOp == CMessage.MessageOperate.MSG_OP_EDIT){
+                var index = mlMsgList.value?.indexOfFirst { it.cMsg?.msgId == newItem.cMsg?.msgId}
+                if (index != null && index != -1){
+                    mlMsgList.value!![index].cMsg = newItem.cMsg
+                    mlMsgList.postValue(mlMsgList.value)
+                    return
+                }
+            }
+            /*else if (newItem.cMsg?.replyMsgId != null && newItem.cMsg?.replyMsgId!! > 0){
                 var replyMsg = mlMsgList.value?.find { it.cMsg?.msgId == newItem.cMsg?.replyMsgId || it.msgId == newItem.cMsg?.replyMsgId }
                 var replyStr = "回复："
                 if (replyMsg != null){
@@ -87,9 +96,9 @@ class KeFuViewModel() : ViewModel() {
                 val txt = newItem.cMsg?.content?.data + "\n" + replyStr
                 composeLocalMsg(txt, true, false, newItem.cMsg?.msgId?:0)
                 return
-            }else{
+            }else{*/
                 newItem.cellType = CellType.TYPE_Text
-            }
+            //}
         }
 
         mlMsgList.value?.add(newItem)
