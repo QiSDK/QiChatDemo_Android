@@ -3,7 +3,7 @@ package com.teneasy.chatuisdk.ui.http.bean.ChatHistory
 data class ChatHistory (
   val request: Request,
   val list: List<list>,
-
+  val replyList: List<list>,
   val lastMsgID: String,
 
   val nick: String

@@ -48,6 +48,8 @@ class KeFuViewModel() : ViewModel() {
     val mlAssignWorker = MutableLiveData<AssignWorker>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
     val mHistoryList = MutableLiveData<List<list>?>()
+
+    var mReplyList = ArrayList<list>()
     val Tag = "KeFuFragment"
     val mlNewWorkAssigned = MutableLiveData<Boolean>()
 
@@ -223,7 +225,23 @@ class KeFuViewModel() : ViewModel() {
         d.seconds = (millis * 0.001).toLong()
         cMsg.msgTime = d.build()
 
-        if (history.workerChanged != null){
+        //回复消息
+        val replyMsgId = (history.replyMsgID?: "0").toLong()
+        if (replyMsgId > 0){
+            var replyText = history.content?.data?: "no txt"
+            val oriMsg =  mReplyList.firstOrNull { it.msgId == replyMsgId.toString() }
+            if (oriMsg != null){
+                if (oriMsg.msgFmt == "MSG_TEXT"){
+                    replyText = "$replyText\n${oriMsg.content?.data}"
+                }else if (oriMsg.msgFmt == "MSG_IMAGE"){
+                    replyText = "$replyText\n回复：[图片]"
+                }else if (oriMsg.msgFmt == "MSG_VIDEO"){
+                    replyText = "$replyText\n回复：[视频]"
+                }
+            }
+            cMContent.data = replyText
+        }
+        else if (history.workerChanged != null){
             cMContent.data = history.workerChanged.greeting
             chatModel.cellType = CellType.TYPE_Tip
         }
@@ -399,6 +417,10 @@ class KeFuViewModel() : ViewModel() {
                 override fun onSuccess(res: ReturnData<ChatHistory>) {
                     res.data.list?.let {
                         mHistoryList.postValue(it)
+                    }
+
+                    res.data.replyList?.let {
+                        mReplyList = it as ArrayList<list>
                     }
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
