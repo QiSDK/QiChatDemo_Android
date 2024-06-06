@@ -410,7 +410,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 this.lifecycleScope.launch {
                     //delay(100L)
                     if(isFirstLoad) {
-                        isFirstLoad = false
                         viewModel.queryChatHistory(Constants.CONSULT_ID)
                     }
                 }
@@ -493,10 +492,12 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                viewModel.addAllMsgItem(historyList)
 
                if (isFirstLoad){
+                   isFirstLoad = false
                    viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", true, false)
-               }else{
-                   viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", false, true)
                }
+               /*else{
+                   viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", false, true)
+               }*/
                if (viewModel.mlAutoReplyItem.value == null){
                        viewModel.queryAutoReply(Constants.CONSULT_ID, Constants.workerId)
                }

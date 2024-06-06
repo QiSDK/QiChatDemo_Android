@@ -17,7 +17,7 @@ data class list (
   val msgTime: String,
   val sender: String,
 
-  val replyMsgID: String,
+  val replyMsgId: String?,
 
   val msgOp: String,
   val worker: Long,

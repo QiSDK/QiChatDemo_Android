@@ -226,7 +226,7 @@ class KeFuViewModel() : ViewModel() {
         cMsg.msgTime = d.build()
 
         //回复消息
-        val replyMsgId = (history.replyMsgID?: "0").toLong()
+        val replyMsgId = (history.replyMsgId?: "0").toLong()
         if (replyMsgId > 0){
             var replyText = history.content?.data?: "no txt"
             val oriMsg =  mReplyList.firstOrNull { it.msgId == replyMsgId.toString() }
