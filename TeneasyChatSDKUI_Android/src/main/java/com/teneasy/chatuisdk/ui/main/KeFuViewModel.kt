@@ -189,6 +189,7 @@ class KeFuViewModel() : ViewModel() {
         }
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
+        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
         cMsg.msgTime = d.build()
 
         cMsg.msgId = (history?.msgId?: "0").toLong()
@@ -221,8 +222,10 @@ class KeFuViewModel() : ViewModel() {
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
         cal.time = Utils().convertStrToDate(history.msgTime)
+
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
+        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
         cMsg.msgTime = d.build()
 
         //回复消息
@@ -232,7 +235,7 @@ class KeFuViewModel() : ViewModel() {
             val oriMsg =  mReplyList.firstOrNull { it.msgId == replyMsgId.toString() }
             if (oriMsg != null){
                 if (oriMsg.msgFmt == "MSG_TEXT"){
-                    replyText = "$replyText\n${oriMsg.content?.data}"
+                    replyText = "$replyText\n回复：${oriMsg.content?.data}"
                 }else if (oriMsg.msgFmt == "MSG_IMAGE"){
                     replyText = "$replyText\n回复：[图片]"
                 }else if (oriMsg.msgFmt == "MSG_VIDEO"){
@@ -269,8 +272,11 @@ class KeFuViewModel() : ViewModel() {
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
         cal.time = Date()
+
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
+        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
+        cMsg.msgTime = d.build()
 
         cMsg.msgId = msgId
         cMsg.msgTime = d.build()

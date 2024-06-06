@@ -32,6 +32,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.base.Utils.Companion.localDateFormat
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.QA
 
@@ -122,11 +124,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             }
         }
        else if (holder is ItemVideoViewHolder) {
-            holder.tvTitle.text = ""
             val item = msgList!![position]
             item.cMsg?.let {
-                val msgDate = Date(it.msgTime.seconds * 1000L)
-                holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
+                val timeStr = Utils().timestampToString(it.msgTime)
+                holder.tvTitle.text = timeStr
+            }
+            item.cMsg?.let {
                 val videoUrl = Constants.baseUrlImage + item.cMsg?.video?.uri?: ""
                 //val mediaItem = MediaItem.fromUri(videoUrl)
                 val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(position).setUri(videoUrl).build()
@@ -160,8 +163,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         else if (holder is TipMsgViewHolder) {
             val item = msgList!![position]
             item.cMsg?.let {
-                val msgDate = Date(it.msgTime.seconds * 1000L)
-                holder.tvTitle.text = TimeUtil.getTimeStringAutoShort2(msgDate, true) + "\n" + it.content.data + "\n"
+                val timeStr = Utils().timestampToString(it.msgTime)
+                holder.tvTitle.text = timeStr + "\n" + it.content.data + "\n"
             }
         }
         else if (holder is MsgViewHolder) {
@@ -175,8 +178,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             var localTime = "Time error"
 
             item.cMsg?.let {
-                val msgDate = Date(it.msgTime.seconds * 1000L)
-                localTime = TimeUtil.getTimeStringAutoShort2(msgDate, true)
+               // val msgDate = Date(it.msgTime.seconds * 1000L)
+                //localTime = TimeUtil.getTimeString(msgDate, localDateFormat)
+                localTime = Utils().timestampToString(it.msgTime)
             }
             if (!item.isLeft) {
                 holder.tvRightMsg.tag = position

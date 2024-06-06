@@ -11,6 +11,7 @@ import android.net.Uri
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import com.google.protobuf.Timestamp
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -18,13 +19,18 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 
 class Utils {
 
+        companion object{
+            var localDateFormat = "yyyy-MM-dd HH:mm:ss"
+        }
      fun copyText(text: String, context: Context){
         // Get the system clipboard service
         val clipboardManager =  context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -62,6 +68,8 @@ class Utils {
         var date = Date()
         try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault())
+            //dateFormat.timeZone = TimeZone.getDefault()
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
              date = dateFormat.parse(datetimeString)
         }catch (ex:Exception){
 
@@ -169,5 +177,22 @@ class Utils {
 
     fun encodeFilePath(filePath: String): String {
         return URLEncoder.encode(filePath, StandardCharsets.UTF_8.toString())
+    }
+
+    fun timestampToString(timestamp: Timestamp): String {
+        // Convert the protobuf Timestamp to milliseconds
+        val millis = timestamp.seconds * 1000 + timestamp.nanos / 1_000_000
+
+        // Create a Date object from milliseconds
+        val date = Date(millis)
+
+        // Create a SimpleDateFormat object for the desired format
+        val sdf = SimpleDateFormat(localDateFormat, Locale.getDefault())
+
+        // Set the timezone to UTC to avoid any timezone offset issues
+        sdf.timeZone = TimeZone.getDefault()
+
+        // Format the date to the desired string format
+        return sdf.format(date)
     }
 }
