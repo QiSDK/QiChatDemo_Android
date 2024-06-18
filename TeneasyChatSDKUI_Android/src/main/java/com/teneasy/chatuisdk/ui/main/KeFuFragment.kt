@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.gson.Gson
 import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
@@ -29,6 +30,7 @@ import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.XPopup
 import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.databinding.FragmentKefuBinding
 import com.teneasy.chatuisdk.ui.BigImageView
 import com.teneasy.chatuisdk.ui.VideoPlayView
@@ -639,15 +641,16 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                     .addFormDataPart("type", "4")
                     .build()
 
-                val request2 = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload/")
+                val request2 = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload-v3")
                     .addHeader("X-Token", Constants.xToken)
                     .post(multipartBody).build()
 
 
+
                 val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
                     .connectTimeout(50, TimeUnit.SECONDS)
-                    .writeTimeout(5, TimeUnit.MINUTES)
-                    .readTimeout(5, TimeUnit.MINUTES)
+                    .writeTimeout(50, TimeUnit.MINUTES)
+                    .readTimeout(50, TimeUnit.MINUTES)
                     .build()
                 val call = okHttpClient.newCall(request2)
                 call.enqueue(object : Callback {
@@ -661,22 +664,27 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                         val body = response.body
                         if(response.code == 200 && body != null) {
                             val path = response.body!!.string()
-                            if (path.length < 100) {
-                                if (path.contains(".png") || path.contains(".jpg") || path.contains(
+                            val gson = Gson()
+                            val result = gson.fromJson(path, UploadResult::class.java)
+
+                            if (result.code == 0 || result.code == 200) {
+                                val filePath = file.name?:" "
+                                if (filePath.contains(".png") || filePath.contains("IMG_") || filePath.contains(".jpg") || filePath.contains(
                                         ".jpeg"
                                     )
                                 ) {
                                     // 发送图片
-                                    sendImgMsg(path)//Constants.baseUrlImage +
+                                    sendImgMsg(filePath)//Constants.baseUrlImage +
                                 } else {
-                                    sendVideoMsg(path)//Constants.baseUrlImage +
+                                    sendVideoMsg(filePath)//Constants.baseUrlImage +
                                 }
                             } else {
-                                if (path.contains("无效")){
+                                /*if (path.contains("无效")){
                                     toast("无效的文件类型")
                                 }else {
                                     toast("上传失败，服务器返回无效路径")
-                                }
+                                }*/
+                                toast(result.message?: "上传失败");
                             }
                         } else {
                             toast("上传失败 Code:" + response.code)
