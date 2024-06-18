@@ -674,9 +674,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                                     )
                                 ) {
                                     // 发送图片
-                                    sendImgMsg(filePath)//Constants.baseUrlImage +
+                                    sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 } else {
-                                    sendVideoMsg(filePath)//Constants.baseUrlImage +
+                                    sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 }
                             } else {
                                 /*if (path.contains("无效")){

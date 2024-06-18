@@ -214,10 +214,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 //                    .into(holder.ivRightImg)
-                    Log.d("AdapterNChatLib", "imageUrl:" + Constants.baseUrlImage + item.cMsg!!.image.uri.replace(".js",""))
+                    Log.d("AdapterNChatLib", "imageUrl:" + Constants.baseUrlImage + item.cMsg!!.image.uri)
                     Glide.with(act)
                         //.asBitmap()
-                        .load(Constants.baseUrlImage + item.cMsg!!.image.uri.replace(".js",""))
+                        .load(Constants.baseUrlImage + item.cMsg!!.image.uri)
                         .skipMemoryCache(true)
                         //.override(600,400)
                         //.centerCrop()
@@ -247,7 +247,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         showBigImage(it as ImageView, Constants.baseUrlImage + item.cMsg!!.image.uri)
                     }
 
-                Glide.with(act).load(Constants.baseUrlImage + item.cMsg!!.image.uri.replace(".js","")).dontAnimate()
+                Glide.with(act).load(Constants.baseUrlImage + item.cMsg!!.image.uri).dontAnimate()
                     .skipMemoryCache(true)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .into(holder.ivLeftImg)
