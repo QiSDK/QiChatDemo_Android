@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -24,6 +25,9 @@ class VideoPlayView(context: Context, videoUrl: String): CenterPopupView (contex
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
+
+        print(videoUrl)
+        Log.d("chatlibVideo", "onCreate: $videoUrl")
 
         val playerView = findViewById<PlayerView>(R.id.player_view)
         val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(991).setUri(videoUrl).build()

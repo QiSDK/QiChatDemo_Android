@@ -609,9 +609,11 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
            // Step 1: Load the image
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
             // Step 2: Compress the image
-            val compressedData = Utils().compressBitmap(bitmap, 50)
+            val compressedData = Utils().compressBitmap(bitmap, 100)
             var extenion = file.absoluteFile.extension
-            var newFilePath = file.absolutePath.replace("." + extenion,"") + Date().time + "." + extenion
+
+            ///storage/emulated/0/Download/PXL_20240530_044249124.MP1717158299882.jpg
+            var newFilePath = file.absolutePath.replace("." + extenion,"").replace(".","") + Date().time + "." + extenion
             var newFile = File(newFilePath)
             // Step 3: Save the compressed image to a file
             Utils().saveCompressedBitmapToFile(compressedData, newFile)
@@ -621,7 +623,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                  //toast("压缩失败")
             }
 
-            if (file.length() > 20 * 1024 * 1024){
+            if (file.length() > 20 * 1000 * 1000){
                 ToastUtils.showToast(requireContext(), "图片限制20M")
                 mIProgressLoader?.dismissLoading()
                 return

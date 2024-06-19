@@ -32,7 +32,7 @@ class Constants {
         var lines = "https://csapi.xdev.stream,https://wcsapi.qixin14.xyz"
         var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
         var merchantId = 230
-        var userId = 666662//1125324
+        var userId = 666664//1125324
         var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
 
 

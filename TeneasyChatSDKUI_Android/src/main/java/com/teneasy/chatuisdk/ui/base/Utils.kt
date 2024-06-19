@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import com.google.protobuf.Timestamp
@@ -172,6 +173,7 @@ class Utils {
             fos.close()
         } catch (e: IOException) {
             e.printStackTrace()
+            Log.d("chatLibUtils", "Failed to save compressed bitmap to file")
         }
     }
 
