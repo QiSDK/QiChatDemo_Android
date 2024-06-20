@@ -603,17 +603,18 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             mIProgressLoader?.dismissLoading()
             return
         }
-// (.tif, .tiff) · Bitmap (.bmp) · JPEG (.jpg, .jpeg) · GIF (.gif) · PNG (.png)
-        if ((filePath.contains(".png") || filePath.contains(".jpg") || filePath.contains(".jpeg"))){
-            //图片压缩
-           // Step 1: Load the image
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            // Step 2: Compress the image
-            val compressedData = Utils().compressBitmap(bitmap, 100)
-            var extenion = file.absoluteFile.extension
+        val ext = file.absoluteFile.extension
+        val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
 
-            var newFilePath = file.absolutePath.replace("." + extenion,"").replace(".","") + Date().time + "." + extenion
-            var newFile = File(newFilePath)
+        if (imageTypes.contains(ext.lowercase())){
+           // Step 1: Load the image，读取图片
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            // Step 2: Compress the image，图片压缩
+            val compressedData = Utils().compressBitmap(bitmap, 100)
+            //获取文件扩展名
+
+            val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
+            val newFile = File(newFilePath)
             // Step 3: Save the compressed image to a file，压缩图片
             Utils().saveCompressedBitmapToFile(compressedData, newFile)
             if (newFile.exists()){
@@ -622,13 +623,13 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                  //toast("压缩失败")
             }
 
-            if (file.length() > 20 * 1000 * 1000){
+            if (file.length() >= 2048 * 10 * 1000){
                 ToastUtils.showToast(requireContext(), "图片限制20M")
                 mIProgressLoader?.dismissLoading()
                 return
             }
         }else{
-            if (file.length() > 300 * 1000 * 1000){
+            if (file.length() >= 3072 * 10 * 1000){
                 ToastUtils.showToast(requireContext(), "视频/文件限制300M")
                 mIProgressLoader?.dismissLoading()
                 return
@@ -645,8 +646,6 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                 val request2 = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload-v3")
                     .addHeader("X-Token", Constants.xToken)
                     .post(multipartBody).build()
-
-
 
                 val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
                     .connectTimeout(50, TimeUnit.SECONDS)
@@ -669,13 +668,7 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                             val result = gson.fromJson(path, UploadResult::class.java)
 
                             if (result.code == 0 || result.code == 200) {
-                                //上传时候的文件名
-                                val filePath = file.name?:" "
-                                //这里的扩展名判读可以添加更多，比如.webp .gif等
-                                if (filePath.contains(".png") || filePath.contains("IMG_") || filePath.contains(".jpg") || filePath.contains(
-                                        ".jpeg"
-                                    )
-                                ) {
+                                if (imageTypes.contains(ext.lowercase())) {
                                     // 发送图片
                                     sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 } else {
