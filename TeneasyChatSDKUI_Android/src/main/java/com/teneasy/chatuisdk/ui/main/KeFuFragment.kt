@@ -612,10 +612,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
             val compressedData = Utils().compressBitmap(bitmap, 100)
             var extenion = file.absoluteFile.extension
 
-            ///storage/emulated/0/Download/PXL_20240530_044249124.MP1717158299882.jpg
             var newFilePath = file.absolutePath.replace("." + extenion,"").replace(".","") + Date().time + "." + extenion
             var newFile = File(newFilePath)
-            // Step 3: Save the compressed image to a file
+            // Step 3: Save the compressed image to a file，压缩图片
             Utils().saveCompressedBitmapToFile(compressedData, newFile)
             if (newFile.exists()){
                 file = newFile
@@ -670,7 +669,9 @@ class KeFuFragment : BaseBindingFragment<FragmentKefuBinding>(), TeneasySDKDeleg
                             val result = gson.fromJson(path, UploadResult::class.java)
 
                             if (result.code == 0 || result.code == 200) {
+                                //上传时候的文件名
                                 val filePath = file.name?:" "
+                                //这里的扩展名判读可以添加更多，比如.webp .gif等
                                 if (filePath.contains(".png") || filePath.contains("IMG_") || filePath.contains(".jpg") || filePath.contains(
                                         ".jpeg"
                                     )
