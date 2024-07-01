@@ -49,6 +49,7 @@
 
         <activity android:name="com.teneasy.chatuisdk.ui.main.KeFuActivity"
             android:theme= "@style/Theme.AppCompat.Light.NoActionBar"
+            android:hardwareAccelerated="true"
             android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />

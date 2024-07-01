@@ -1,11 +1,13 @@
 package com.teneasy.chatuisdk
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowInsetsController
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,7 @@ import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.Result
 import com.xuexiang.xhttp2.XHttpSDK
+
 
 class SelectConsultTypeFragment : Fragment(){
     private val viewModel: SelectConsultTypeViewModel by viewModels()

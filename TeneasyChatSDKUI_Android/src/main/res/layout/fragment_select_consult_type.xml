@@ -1,23 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_marginTop="100dp"
-            android:id="@+id/rv_list"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_header"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:background="@color/chatBody"
-            android:layout_marginBottom="100dp"
-            app:layout_constraintBottom_toTopOf="@id/tv_line"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
+            android:elevation="2dp"
+            app:cardCornerRadius="0dp">
+
+            <ImageView
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"
+                android:src="@drawable/backicon"
+                ></ImageView>
+
+            <TextView
+                android:text="@string/str_kefu"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            </TextView>
+        </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginStart="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_header"
+            android:layout_marginTop="20dp"
+
+            android:src="@drawable/qiliaowithback"
+            ></ImageView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_list"
+            android:background="@color/white"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:outlineProvider="bounds"
+            android:elevation="2dp"
+            android:layout_marginBottom="100dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="60dp"
+            app:layout_constraintBottom_toTopOf="@id/tv_line"
+            app:layout_constraintTop_toTopOf="@id/iv_logo"
+            app:layout_constraintStart_toEndOf="@id/iv_logo"
+            app:layout_constraintEnd_toEndOf="parent">
         </androidx.recyclerview.widget.RecyclerView>
+
+
+
 
         <TextView
             android:id="@+id/tv_empty"
