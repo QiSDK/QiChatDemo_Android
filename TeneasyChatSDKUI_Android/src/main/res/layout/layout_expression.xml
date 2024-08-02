@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:background="@color/chatBody"  >
+
+        <View
+            android:id="@+id/bg_chat_pan_top"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/chatBody"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_navigation"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="7dp"
+            android:overScrollMode="never"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_constraintEnd_toStartOf="@id/iv_delete_chat"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/bg_chat_pan_top"
+            app:spanCount="8"
+            tools:listitem="@layout/item_emoji_emoji" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_delete_chat"
+            android:layout_width="45dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="7dp"
+            android:background="@drawable/bg_emoji_white"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
+            android:src="@drawable/selector_delete_chat"
+            app:layout_constraintBottom_toBottomOf="@id/rcv_navigation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/rcv_navigation" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_more"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="@string/search_result_more"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/iv_delete_chat"
+            app:layout_constraintEnd_toEndOf="@id/iv_delete_chat"
+            app:layout_constraintStart_toStartOf="@id/iv_delete_chat"
+            app:layout_constraintTop_toTopOf="@id/iv_delete_chat" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
+            android:overScrollMode="never"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/rcv_navigation"
+            app:layout_constraintTop_toBottomOf="@id/rcv_navigation" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

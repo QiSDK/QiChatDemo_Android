@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/cs_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_Title"
+        android:text="dd"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="wrap_content"
+        android:gravity="start"
+        android:layout_height="20dp"
+        android:layout_margin="5dp"
+        ></TextView>
+
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view"
+        android:layout_width="230dp"
+        android:minHeight="150dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_Title"
+        android:layout_height="wrap_content"
+      />
+
+    <ImageView
+        android:id="@+id/iv_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:src="@drawable/ps_ic_audio_play"
+       app:layout_constraintStart_toStartOf="@id/player_view"
+        app:layout_constraintEnd_toEndOf="@id/player_view"
+        app:layout_constraintTop_toTopOf="@id/player_view"
+        app:layout_constraintBottom_toBottomOf="@id/player_view"
+        ></ImageView>
+
+
+    <!--   app:show_buffering="when_playing"
+        app:show_shuffle_button="true" -->
+</androidx.constraintlayout.widget.ConstraintLayout>

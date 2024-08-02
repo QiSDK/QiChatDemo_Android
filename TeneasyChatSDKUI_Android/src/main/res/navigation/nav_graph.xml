@@ -1,0 +1,39 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/frg_consult_type">
+
+    <fragment
+        android:id="@+id/frg_consult_type"
+        android:name="com.teneasy.chatuisdk.SelectConsultTypeFragment"
+        android:label="Consult Type">
+
+        <!-- Action to navigate from Profile to Friends List. -->
+        <action
+            android:id="@+id/action_profile_to_friendslist"
+            app:destination="@id/frg_kefu_main" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/frg_kefu_main"
+        android:name="com.teneasy.chatuisdk.ui.main.KeFuFragment"
+        android:label="KeFu" />
+
+    <fragment
+        android:id="@+id/frg_video_full"
+        android:name="com.teneasy.chatuisdk.VideoFragment"
+        android:label="KeFu" />
+
+    <fragment
+        android:id="@+id/frg_image_full"
+        android:name="com.teneasy.chatuisdk.ImageFragment"
+        android:label="KeFu" />
+
+    <fragment
+        android:id="@+id/frg_settings"
+        android:name="com.teneasy.chatuisdk.SettingsFragment"
+        android:label="KeFu" />
+
+
+    <!-- Add other fragment destinations similarly. -->
+</navigation>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application android:name=".ui.base.ApplicationExt">
+        <!-- android:theme="@style/Theme.TeneasyChatSdkDemo"，使用这个主题，顶部就会是白色 -->
+        <activity
+            android:name=".FullImageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FullVideoActivity"
+            android:exported="false"
+            />
+    </application>
+
+</manifest>

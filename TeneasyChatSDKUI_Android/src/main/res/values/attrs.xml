@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MySwitchTitleView">
+
+        <attr name="title" format="string" />
+
+    </declare-styleable>
+
+    <declare-styleable name="MyItem">
+        <attr name="myitemTitle" format="string" />
+        <attr name="myitemInfo" format="string" />
+    </declare-styleable>
+    <declare-styleable name="PraiseListView">
+        <attr name="item_color" format="color" />
+        <attr name="item_selector_color" format="color" />
+    </declare-styleable>
+    <declare-styleable name="ExpandTextView">
+        <attr name="showLines" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="ChatInputImageButton">
+        <attr name="normal_image_res_id" format="reference" />
+        <attr name="pressed_image_res_id" format="reference" />
+        <attr name="disabled_image_res_id" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="ChatMessageView">
+        <attr name="direction">
+            <enum name="left" value="1" />
+            <enum name="right" value="2" />
+        </attr>
+        <attr name="avatarMargin" format="dimension" />
+        <attr name="ContentSafeMargin" format="dimension" />
+    </declare-styleable>
+
+
+    <declare-styleable name="IndexBar">
+        <attr name="letterSize" format="dimension" />
+        <attr name="letterColor" format="color" />
+        <attr name="focusLetterColor" format="color" />
+        <attr name="letterSpacingExtra" format="float" />
+    </declare-styleable>
+
+
+    <declare-styleable name="IndexView">
+        <!--选中时的圆形背景颜色-->
+        <attr name="words_background_color" format="color" />
+        <!--索引字母大小-->
+        <attr name="android:textSize" />
+    </declare-styleable>
+
+    <declare-styleable name="DropView">
+        <!--圆形背景颜色-->
+        <attr name="background_color" format="color" />
+        <!--字母大小-->
+        <attr name="android:textSize" />
+    </declare-styleable>
+
+
+    <declare-styleable name="SearchView">
+        <attr name="scTextSize" format="dimension|reference" />
+        <attr name="scTextColor" format="color|reference" />
+        <attr name="scText" format="string|reference" />
+        <attr name="scHint" format="string|reference" />
+        <attr name="scHintColor" format="color|reference" />
+        <attr name="scDividerColor" format="color|reference" />
+        <attr name="scShowDividers" format="boolean" />
+        <attr name="scSearchIcon" format="reference" />
+        <attr name="scSearchIconShow" format="boolean" />
+        <attr name="scSearchMinWidth" format="dimension|reference" />
+    </declare-styleable>
+
+
+    <declare-styleable name="MaskedEditText">
+        <attr name="mask" format="string" />
+        <attr name="allowed_chars" format="string" />
+        <attr name="enable_ime_action" format="boolean" />
+        <attr name="denied_chars" format="string" />
+        <attr name="char_representation" format="string" />
+        <attr name="keep_hint" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="myEditText">
+        <attr name="showClean" format="boolean" />
+        <attr name="drawableClean" format="reference" />
+        <attr name="cleanPadding" format="dimension" />
+        <attr name="showEye" format="boolean" />
+        <attr name="drawableEyeOpen" format="reference" />
+        <attr name="drawableEyeClose" format="reference" />
+        <attr name="drawableLeft" format="reference" />
+        <attr name="hint" format="string" />
+        <attr name="text" format="string" />
+        <attr name="textColorHint" format="reference|color" />
+        <attr name="textColor" format="reference|color" />
+        <attr name="textSize" format="dimension" />
+        <attr name="maxLength" format="integer" />
+        <attr name="maxLines" format="integer" />
+        <attr name="inputType">
+            <enum name="none" value="0" />
+            <enum name="number" value="1" />
+            <enum name="textPassword" value="2" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="Emojicon">
+        <attr name="emojiconSize" format="dimension" />
+        <attr name="emojiconAlignment" format="enum">
+            <enum name="bottom" value="0" />
+            <enum name="baseline" value="1" />
+        </attr>
+        <attr name="emojiconTextStart" format="integer" />
+        <attr name="emojiconTextLength" format="integer" />
+        <attr name="emojiconUseSystemDefault" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="ChatTextContentLayout">
+        <attr name="content_top" format="dimension" />
+        <attr name="content_bottom" format="dimension" />
+        <attr name="time_offset" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="CircleProgressBar">
+        <attr name="line_count" format="integer|reference" />
+        <attr name="line_width" format="dimension|reference" />
+        <attr name="progress_start_color" format="color|reference" />
+        <attr name="progress_end_color" format="color|reference" />
+        <attr name="progress_text_color" format="color|reference" />
+        <attr name="progress_text_size" format="dimension|reference" />
+        <attr name="progress_stroke_width" format="dimension|reference" />
+        <attr name="progress_background_color" format="color|reference" />
+        <attr name="progress_start_degree" format="integer|reference" />
+        <attr name="drawBackgroundOutsideProgress" format="boolean|reference" />
+        <attr name="progress_center_icon" format="reference" />
+
+        <attr name="progress_blur_radius" format="dimension|reference" />
+        <attr name="progress_blur_style">
+            <enum name="normal" value="0" />
+            <enum name="solid" value="1" />
+            <enum name="outer" value="2" />
+            <enum name="inner" value="3" />
+        </attr>
+
+        <attr name="progress_style">
+            <enum name="line" value="0" />
+            <enum name="solid" value="1" />
+            <enum name="solid_line" value="2" />
+        </attr>
+
+        <attr name="progress_shader">
+            <enum name="linear" value="0" />
+            <enum name="radial" value="1" />
+            <enum name="sweep" value="2" />
+        </attr>
+
+        <attr name="progress_stroke_cap">
+            <enum name="butt" value="0" />
+            <enum name="round" value="1" />
+            <enum name="square" value="2" />
+        </attr>
+
+    </declare-styleable>
+    <declare-styleable name="BubbleLayout">
+        <attr name="bl_arrowWidth" format="dimension|reference" />
+        <attr name="bl_cornersRadius" format="dimension|reference" />
+        <attr name="bl_arrowHeight" format="dimension|reference" />
+        <attr name="bl_arrowPosition" format="dimension|reference" />
+        <attr name="bl_arrowBottomRadius" format="dimension|reference" />
+        <attr name="bl_arrowTopRadius" format="dimension|reference" />
+        <attr name="bl_bubbleColor" format="color|reference" />
+        <attr name="bl_strokeWidth" format="dimension|reference" />
+        <attr name="bl_strokeColor" format="color|reference" />
+
+        <attr name="bl_arrowDirection" format="enum">
+            <enum name="left" value="0" />
+            <enum name="right" value="1" />
+            <enum name="top" value="2" />
+            <enum name="bottom" value="3" />
+            <enum name="left_center" value="4" />
+            <enum name="right_center" value="5" />
+            <enum name="top_center" value="6" />
+            <enum name="bottom_center" value="7" />
+            <enum name="top_right" value="8" />
+            <enum name="bottom_right" value="9" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="CusContentContainer">
+        <attr name="edit_view" format="reference" />
+        <attr name="auto_reset_area" format="reference" />
+        <attr name="auto_reset_enable" format="boolean" />
+    </declare-styleable>
+    <!--密码框 有 实心、空心、下划线 begin -->
+    <declare-styleable name="verify_EditText">
+        <!-- 验证码的个数 -->
+        <attr name="verify_count" format="integer" />
+        <!--        TextView 的宽度-->
+        <attr name="verify_width" format="dimension" />
+        <!--        TextView 的高度-->
+        <attr name="verify_height" format="dimension" />
+        <!--        TextView 的间隔-->
+        <attr name="verify_margin" format="dimension" />
+        <!--        TextView 的字体大小-->
+        <attr name="verify_textSize" format="dimension" />
+        <!--        TextView 的字体颜色-->
+        <attr name="verify_textColor" format="color" />
+        <!-- TextView 无值背景 -->
+        <attr name="verify_background_normal" format="reference" />
+        <!-- TextView 有值背景 -->
+        <attr name="verify_background_selected" format="reference" />
+        <!--        是否隐藏密码-->
+        <attr name="verify_password" format="boolean" />
+        <!--        密码显示时间ms-->
+        <attr name="verify_password_visible_time" format="integer" />
+        <!--        是否弹出普通键盘-->
+        <attr name="verify_show_key_common_board" format="boolean" />
+        <!--        是否弹出密码键盘-->
+        <attr name="verify_show_key_pwd_board" format="boolean" />
+        <!--        只有点击才弹出密码键盘-->
+        <attr name="verify_show_key_pwd_board_by_click" format="boolean" />
+        <!--        editText的输入类型 -->
+        <attr name="verify_inputType">
+            <flag name="none" value="0x00000000" />
+            <flag name="text" value="0x00000001" />
+            <flag name="textCapCharacters" value="0x00001001" />
+            <flag name="textCapWords" value="0x00002001" />
+            <flag name="textCapSentences" value="0x00004001" />
+            <flag name="textAutoCorrect" value="0x00008001" />
+            <flag name="textAutoComplete" value="0x00010001" />
+            <flag name="textMultiLine" value="0x00020001" />
+            <flag name="textImeMultiLine" value="0x00040001" />
+            <flag name="textNoSuggestions" value="0x00080001" />
+            <flag name="textUri" value="0x00000011" />
+            <flag name="textEmailAddress" value="0x00000021" />
+            <flag name="textEmailSubject" value="0x00000031" />
+            <flag name="textShortMessage" value="0x00000041" />
+            <flag name="textLongMessage" value="0x00000051" />
+            <flag name="textPersonName" value="0x00000061" />
+            <flag name="textPostalAddress" value="0x00000071" />
+            <flag name="textPassword" value="0x00000081" />
+            <flag name="textVisiblePassword" value="0x00000091" />
+            <flag name="textWebEditText" value="0x000000a1" />
+            <flag name="textFilter" value="0x000000b1" />
+            <flag name="textPhonetic" value="0x000000c1" />
+            <flag name="textWebEmailAddress" value="0x000000d1" />
+            <flag name="textWebPassword" value="0x000000e1" />
+            <flag name="number" value="0x00000002" />
+            <flag name="numberSigned" value="0x00001002" />
+            <flag name="numberDecimal" value="0x00002002" />
+            <flag name="numberPassword" value="0x00000012" />
+            <flag name="phone" value="0x00000003" />
+            <flag name="datetime" value="0x00000004" />
+            <flag name="date" value="0x00000014" />
+            <flag name="time" value="0x00000024" />
+        </attr>
+    </declare-styleable>
+    <!--密码框 有 实心、空心、下划线 end -->
+    <declare-styleable name="DecimalEditText">
+        <attr name="decimal_symbol" format="string" />
+        <attr name="decimal_symbol_size" format="dimension" />
+        <attr name="decimal_show_symbol" format="boolean" />
+        <attr name="decimal_show_commas" format="boolean" />
+        <attr name="decimal_upper" format="float" />
+        <attr name="decimal_scale" format="integer" />
+        <attr name="decimal_fill_zero" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="DecimalEditText1">
+        <attr name="prefix" format="string" />
+        <attr name="suffix" format="string" />
+        <attr name="maxValue" format="float" />
+        <attr name="maxDecimalDigit" format="integer" />
+        <attr name="maxIntegerDigit" format="integer" />
+    </declare-styleable>
+</resources>

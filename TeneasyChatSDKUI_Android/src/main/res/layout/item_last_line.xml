@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_title"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:text=""
+    android:padding="@dimen/dp_10"
+    android:textAppearance="?android:attr/textAppearanceListItemSmall"
+    android:gravity="center_horizontal"
+    android:textColor="#80005EFF"
+    android:layout_marginBottom="@dimen/dp_10"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall" />

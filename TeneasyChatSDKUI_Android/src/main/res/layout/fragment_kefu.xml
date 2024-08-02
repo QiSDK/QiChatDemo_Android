@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="vm"
+            type="com.teneasy.chatuisdk.ui.main.KeFuViewModel" />
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.main.KeFuFragment">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/llTop"
+            android:layout_width="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_height="47dp"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ll_close"
+                android:layout_width="47dp"
+                android:layout_height="47dp"
+                android:src="@drawable/backicon"
+                >
+            </androidx.appcompat.widget.AppCompatImageView>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/civ_author_image"
+                android:layout_width="50dp"
+                android:visibility="gone"
+                android:src="@drawable/com_moren"
+                app:civ_border_color="#80ffffff"
+                app:civ_border_width="1dp"
+                android:layout_marginStart="5dp"
+                app:civ_border_overlay="true"
+                android:layout_height="50dp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/connect_to_worker"
+                android:textColor="@color/black4848"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:layout_marginEnd="23dp"
+                android:layout_gravity="center"
+                android:gravity="center">
+            </androidx.appcompat.widget.AppCompatTextView>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+        <com.effective.android.panel.view.PanelSwitchLayout
+            android:id="@+id/panel_switch_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/chatBody"
+            app:layout_constraintTop_toBottomOf="@id/llTop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:fitsSystemWindows="true"
+            android:orientation="vertical"
+            app:animationSpeed="fastest">
+
+        <com.android.common.view.CusContentContainer
+            android:id="@+id/content_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            android:orientation="vertical"
+            app:auto_reset_area="@id/recycler_view"
+            app:auto_reset_enable="true"
+            app:edit_view="@id/et_msg">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_msg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/chatBody"
+            android:layout_marginBottom="15dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tv_tips" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_tips"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textAlignment="center"
+            android:textSize="12sp"
+            android:padding="5dp"
+            android:textColor="@color/blue"
+            android:gravity="center|top"
+            android:alpha="0.7"
+            android:elevation="0.3dp"
+            android:layout_marginBottom="15dp"
+            app:layout_constraintBottom_toTopOf="@id/tv_QuotedMsg"
+          />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_QuotedMsg"
+            app:layout_constraintLeft_toLeftOf="@id/et_msg"
+            app:layout_constraintBottom_toTopOf="@id/et_msg"
+            app:layout_constraintRight_toRightOf="@id/et_msg"
+            android:visibility="gone"
+            android:gravity="center_vertical|start"
+            android:layout_width="0dp"
+            android:layout_height="30dp">   </androidx.appcompat.widget.AppCompatTextView>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_Close"
+                app:layout_constraintLeft_toRightOf="@id/tv_QuotedMsg"
+                app:layout_constraintTop_toTopOf="@id/tv_QuotedMsg"
+                android:layout_marginStart="-10dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/close" />
+
+        <com.android.common.view.chat.emoji.EmoticonEditText
+            android:id="@+id/et_msg"
+            android:layout_width="0dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_tips"
+            android:layout_height="wrap_content"
+            android:maxLines="5"
+            android:padding="8dp"
+            android:background="@drawable/rounded_corner"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:hint="@string/str_inputquestion"
+            android:text="@={vm.mlSendMsg}"
+            android:textSize="14sp"
+            android:gravity="top"
+            app:layout_constraintBottom_toTopOf="@id/ivEmoj"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivImg"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/h5_zhaoping"
+            android:layout_marginTop="@dimen/dp_10"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/btn_send"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivVideo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/camera_light"
+            app:layout_constraintStart_toEndOf="@id/ivImg"
+            app:layout_constraintTop_toTopOf="@id/ivImg"
+            app:layout_constraintRight_toLeftOf="@+id/btn_send"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivEmoj"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/emoj"
+            app:layout_constraintStart_toEndOf="@id/ivVideo"
+            app:layout_constraintTop_toTopOf="@id/ivImg"
+            />
+
+            <TextView
+                android:id="@+id/tv_count"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:textSize="@dimen/sp_14"
+                android:gravity="center"
+                android:layout_marginEnd="@dimen/dp_10"
+                app:layout_constraintEnd_toStartOf="@id/btn_send"
+                app:layout_constraintTop_toTopOf="@id/ivImg"
+                android:text="@string/limit500"
+                >
+            </TextView>
+        <androidx.constraintlayout.utils.widget.MotionButton
+            android:id="@+id/btn_send"
+            android:background="@drawable/rounded_corner_blue"
+            android:layout_width="62dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="5dp"
+            android:padding="15dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:text="@string/send"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ivEmoj"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+        </com.android.common.view.CusContentContainer>
+
+            <!--Panel Container, can only contain PanelView-->
+            <com.effective.android.panel.view.panel.PanelContainer
+                android:id="@+id/panel_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/teal_700"  >
+
+                <com.effective.android.panel.view.panel.PanelView
+                    android:id="@+id/panel_emotion"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:panel_layout="@layout/layout_expression"
+                    app:panel_trigger="@id/ivEmoj" />
+
+
+                <com.effective.android.panel.view.panel.PanelView
+                    android:id="@+id/panel_more"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:panel_layout="@layout/layout_more_panel"
+                    app:panel_toggle="true"
+                    app:panel_trigger="@id/iv_Close" />
+            </com.effective.android.panel.view.panel.PanelContainer>
+        </com.effective.android.panel.view.PanelSwitchLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/bg_chat_pan_top"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="#F6F6F6"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_emoji_chat"
+            android:layout_width="39dp"
+            android:layout_height="39dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/bg_emoji_white"
+            android:padding="8dp"
+            android:src="@drawable/ic_emoji"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_delete_chat"
+            android:layout_width="50dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="7dp"
+            android:background="@drawable/bg_emoji_white"
+            android:padding="8dp"
+            android:paddingStart="16dp"
+            android:paddingTop="13dp"
+            android:paddingEnd="16dp"
+            android:src="@drawable/selector_delete_chat"
+            app:layout_constraintEnd_toStartOf="@id/tv_send_chat"
+            app:layout_constraintTop_toTopOf="@id/iv_emoji_chat" />
+
+        <TextView
+            android:id="@+id/tv_send_chat"
+            android:layout_width="50dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/selector_bg_emoji"
+            android:enabled="false"
+            android:visibility="gone"
+            android:gravity="center"
+            android:text="@string/send"
+            android:textColor="@color/chatBody"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/iv_emoji_chat" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_emoji"
+            android:layout_width="match_parent"
+            android:layout_height="268dp"
+            android:background="@color/white"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="89dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/bg_chat_pan_top"
+            app:spanCount="8"
+            tools:listitem="@layout/item_emoji_emoji" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
