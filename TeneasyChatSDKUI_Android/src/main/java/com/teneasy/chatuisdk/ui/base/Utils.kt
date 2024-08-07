@@ -147,7 +147,7 @@ class Utils {
     }
 
     fun timestampToDate(timestamp: Long): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'")
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val date = Date(timestamp)
         return sdf.format(date)
     }

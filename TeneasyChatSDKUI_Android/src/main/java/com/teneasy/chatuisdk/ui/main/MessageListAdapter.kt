@@ -130,6 +130,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.qaAdapter.setDataList(it)
                     //holder.qaAdapter.expandGroup(0)
                     holder.tvTitle.visibility = View.VISIBLE
+
+                    val localTime = Utils().timestampToDate(System.currentTimeMillis() + 700)
+                    holder.tvLeftTime.text = localTime
                 }
             }
 
@@ -227,7 +230,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             dataSource: DataSource,
                             isFirstResource: Boolean
                         ): Boolean {
-                            val bitmap = Utils().drawableToBitmap(resource!!);
+                            val bitmap = Utils().drawableToBitmap(resource);
                             print(bitmap.width)
                             if (bitmap.height > bitmap.width) {
                                 Utils().updateLayoutParams(
@@ -305,7 +308,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             dataSource: DataSource,
                             isFirstResource: Boolean
                         ): Boolean {
-                            val bitmap = Utils().drawableToBitmap(resource!!);
+                            val bitmap = Utils().drawableToBitmap(resource);
                             print(bitmap.width)
                             if (bitmap.height > bitmap.width) {
                                 Utils().updateLayoutParams(
@@ -507,6 +510,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     inner class QAViewHolder(binding: ItemQaListBinding) : RecyclerView.ViewHolder(binding.root){
         var rcvQa = binding.rcvQa
         var tvTitle = binding.tvTitle
+        var tvLeftTime = binding.tvLeftTime;
         var qaAdapter: GroupedQAdapter
         var ivKefuImage =  binding.civKefuImage
 
@@ -524,16 +528,16 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 2、一级问题，点击展示与一级相关的问题分类（及二级问题），点击二级对应应的问题，则回复答案。
                 */
 
-                var QA = qaAdapter.data.get(groupPosition)
-                QA?.apply {
+                val QA = qaAdapter.data.get(groupPosition)
+                QA.apply {
                     if (this.clicked ?: true) {
                         return@setOnHeaderClickListener
                     }
 
-                    val questionTxt = this.question?.content?.data ?: ""
+                    val questionTxt = this.question.content.data ?: ""
                     val txtAnswer = this.content ?: "null"
 
-                    val multipAnswer = this.answer?.joinToString(separator = "\n") ?: ""
+                    val multipAnswer = this.answer.joinToString(separator = "\n") ?: ""
                     if (txtAnswer.isNotEmpty()) {
                         // 发送提问消息
                         listener?.onSendLocalMsg(questionTxt, false)
@@ -545,7 +549,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     if (multipAnswer.isNotEmpty()) {
                         listener?.onSendLocalMsg(questionTxt, false)
                         for (a in this.answer) {
-                            if (a!!.image != null) {
+                            if (a?.image != null) {
                                 // 自动回答
                                 listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
                             }
