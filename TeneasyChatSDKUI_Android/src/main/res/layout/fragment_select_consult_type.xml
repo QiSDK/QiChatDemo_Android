@@ -3,16 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@color/chatBody"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_header"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:elevation="12dp"
+            android:layout_height="47dp"
+            android:background="?android:attr/colorBackgroundFloating"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:elevation="2dp"
             app:cardCornerRadius="0dp">
 
             <ImageView
@@ -26,7 +28,7 @@
                 android:text="@string/str_kefu"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:textColor="@color/black"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -43,24 +45,27 @@
             app:layout_constraintTop_toBottomOf="@id/card_header"
             android:layout_marginTop="20dp"
             android:src="@drawable/qiliaowithback"
-            ></ImageView>
+            >
+        </ImageView>
 
         <ImageView
             android:id="@+id/iv_arrow"
-            android:layout_width="8dp"
+            android:layout_width="11dp"
             android:layout_height="11dp"
-            android:elevation="2dp"
-            android:backgroundTint="@color/white"
+            android:elevation="12dp"
+            android:backgroundTint="?android:attr/colorBackgroundFloating"
             android:background="@drawable/polygon_2"
             android:layout_marginStart="10dp"
             app:layout_constraintStart_toEndOf="@id/iv_logo"
             app:layout_constraintTop_toTopOf="@id/iv_logo"
             android:layout_marginTop="2dp"
-            ></ImageView>
+            >
+
+        </ImageView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_list"
-            android:background="@color/white"
+            android:background="?android:attr/colorBackgroundFloating"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:outlineProvider="bounds"
@@ -71,9 +76,6 @@
             app:layout_constraintStart_toEndOf="@id/iv_arrow"
             app:layout_constraintEnd_toEndOf="parent">
         </androidx.recyclerview.widget.RecyclerView>
-
-
-
 
         <TextView
             android:id="@+id/tv_empty"

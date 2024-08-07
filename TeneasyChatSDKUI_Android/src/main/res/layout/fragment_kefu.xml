@@ -13,6 +13,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
+        android:background="@color/chatBody"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.main.KeFuFragment">
@@ -20,6 +21,8 @@
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/llTop"
             android:layout_width="match_parent"
+            android:elevation="12dp"
+            android:background="?android:attr/colorBackgroundFloating"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_height="47dp"
@@ -49,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="@string/connect_to_worker"
-                android:textColor="@color/black4848"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:layout_marginEnd="23dp"
@@ -61,7 +64,6 @@
             android:id="@+id/panel_switch_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/chatBody"
             app:layout_constraintTop_toBottomOf="@id/llTop"
             app:layout_constraintBottom_toBottomOf="parent"
             android:fitsSystemWindows="true"
@@ -82,7 +84,6 @@
             android:id="@+id/rcv_msg"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/chatBody"
             android:layout_marginBottom="15dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -134,6 +135,7 @@
             android:layout_marginEnd="20dp"
             android:hint="@string/str_inputquestion"
             android:text="@={vm.mlSendMsg}"
+            android:textColor="@color/black4848"
             android:textSize="14sp"
             android:gravity="top"
             app:layout_constraintBottom_toTopOf="@id/ivEmoj"
@@ -143,7 +145,7 @@
 
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivImg"
+            android:id="@+id/ivPhoto"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="20dp"
@@ -163,8 +165,8 @@
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
             android:src="@drawable/camera_light"
-            app:layout_constraintStart_toEndOf="@id/ivImg"
-            app:layout_constraintTop_toTopOf="@id/ivImg"
+            app:layout_constraintStart_toEndOf="@id/ivPhoto"
+            app:layout_constraintTop_toTopOf="@id/ivPhoto"
             app:layout_constraintRight_toLeftOf="@+id/btn_send"
             />
 
@@ -176,7 +178,7 @@
             android:layout_marginStart="10dp"
             android:src="@drawable/emoj"
             app:layout_constraintStart_toEndOf="@id/ivVideo"
-            app:layout_constraintTop_toTopOf="@id/ivImg"
+            app:layout_constraintTop_toTopOf="@id/ivPhoto"
             />
 
             <TextView
@@ -187,7 +189,7 @@
                 android:gravity="center"
                 android:layout_marginEnd="@dimen/dp_10"
                 app:layout_constraintEnd_toStartOf="@id/btn_send"
-                app:layout_constraintTop_toTopOf="@id/ivImg"
+                app:layout_constraintTop_toTopOf="@id/ivPhoto"
                 android:text="@string/limit500"
                 >
             </TextView>

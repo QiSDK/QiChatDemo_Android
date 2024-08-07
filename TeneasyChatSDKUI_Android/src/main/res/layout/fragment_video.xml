@@ -3,15 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/chatBody"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".VideoFragment">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/llTop"
         android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:background="?android:attr/colorBackgroundFloating"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_height="47dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -19,7 +21,8 @@
             android:layout_width="47dp"
             android:layout_height="47dp"
             android:src="@drawable/backicon"
-            ></ImageView>
+            >
+        </ImageView>
 
         <TextView
             android:id="@+id/tv_title"
@@ -31,7 +34,8 @@
             android:layout_marginEnd="23dp"
             android:layout_gravity="center"
             android:textColor="@color/black"
-            android:gravity="center"></TextView>
+            android:gravity="center">
+        </TextView>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.media3.ui.PlayerView

@@ -346,7 +346,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             this.etMsg.isFocusable = true
             this.etMsg.isFocusableInTouchMode = true;
 
-            this.ivImg.setOnClickListener { v: View ->
+            this.ivPhoto.setOnClickListener { v: View ->
                 selectImageOrVideo(0)
             }
 
