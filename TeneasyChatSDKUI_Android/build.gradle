@@ -137,7 +137,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.github.QiSDK'
             artifactId = 'qi-chatsdkui'
-            version = '1.0.5'
+            version = '1.0.6'
 
             afterEvaluate {
                 from components.release
