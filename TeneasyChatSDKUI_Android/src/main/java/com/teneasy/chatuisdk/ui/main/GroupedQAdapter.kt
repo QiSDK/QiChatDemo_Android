@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.main
 
 import android.content.Context
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
@@ -63,6 +64,10 @@ class GroupedQAdapter(
             rightArrow?.setImageResource(R.drawable.arrowup)
         }else{
             rightArrow?.setImageResource(R.drawable.arrowdown)
+        }
+
+        if (bean.related == null || bean.related.size == 0){
+            rightArrow?.visibility = View.GONE
         }
     }
 

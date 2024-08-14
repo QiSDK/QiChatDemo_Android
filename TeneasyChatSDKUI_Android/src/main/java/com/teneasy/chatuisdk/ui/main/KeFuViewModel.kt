@@ -16,7 +16,6 @@ import com.teneasy.chatuisdk.ui.http.bean.AssignWorker
 import com.teneasy.chatuisdk.ui.http.bean.AutoReply
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory
-import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.list
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib

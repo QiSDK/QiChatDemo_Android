@@ -33,11 +33,15 @@ import com.teneasy.chatuisdk.databinding.ItemTextMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.databinding.ItemVideoImageMessageBinding
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.autoPlay
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
+import com.teneasy.chatuisdk.ui.http.bean.QA
 import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
+import com.teneasyChat.api.common.CMessage
+import com.teneasyChat.api.common.CReply.QuestionAnswerOrBuilder
 import java.util.*
 
 
@@ -529,41 +533,17 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 */
 
                 val QA = qaAdapter.data.get(groupPosition)
-                QA.apply {
-                    if (this.clicked ?: true) {
-                        return@setOnHeaderClickListener
-                    }
+                qaClicked(QA)
+                if (qaAdapter.data.get(groupPosition).related != null && (qaAdapter.data.get(
+                        groupPosition
+                    ).related!!.size ?: 0) > 0
+                ) {
+                    if (qaAdapter.isExpand(groupPosition)) {
+                        qaAdapter.collapseGroup(groupPosition)
 
-                    val questionTxt = this.question.content.data ?: ""
-                    val txtAnswer = this.content ?: "null"
-
-                    val multipAnswer = this.answer.joinToString(separator = "\n") ?: ""
-                    if (txtAnswer.isNotEmpty()) {
-                        // 发送提问消息
-                        listener?.onSendLocalMsg(questionTxt, false)
-                        // 自动回答
-                        listener?.onSendLocalMsg(txtAnswer, true)
-                        QA.clicked = true;
-                        qaAdapter.notifyDataChanged()
-                    }
-                    if (multipAnswer.isNotEmpty()) {
-                        listener?.onSendLocalMsg(questionTxt, false)
-                        for (a in this.answer) {
-                            if (a?.image != null) {
-                                // 自动回答
-                                listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
-                            }
-                        }
-                        QA.clicked = true;
-                        qaAdapter.notifyDataChanged()
                     } else {
-                        if (qaAdapter.isExpand(groupPosition)) {
-                            qaAdapter.collapseGroup(groupPosition)
-
-                        } else {
-                            qaAdapter.collapseTheResetGroup(groupPosition)
-                            qaAdapter.expandGroup(groupPosition)
-                        }
+                        qaAdapter.collapseTheResetGroup(groupPosition)
+                        qaAdapter.expandGroup(groupPosition)
                     }
                 }
             }
@@ -571,37 +551,59 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             // 问题点击事件
             qaAdapter.setOnChildClickListener { _, _, groupPosition, childPosition ->
 
-                var QA = qaAdapter.data.get(groupPosition).related?.get(childPosition)
-                QA?.apply {
-                    if (this.clicked?:true){
-                        return@setOnChildClickListener
-                    }
+                val QA = qaAdapter.data.get(groupPosition).related?.get(childPosition)
+                qaClicked(QA)
+            }
+        }
 
-                    val questionTxt = this.question?.content?.data ?:""
-                    val txtAnswer = this.content ?:"null"
+        fun qaClicked(QA: QA?){
+            QA?.apply {
+                if (this.clicked ?: true) {
+                    return
+                }
 
-                    val multipAnswer = this.answer?.joinToString(separator = "\n")  ?:""
-                    // 发送提问消息
-                    if (txtAnswer.isNotEmpty()){
-                        listener?.onSendLocalMsg(questionTxt, false)
-                        // 自动回答
-                        listener?.onSendLocalMsg(txtAnswer, true)
-                        QA.clicked = true;
-                        qaAdapter.notifyDataChanged()
-                    }
-                    if (multipAnswer.isNotEmpty()){
-                        listener?.onSendLocalMsg(questionTxt, false)
-                        for (a in this.answer){
-                            if (a!!.image != null){
-                                // 自动回答
-                                listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
-                            }
+                val questionTxt = this.question.content.data ?: ""
+                val txtAnswer = this.content ?: "null"
+
+                val uQA = CMessage.MessageAutoReplyQA.newBuilder()
+                val uQ = CMessage.MessageUnion.newBuilder()
+                val uQC = CMessage.MessageContent.newBuilder()
+                uQC.data = questionTxt
+                uQ.content = uQC.build()
+                uQA.question = uQ.build()
+
+                autoPlay.qaList.add(uQA.build())
+
+
+
+
+                val multipAnswer = this.answer?.joinToString(separator = "\n") ?: ""
+                // 发送提问消息
+                if (txtAnswer.isNotEmpty()) {
+                    listener?.onSendLocalMsg(questionTxt, false)
+                    // 自动回答
+                    listener?.onSendLocalMsg(txtAnswer, true)
+                    QA.clicked = true;
+                    qaAdapter.notifyDataChanged()
+
+                    val uAnswer = CMessage.MessageUnion.newBuilder()
+                    val uQC = CMessage.MessageContent.newBuilder()
+                    uQC.data = txtAnswer
+                    uAnswer.content = uQC.build()
+                    uQA.answerList.add(uAnswer.build())
+                }
+                if (multipAnswer.isNotEmpty()) {
+                    listener?.onSendLocalMsg(questionTxt, false)
+                    for (a in this.answer) {
+                        if (a!!.image != null) {
+                            // 自动回答
+                            listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
                         }
-                        QA.clicked = true;
-                        qaAdapter.notifyDataChanged()
                     }
+                    QA.clicked = true;
+                    qaAdapter.notifyDataChanged()
                 }
-                }
+            }
         }
     }
 
