@@ -46,6 +46,7 @@ import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.ui.BigImageView
 import com.teneasy.chatuisdk.ui.VideoPlayView
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
@@ -107,6 +108,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     private var lastMsg: CMessage.Message? = null
     private var workInfo = WorkerInfo()
+
+    private var isFirstSend = true
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -769,10 +772,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         }
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId)
-        var messageItem = MessageItem()
+        val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+
+        if (isFirstSend){
+            //var cMContent = CMessage.WithAutoReplyOrBuilder()
+
+        }
+        isFirstSend = false
     }
 
     /**

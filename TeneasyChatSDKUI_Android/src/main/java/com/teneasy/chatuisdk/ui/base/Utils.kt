@@ -26,6 +26,7 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -287,5 +288,16 @@ class Utils {
         val H = W * aspRat
         val b = Bitmap.createScaledBitmap(bitmap, W, H, false)
         return b
+    }
+
+    fun getNowTimeStamp() : Timestamp{
+        var d = Timestamp.newBuilder()
+        val cal = Calendar.getInstance()
+        cal.time = Date()
+
+        val millis = cal.timeInMillis
+        d.seconds = (millis * 0.001).toLong()
+        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
+        return d.build()
     }
 }

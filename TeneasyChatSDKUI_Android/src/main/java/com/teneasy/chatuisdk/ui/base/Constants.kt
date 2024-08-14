@@ -74,7 +74,9 @@ var userId = 6666668// 364310
         //val wss_token = "wss_token"
         var workerAvatar = ""
 
-        var autoPlay = CMessage.MessageAutoReply.newBuilder()
+        //var autoPlay = CMessage.MessageAutoReply.newBuilder()
+
+        var withAutoReplyU = CMessage.WithAutoReply.newBuilder()
 
         //self.autoReply.qa.removeAll()
 

@@ -264,7 +264,6 @@ class KeFuViewModel() : ViewModel() {
         cMsg.msgTime = d.build()
 
         cMsg.msgId = msgId
-        cMsg.msgTime = d.build()
         cMContent.data = text.trim()
         cMsg.setContent(cMContent)
 

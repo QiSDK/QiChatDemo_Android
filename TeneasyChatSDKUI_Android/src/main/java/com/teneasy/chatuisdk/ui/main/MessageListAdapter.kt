@@ -3,9 +3,7 @@ package com.teneasy.chatuisdk.ui.main;
 //import com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.transition.Transition
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +20,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
@@ -33,7 +30,7 @@ import com.teneasy.chatuisdk.databinding.ItemTextMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.databinding.ItemVideoImageMessageBinding
 import com.teneasy.chatuisdk.ui.base.Constants
-import com.teneasy.chatuisdk.ui.base.Constants.Companion.autoPlay
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.QA
@@ -41,7 +38,6 @@ import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
-import com.teneasyChat.api.common.CReply.QuestionAnswerOrBuilder
 import java.util.*
 
 
@@ -565,17 +561,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val questionTxt = this.question.content.data ?: ""
                 val txtAnswer = this.content ?: "null"
 
-                val uQA = CMessage.MessageAutoReplyQA.newBuilder()
-                val uQ = CMessage.MessageUnion.newBuilder()
-                val uQC = CMessage.MessageContent.newBuilder()
-                uQC.data = questionTxt
-                uQ.content = uQC.build()
-                uQA.question = uQ.build()
+                withAutoReplyU = CMessage.WithAutoReply.newBuilder()
 
-                autoPlay.qaList.add(uQA.build())
-
-
-
+                withAutoReplyU.title = questionTxt
+                withAutoReplyU.id = QA.id
+                withAutoReplyU.createdTime = Utils().getNowTimeStamp()
 
                 val multipAnswer = this.answer?.joinToString(separator = "\n") ?: ""
                 // 发送提问消息
@@ -590,15 +580,29 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     val uQC = CMessage.MessageContent.newBuilder()
                     uQC.data = txtAnswer
                     uAnswer.content = uQC.build()
-                    uQA.answerList.add(uAnswer.build())
+                    withAutoReplyU.addAnswers(uAnswer)
                 }
                 if (multipAnswer.isNotEmpty()) {
-                    listener?.onSendLocalMsg(questionTxt, false)
+                    //listener?.onSendLocalMsg(questionTxt, false)
                     for (a in this.answer) {
-                        if (a!!.image != null) {
+                        //if (a!!.image != null) {
+                        a?.image?.uri?.let {
                             // 自动回答
-                            listener?.onSendLocalMsg(a.image.uri, true, "MSG_IMG")
+                            listener?.onSendLocalMsg(it, true, "MSG_IMG")
+
+                            val uAnswer = CMessage.MessageUnion.newBuilder()
+                            val uQC = CMessage.MessageImage.newBuilder()
+                            uQC.uri = txtAnswer
+                            uAnswer.image = uQC.build()
+                            withAutoReplyU.addAnswers(uAnswer)
                         }
+
+                        a?.content?.data?.let {
+                            // 自动回答
+                            listener?.onSendLocalMsg(it, true, "MSG_TEXT")
+                        }
+
+                        //}
                     }
                     QA.clicked = true;
                     qaAdapter.notifyDataChanged()
