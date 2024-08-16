@@ -31,16 +31,23 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-
+import com.arthenica.mobileffmpeg.Config
+import com.arthenica.mobileffmpeg.FFmpeg
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class Utils {
 
-        companion object{
-            var localDateFormat = "yyyy-MM-dd HH:mm:ss"
-        }
-     fun copyText(text: String, context: Context){
+    companion object {
+        var localDateFormat = "yyyy-MM-dd HH:mm:ss"
+    }
+
+    fun copyText(text: String, context: Context) {
         // Get the system clipboard service
-        val clipboardManager =  context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboardManager =
+            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
         // Create a new ClipData object with the text
         val clipData = ClipData.newPlainText("Copied Text", text)
@@ -58,27 +65,29 @@ class Utils {
         Constants.merchantId = UserPreferences().getInt(PARAM_MERCHANT_ID, Constants.merchantId)
         Constants.lines = UserPreferences().getString(PARAM_LINES, Constants.lines)
         Constants.cert = UserPreferences().getString(PARAM_CERT, Constants.cert)
-        Constants.baseUrlImage = UserPreferences().getString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
+        Constants.baseUrlImage =
+            UserPreferences().getString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
     }
 
-         fun closeSoftKeyboard(view: View?) {
-            if (view == null || view.windowToken == null) {
-                return
-            }
-            val imm: InputMethodManager =
-                view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(view.windowToken, 0)
+    fun closeSoftKeyboard(view: View?) {
+        if (view == null || view.windowToken == null) {
+            return
         }
+        val imm: InputMethodManager =
+            view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
 
     fun convertStrToDate(datetimeString: String): Date {
         //yyyy-MM-dd'T'HH:mm:sss'Z'
         var date = Date()
         try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault())
+            val dateFormat =
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", Locale.getDefault())
             //dateFormat.timeZone = TimeZone.getDefault()
             dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-             date = dateFormat.parse(datetimeString)
-        }catch (ex:Exception){
+            date = dateFormat.parse(datetimeString)
+        } catch (ex: Exception) {
 
         }
         return date
@@ -90,7 +99,11 @@ class Utils {
     }
 
 
-    fun isMessageTimeDifferenceValid(lastMsgTime: Date?, sendingMsgTime: Date?, minutesDifference: Int): Boolean {
+    fun isMessageTimeDifferenceValid(
+        lastMsgTime: Date?,
+        sendingMsgTime: Date?,
+        minutesDifference: Int
+    ): Boolean {
         if (lastMsgTime == null || sendingMsgTime == null) {
             return false
         }
@@ -290,7 +303,7 @@ class Utils {
         return b
     }
 
-    fun getNowTimeStamp() : Timestamp{
+    fun getNowTimeStamp(): Timestamp {
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
         cal.time = Date()
@@ -299,5 +312,56 @@ class Utils {
         d.seconds = (millis * 0.001).toLong()
         d.nanos = ((millis * 0.001) * 1_000_000).toInt()
         return d.build()
+    }
+
+    suspend fun compressVideo(inputFilePath: String, outputFilePath: String): Int {
+        return withContext(Dispatchers.IO) {
+            val command = arrayOf(
+                "-i",
+                inputFilePath,       // Input file path
+                "-c:v",
+                "libx264",         // Video codec (H.264)
+                "-pix_fmt",
+                "yuv420p",     // Pixel format (yuv420p is widely compatible)
+                "-crf",
+                "28",              // Compression level (lower value = higher quality, larger file)
+                "-preset",
+                "fast",         // Compression speed
+                outputFilePath             // Output file path
+            )
+
+            //ffmpeg -i input.mov -c:v libx264 -pix_fmt yuv420p output.mp4
+
+            FFmpeg.execute(command)
+
+            // Execute FFmpeg command
+//            val rc = FFmpeg.execute(command)
+//
+//            if (rc == Config.RETURN_CODE_SUCCESS) {
+//                println("Video compression succeeded")
+//            } else {
+//                println("Video compression failed with return code $rc")
+//                Config.printLastCommandOutput(Log.INFO)
+//            }
+        }
+    }
+
+
+    fun startCompression(inputFilePath: String, outputFilePath: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val resultCode = compressVideo(inputFilePath, outputFilePath)
+
+            withContext(Dispatchers.Main) {
+                if (resultCode == Config.RETURN_CODE_SUCCESS) {
+                    println("Video compression succeeded")
+                    // If you need to update the UI, do it here
+                } else {
+                    println("Video compression failed with return code $resultCode")
+                    Config.printLastCommandOutput(Log.INFO)
+                    // If you need to update the UI, do it here
+                }
+            }
+            return@launch
+        }
     }
 }

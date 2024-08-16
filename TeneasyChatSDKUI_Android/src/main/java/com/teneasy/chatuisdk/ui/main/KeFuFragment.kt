@@ -1,31 +1,25 @@
 package com.teneasy.chatuisdk.ui.main;
 
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
-import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.emoji2.text.EmojiCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.arthenica.mobileffmpeg.Config
+import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
@@ -33,8 +27,6 @@ import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
 import com.luck.picture.lib.utils.ToastUtils
-import com.lxj.xpopup.BuildConfig
-import com.lxj.xpopup.XPopup
 import com.teneasy.chatuisdk.ARG_IMAGEURL
 import com.teneasy.chatuisdk.ARG_KEFUNAME
 import com.teneasy.chatuisdk.ARG_VIDEOURL
@@ -43,8 +35,6 @@ import com.teneasy.chatuisdk.FullImageActivity
 import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.UploadResult
-import com.teneasy.chatuisdk.ui.BigImageView
-import com.teneasy.chatuisdk.ui.VideoPlayView
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
@@ -53,7 +43,6 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
-import com.teneasy.chatuisdk.ui.base.showToast
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -65,13 +54,13 @@ import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
@@ -110,6 +99,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private var workInfo = WorkerInfo()
 
     private var isFirstSend = true
+    val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -376,6 +366,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun selectImageOrVideo(i: Int){
         when (i) {
             0 -> {
@@ -387,7 +378,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             dialogBottomMenu.dismiss()
                             // 上传图片之前，首先在聊天框添加一个图片消息，更新聊天界面
                             //val id = viewModel.composeAChatmodelImg(item.path, false)
-                            uploadImg(item.realPath)
+
+                                beforeUpload(item.realPath)
+
                         }
                     }
                     override fun onCancel() {}
@@ -401,7 +394,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             val item = result[0]
                             dialogBottomMenu.dismiss()
                             //val id = viewModel.composeAChatmodelImg(item.path, false)
-                            uploadImg(item.realPath)
+
+                            beforeUpload(item.realPath)
+
                         }
                     }
 
@@ -538,9 +533,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 override fun run() {
                     if (chatLib == null || !isConnected) {
                         //Log.d(TAG, "SDK 重新初始化")
-                        //runOnUiThread {
-                         //   initChatSDK(Constants.domain)
-                       // }
+//                        runOnUiThread {
+//                            initChatSDK(Constants.domain)
+//                        }
                         if (chatLib == null) {
                             Log.d(TAG, "SDK 重新初始化")
                             initChatSDK(Constants.domain)
@@ -570,6 +565,95 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         return mIProgressLoader
     }
 
+    fun beforeUpload(filePath: String){
+        mIProgressLoader?.updateMessage("上传中。。。")
+        mIProgressLoader?.showLoading()
+
+        //val filePath = Utils().encodeFilePath(mediaPath)
+        var file = File(filePath)
+
+        if (!file.exists()){
+            ToastUtils.showToast(requireContext(), "文件不存在")
+            mIProgressLoader?.dismissLoading()
+            return
+        }
+        val ext = file.absoluteFile.extension
+
+        if (imageTypes.contains(ext.lowercase())){
+            /*  // Step 1: Load the image，读取图片
+               val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+               // Step 2: Compress the image，图片压缩
+               val compressedData = Utils().compressBitmap(bitmap, 60)
+               //获取文件扩展名
+
+               val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
+               val newFile = File(newFilePath)
+               // Step 3: Save the compressed image to a file，压缩图片
+               Utils().saveCompressedBitmapToFile(compressedData, newFile)
+
+               //if (BuildConfig.DEBUG){
+                  var newBitmap = BitmapFactory.decodeFile(newFile.absolutePath)
+                   println(newBitmap.width)
+               //}
+               if (newFile.exists()){
+                   file = newFile
+               }else{
+                    //toast("压缩失败")
+               }
+   */
+            if (file.length() >= 2000 * 10 * 1000){
+                ToastUtils.showToast(requireContext(), "图片限制20M")
+                mIProgressLoader?.dismissLoading()
+                return
+            }
+
+        }else{
+            val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
+            val newFile = File(newFilePath)
+
+            CoroutineScope(Dispatchers.Main).launch {
+                val resultCode = Utils().compressVideo(file.absolutePath.toString(), newFilePath)
+
+                withContext(Dispatchers.Main) {
+                    if (resultCode == RETURN_CODE_SUCCESS) {
+                        Log.i(TAG, "原始文件大小:" + file.length() )
+                        Log.i(TAG, "Video compression succeeded")
+                        // If you need to update the UI, do it here
+                        if (newFile.length() >= 30000 * 10 * 1000){
+                            ToastUtils.showToast(requireContext(), "视频/文件限制300M")
+                            mIProgressLoader?.dismissLoading()
+                            return@withContext
+                        }
+
+                        val videoThumbnail = Utils().getVideoThumb(requireContext(), Uri.fromFile(file))
+                        if (videoThumbnail == null){
+                            ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
+                            mIProgressLoader?.dismissLoading()
+                            return@withContext
+                        }
+
+                        if (newFile.length() > 0) {
+                            file = newFile
+                        }
+                        uploadFile(file)
+                        Log.i(TAG, "上传文件大小:" + file.length() )
+                    } else {
+                        Log.i(TAG, "Video compression failed with return code $resultCode")
+                        Config.printLastCommandOutput(Log.INFO)
+                        if (file.length() >= 30000 * 10 * 1000){
+                            ToastUtils.showToast(requireContext(), "视频/文件限制300M")
+                            mIProgressLoader?.dismissLoading()
+                            return@withContext
+                        }
+                        Log.i(TAG, "上传文件大小:" + file.length() )
+                        uploadFile(file)
+                        // If you need to update the UI, do it here
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 上传图片。上传成功后，会直接调用socket进行消息发送。
      *  @param filePath
@@ -587,63 +671,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      * }
      */
     //这个函数可以上传图片和视频
-    fun uploadImg(filePath: String) {
-        mIProgressLoader?.updateMessage("上传中。。。")
-        mIProgressLoader?.showLoading()
-
-        //val filePath = Utils().encodeFilePath(mediaPath)
-        var file = File(filePath)
-
-        if (!file.exists()){
-            ToastUtils.showToast(requireContext(), "文件不存在")
-            mIProgressLoader?.dismissLoading()
-            return
-        }
-        val ext = file.absoluteFile.extension
-        val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
-
-        if (imageTypes.contains(ext.lowercase())){
-         /*  // Step 1: Load the image，读取图片
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            // Step 2: Compress the image，图片压缩
-            val compressedData = Utils().compressBitmap(bitmap, 60)
-            //获取文件扩展名
-
-            val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
-            val newFile = File(newFilePath)
-            // Step 3: Save the compressed image to a file，压缩图片
-            Utils().saveCompressedBitmapToFile(compressedData, newFile)
-
-            //if (BuildConfig.DEBUG){
-               var newBitmap = BitmapFactory.decodeFile(newFile.absolutePath)
-                println(newBitmap.width)
-            //}
-            if (newFile.exists()){
-                file = newFile
-            }else{
-                 //toast("压缩失败")
-            }
-*/
-            if (file.length() >= 2000 * 10 * 1000){
-                ToastUtils.showToast(requireContext(), "图片限制20M")
-                mIProgressLoader?.dismissLoading()
-                return
-            }
-
-        }else{
-            if (file.length() >= 3000 * 10 * 1000){
-                ToastUtils.showToast(requireContext(), "视频/文件限制300M")
-                mIProgressLoader?.dismissLoading()
-                return
-            }
-
-            val videoThumbnail = Utils().getVideoThumb(requireContext(), Uri.fromFile(file))
-            if (videoThumbnail == null){
-                ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
-                mIProgressLoader?.dismissLoading()
-                return
-            }
-        }
+     fun uploadFile(file: File) {
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()
@@ -666,6 +694,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     override fun onFailure(call: Call, e: IOException) {
                         // 上传失败
                         toast("上传失败" + e.localizedMessage)
+                        mIProgressLoader?.dismissLoading()
                     }
 
                     override fun onResponse(call: Call, response: Response) {
@@ -677,7 +706,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             val result = gson.fromJson(path, UploadResult::class.java)
 
                             if (result.code == 0 || result.code == 200) {
-                                if (imageTypes.contains(ext.lowercase())) {
+                                if (imageTypes.contains(file.absoluteFile.extension.lowercase())) {
                                     // 发送图片
                                     sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 } else {
@@ -771,17 +800,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             }
 
         }
-        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId)
+        //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
+        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId, withAutoReplyU)
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
-
-        if (isFirstSend){
-            //var cMContent = CMessage.WithAutoReplyOrBuilder()
-
-        }
-        isFirstSend = false
     }
 
     /**
@@ -792,7 +816,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
-        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID)
+
+        //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
+        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID, 0, withAutoReplyU)
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
@@ -804,7 +830,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
-        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_VIDEO, Constants.CONSULT_ID)
+        //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
+        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_VIDEO, Constants.CONSULT_ID, 0, withAutoReplyU)
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false

@@ -561,11 +561,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val questionTxt = this.question.content.data ?: ""
                 val txtAnswer = this.content ?: "null"
 
-                withAutoReplyU = CMessage.WithAutoReply.newBuilder()
+                var withAutoReplyBuilder = CMessage.WithAutoReply.newBuilder()
 
-                withAutoReplyU.title = questionTxt
-                withAutoReplyU.id = QA.id
-                withAutoReplyU.createdTime = Utils().getNowTimeStamp()
+                withAutoReplyBuilder.title = questionTxt
+                withAutoReplyBuilder.id = QA.id
+                withAutoReplyBuilder.createdTime = Utils().getNowTimeStamp()
 
                 val multipAnswer = this.answer?.joinToString(separator = "\n") ?: ""
                 // 发送提问消息
@@ -580,7 +580,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     val uQC = CMessage.MessageContent.newBuilder()
                     uQC.data = txtAnswer
                     uAnswer.content = uQC.build()
-                    withAutoReplyU.addAnswers(uAnswer)
+                    withAutoReplyBuilder.addAnswers(uAnswer)
                 }
                 if (multipAnswer.isNotEmpty()) {
                     //listener?.onSendLocalMsg(questionTxt, false)
@@ -594,12 +594,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             val uQC = CMessage.MessageImage.newBuilder()
                             uQC.uri = txtAnswer
                             uAnswer.image = uQC.build()
-                            withAutoReplyU.addAnswers(uAnswer)
+                            withAutoReplyBuilder.addAnswers(uAnswer)
                         }
 
                         a?.content?.data?.let {
                             // 自动回答
                             listener?.onSendLocalMsg(it, true, "MSG_TEXT")
+
+                            val uAnswer = CMessage.MessageUnion.newBuilder()
+                            val uQC = CMessage.MessageContent.newBuilder()
+                            uQC.data = txtAnswer
+                            uAnswer.content = uQC.build()
+                            withAutoReplyBuilder.addAnswers(uAnswer)
                         }
 
                         //}
@@ -607,6 +613,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     QA.clicked = true;
                     qaAdapter.notifyDataChanged()
                 }
+               // withAutoReplyU = withAutoReplyBuilder.build()
             }
         }
     }
