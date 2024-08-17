@@ -647,10 +647,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         }
                         Log.i(TAG, "上传文件大小:" + file.length() )
                         uploadFile(file)
-                        // If you need to update the UI, do it here
                     }
                 }
+
             }
+            //不压缩，直接上传
+        //uploadFile(file)
         }
     }
 
@@ -713,11 +715,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                                     sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 }
                             } else {
-                                /*if (path.contains("无效")){
-                                    toast("无效的文件类型")
-                                }else {
-                                    toast("上传失败，服务器返回无效路径")
-                                }*/
                                 toast(result.message?: "上传失败");
                             }
                         } else {
@@ -761,6 +758,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     ) {
         PictureSelector.create(KeFuFragment@this)
             .openCamera(SelectMimeType.TYPE_ALL)
+            .setRecordVideoMaxSecond(300)
             .forResult(resultCallbackListener)
     }
 
