@@ -330,6 +330,8 @@ class Utils {
                 outputFilePath             // Output file path
             )
 
+            //-movflags faststart
+
             //ffmpeg -i input.mov -c:v libx264 -pix_fmt yuv420p output.mp4
 
             FFmpeg.execute(command)

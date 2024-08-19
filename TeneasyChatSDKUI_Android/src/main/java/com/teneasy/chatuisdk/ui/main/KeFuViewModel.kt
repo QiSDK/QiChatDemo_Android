@@ -405,11 +405,11 @@ class KeFuViewModel() : ViewModel() {
             .queryChatHistory(param),
             object : ProgressLoadingCallBack<ReturnData<ChatHistory>>(null) {
                 override fun onSuccess(res: ReturnData<ChatHistory>) {
-                    res.data.list?.let {
+                    res.data?.list?.let {
                         mHistoryList.postValue(it)
                     }
 
-                    res.data.replyList?.let {
+                    res.data?.replyList?.let {
                         mReplyList = it as ArrayList<list>
                     }
                 } override fun onError(e: ApiException?) {

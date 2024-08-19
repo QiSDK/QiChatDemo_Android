@@ -747,6 +747,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     fun exitChat(){
         closeTimer()
         Constants.workerId = 0
+        isConnected = false
         chatLib?.disConnect()
         chatLib = null
         Log.i(TAG, "销毁聊天")
@@ -804,6 +805,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+
+        withAutoReplyU = null
     }
 
     /**
@@ -821,6 +824,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+
+        withAutoReplyU = null
     }
 
     fun sendVideoMsg(url: String) {
@@ -834,6 +839,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+
+        withAutoReplyU = null
     }
 
     //聊天sdk连接成功的回调

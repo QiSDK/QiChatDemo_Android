@@ -613,7 +613,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     QA.clicked = true;
                     qaAdapter.notifyDataChanged()
                 }
-               // withAutoReplyU = withAutoReplyBuilder.build()
+                withAutoReplyU = withAutoReplyBuilder.build()
             }
         }
     }
