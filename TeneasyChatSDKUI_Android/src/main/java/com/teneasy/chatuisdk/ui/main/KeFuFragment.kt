@@ -625,6 +625,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             return@withContext
                         }
 
+                        if (newFile.length() > 0) {
+                            file = newFile
+                        }
                         val videoThumbnail = Utils().getVideoThumb(requireContext(), Uri.fromFile(file))
                         if (videoThumbnail == null){
                             ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
@@ -632,9 +635,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             return@withContext
                         }
 
-                        if (newFile.length() > 0) {
-                            file = newFile
-                        }
                         uploadFile(file)
                         Log.i(TAG, "上传文件大小:" + file.length() )
                     } else {
@@ -652,7 +652,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
             }
             //不压缩，直接上传
-        //uploadFile(file)
+            //uploadFile(file)
         }
     }
 
@@ -714,6 +714,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                                 } else {
                                     sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 }
+                                Log.i(TAG, ("上传成功" + result.data?.filepath))
                             } else {
                                 toast(result.message?: "上传失败");
                             }
@@ -806,7 +807,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
 
-        withAutoReplyU = null
+        //withAutoReplyU = null
     }
 
     /**
@@ -1080,15 +1081,9 @@ code: 1002 无效的Token
         //第二层
         var cMContent = CMessage.MessageContent.newBuilder()
 
-        var d = Timestamp.newBuilder()
-        val cal = Calendar.getInstance()
-        cal.time = Date()
-        val millis = cal.timeInMillis
-        d.seconds = (millis * 0.001).toLong()
-
         //d.t = msgDate.time
         cMsg.msgId = msgId
-        cMsg.msgTime = d.build()
+        cMsg.msgTime = Utils().getNowTimeStamp()
         cMContent.data = textMsg
         cMsg.setContent(cMContent)
 

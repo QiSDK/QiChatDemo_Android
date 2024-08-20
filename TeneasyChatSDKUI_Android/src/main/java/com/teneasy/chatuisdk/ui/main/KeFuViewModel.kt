@@ -134,6 +134,7 @@ class KeFuViewModel() : ViewModel() {
         }
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
+        d.nanos = System.nanoTime().toInt();
         cMsg.msgTime = d.build()
 
         if (!imgPath.isEmpty()){
@@ -174,7 +175,7 @@ class KeFuViewModel() : ViewModel() {
         }
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
-        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
+        d.nanos = System.nanoTime().toInt();
         cMsg.msgTime = d.build()
 
         cMsg.msgId = (history?.msgId?: "0").toLong()
@@ -204,14 +205,7 @@ class KeFuViewModel() : ViewModel() {
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
 
-        var d = Timestamp.newBuilder()
-        val cal = Calendar.getInstance()
-        cal.time = Utils().convertStrToDate(history.msgTime)
-
-        val millis = cal.timeInMillis
-        d.seconds = (millis * 0.001).toLong()
-        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
-        cMsg.msgTime = d.build()
+        cMsg.msgTime = Utils().getNowTimeStamp()
 
         //回复消息
         val replyMsgId = (history.replyMsgId?: "0").toLong()
@@ -254,15 +248,7 @@ class KeFuViewModel() : ViewModel() {
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
 
-        var d = Timestamp.newBuilder()
-        val cal = Calendar.getInstance()
-        cal.time = Date()
-
-        val millis = cal.timeInMillis
-        d.seconds = (millis * 0.001).toLong()
-        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
-        cMsg.msgTime = d.build()
-
+        cMsg.msgTime = Utils().getNowTimeStamp()
         cMsg.msgId = msgId
         cMContent.data = text.trim()
         cMsg.setContent(cMContent)

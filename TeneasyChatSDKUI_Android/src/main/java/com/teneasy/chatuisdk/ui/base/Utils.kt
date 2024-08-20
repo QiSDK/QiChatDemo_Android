@@ -304,13 +304,13 @@ class Utils {
     }
 
     fun getNowTimeStamp(): Timestamp {
-        var d = Timestamp.newBuilder()
+        val d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
         cal.time = Date()
 
         val millis = cal.timeInMillis
         d.seconds = (millis * 0.001).toLong()
-        d.nanos = ((millis * 0.001) * 1_000_000).toInt()
+        //d.nanos = System.nanoTime().toInt();
         return d.build()
     }
 
