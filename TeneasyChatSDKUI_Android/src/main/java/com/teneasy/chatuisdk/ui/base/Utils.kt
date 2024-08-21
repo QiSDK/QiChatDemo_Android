@@ -12,8 +12,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
+import android.util.Size
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.RelativeLayout
@@ -222,9 +224,18 @@ class Utils {
      */
     fun getVideoThumb(context: Context, uri: Uri): Bitmap? {
         try {
-            val mediaMetadataRetriever = MediaMetadataRetriever()
-            mediaMetadataRetriever.setDataSource(context, uri)
-            return mediaMetadataRetriever.frameAtTime
+            // Load thumbnail of a specific media item.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val thumbnail: Bitmap =
+                    context.contentResolver.loadThumbnail(
+                        uri, Size(640, 480), null
+                    )
+                return thumbnail
+            } else {
+                val mediaMetadataRetriever = MediaMetadataRetriever()
+                mediaMetadataRetriever.setDataSource(context, uri)
+                return mediaMetadataRetriever.frameAtTime
+            }
         } catch (ex: Exception) {
             Toast
                 .makeText(context, "从图像获取缩略图失败", Toast.LENGTH_SHORT)

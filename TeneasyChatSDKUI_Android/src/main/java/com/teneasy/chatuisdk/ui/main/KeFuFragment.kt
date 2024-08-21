@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -8,6 +9,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.util.Size
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
@@ -628,11 +630,13 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         if (newFile.length() > 0) {
                             file = newFile
                         }
+
+
                         val videoThumbnail = Utils().getVideoThumb(requireContext(), Uri.fromFile(file))
                         if (videoThumbnail == null){
                             ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
-                            mIProgressLoader?.dismissLoading()
-                            return@withContext
+                           // mIProgressLoader?.dismissLoading()
+                            //return@withContext
                         }
 
                         uploadFile(file)
