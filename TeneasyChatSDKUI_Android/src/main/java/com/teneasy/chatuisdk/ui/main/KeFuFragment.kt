@@ -167,6 +167,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
         chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc")
         chatLib?.listener = this
+        Log.i(TAG, "开始初始化SDK")
         chatLib?.makeConnect()
     }
 
@@ -522,6 +523,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Log.i(TAG, "检查连接状态:${isConnected}")
         if(isConnected) {
             Log.i(TAG, "startTimer return")
+            showTip("状态：已连接")
            return
         }
         if (!isFirstLoad) {
@@ -744,6 +746,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     //页面销毁前销毁聊天
     override fun onDestroy() {
+        Log.i(TAG, "onDestroy")
         exitChat()
         super.onDestroy()
     }
