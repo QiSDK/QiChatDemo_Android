@@ -541,10 +541,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 //                            initChatSDK(Constants.domain)
 //                        }
                         if (chatLib == null) {
-                            Log.d(TAG, "SDK 重新初始化")
+                            Log.d(TAG, "SDK重新初始化...")
+                            showTip("初始化SDK...")
                             initChatSDK(Constants.domain)
                         }else{
-                            Log.d(TAG, "SDK 重新连接")
+                            showTip("SDK连接中...")
+                            Log.d(TAG, "SDK连接中")
                             chatLib?.makeConnect()
                         }
                     }
@@ -758,6 +760,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         isConnected = false
         chatLib?.disConnect()
         chatLib = null
+        isFirstLoad = true
         Log.i(TAG, "销毁聊天")
     }
 
