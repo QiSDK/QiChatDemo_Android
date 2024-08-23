@@ -526,38 +526,37 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             showTip("状态：已连接")
            return
         }
-        if (!isFirstLoad) {
-            showTip("正在重新连接...")
-            Log.i(TAG, "正在重新连接...")
+        if (isFirstLoad) {
+            showTip("初始化SDK")
         }
+
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
-        if(reConnectTimer == null) {
+        //if(reConnectTimer == null) {
+        reConnectTimer?.cancel()
+        reConnectTimer?.purge()
             reConnectTimer = Timer()
             reConnectTimer?.schedule(object : TimerTask() {
                 override fun run() {
-                    if (chatLib == null || !isConnected) {
-                        //Log.d(TAG, "SDK 重新初始化")
-//                        runOnUiThread {
-//                            initChatSDK(Constants.domain)
-//                        }
                         if (chatLib == null) {
                             Log.d(TAG, "SDK重新初始化...")
                             showTip("初始化SDK...")
                             initChatSDK(Constants.domain)
-                        }else{
+                        } else if (!isConnected){
                             showTip("SDK连接中...")
                             Log.d(TAG, "SDK连接中")
                             chatLib?.makeConnect()
                         }
-                    }
                 }
-            }, 3000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
-        }
+            }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
+        //} else{
+//                showTip("...")
+//        }
     }
 
     // 关闭连接状态定时器
     private fun closeTimer() {
         if(reConnectTimer != null) {
+            reConnectTimer?.purge()
             reConnectTimer?.cancel()
             reConnectTimer = null
         }
@@ -748,9 +747,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     //页面销毁前销毁聊天
     override fun onDestroy() {
+        super.onDestroy()
         Log.i(TAG, "onDestroy")
         exitChat()
-        super.onDestroy()
     }
 
     //释放聊天相关库和变量
@@ -882,7 +881,7 @@ code: 1002 无效的Token
         if (msg.code == 1002 || msg.code == 1010) {
             if (msg.code == 1002){
                 //showTip("无效的Token")
-                toast("无效的Token")
+                toast("无效的Token " + Constants.xToken)
             }else {
                 //showTip("在别处登录了")
                 toast("在别处登录了")
