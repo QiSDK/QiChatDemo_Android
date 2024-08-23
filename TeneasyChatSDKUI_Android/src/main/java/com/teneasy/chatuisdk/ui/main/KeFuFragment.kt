@@ -614,7 +614,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 mIProgressLoader?.dismissLoading()
                 return
             }
-
+            uploadFile(file)
         }else{
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
