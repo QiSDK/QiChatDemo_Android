@@ -414,7 +414,6 @@ class KeFuViewModel() : ViewModel() {
 //        val filteredList =
 //            list.filter { it.sendStatus != MessageSendState.发送成功 && it.isLeft == false }
        // val filteredList =  unSentMessage[CONSULT_ID]
-
         unSentMessage[CONSULT_ID]?.let {
             Log.i(TAG, "handleUnSendMsg: " + it.size)
             for (item in it) {
@@ -445,6 +444,7 @@ class KeFuViewModel() : ViewModel() {
             mlMsgList.value?.filter { it.sendStatus != MessageSendState.发送成功 && it.isLeft == false }
 
         unSentMessage[CONSULT_ID] = filteredList as ArrayList<MessageItem>
+        Log.i(TAG, "getUnSendMsg: " + filteredList.size)
     }
 
 }

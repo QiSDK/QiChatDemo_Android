@@ -38,6 +38,8 @@ import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.GlideEngine
@@ -177,6 +179,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         if (workInfo.workerName != null){
             binding?.tvTitle?.text = workInfo.workerName
         }
+
         //定时检测链接状态
         startTimer()
     }
@@ -531,7 +534,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
 
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
-        //if(reConnectTimer == null) {
+        if(reConnectTimer == null) {
         reConnectTimer?.cancel()
         reConnectTimer?.purge()
             reConnectTimer = Timer()
@@ -542,15 +545,15 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             showTip("初始化SDK...")
                             initChatSDK(Constants.domain)
                         } else if (!isConnected){
-                            showTip("SDK连接中...")
+                            //showTip("SDK连接中...")
                             Log.d(TAG, "SDK连接中")
                             chatLib?.makeConnect()
                         }
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
-        //} else{
-//                showTip("...")
-//        }
+        } else{
+                showTip("...")
+        }
     }
 
     // 关闭连接状态定时器
@@ -866,6 +869,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
        chatExpireTime = c.chatExpireTime.toInt()
 
         //检查并重发上次连接未发出去的消息
+        if (unSentMessage[CONSULT_ID] == null || unSentMessage[CONSULT_ID]!!.isEmpty()){
+            viewModel.getUnSendMsg()
+        }
         msgAdapter.msgList?.let { chatLib?.let { it1 -> viewModel.handleUnSendMsg(it, it1) } }
     }
 
@@ -881,17 +887,18 @@ code: 1002 无效的Token
         if (msg.code == 1002 || msg.code == 1010) {
             if (msg.code == 1002){
                 //showTip("无效的Token")
-                toast("无效的Token " + Constants.xToken)
+                //有时候服务器反馈的这个消息不准，可忽略它
+                //toast("无效的Token ")
             }else {
                 //showTip("在别处登录了")
                 toast("在别处登录了")
-            }
-            //禁掉重试机制
-            runOnUiThread{
-                mIProgressLoader?.dismissLoading()
-                exitChat()
-                //返回到上个页面
-                findNavController().popBackStack()
+                //禁掉重试机制
+                runOnUiThread{
+                    mIProgressLoader?.dismissLoading()
+                    exitChat()
+                    //返回到上个页面
+                    findNavController().popBackStack()
+                }
             }
         }else{
             showTip("")
