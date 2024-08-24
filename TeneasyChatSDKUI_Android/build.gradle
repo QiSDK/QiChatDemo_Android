@@ -26,6 +26,7 @@ android {
                 checkReleaseBuilds false
                 abortOnError false
             }
+            crunchPngs false // or true
         }
     }
     compileOptions {
