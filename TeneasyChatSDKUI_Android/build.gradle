@@ -125,19 +125,19 @@ dependencies {
     implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
 }
 
-//afterEvaluate {
-//    publishing {
-//        publications {
-//            // Creates a Maven publication called "release".
-//            release(MavenPublication) {
-//                from components.release
-//                groupId = 'com.github.QiSDK'
-//                artifactId = 'qi-chatsdkui'
-//                version = '1.0.5'
-//            }
-//        }
-//    }
-//}
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.QiSDK'
+                artifactId = 'qi-chatsdkui'
+                version = '1.0.5'
+            }
+        }
+    }
+}
 //
 //publishing {
 //    publications {
