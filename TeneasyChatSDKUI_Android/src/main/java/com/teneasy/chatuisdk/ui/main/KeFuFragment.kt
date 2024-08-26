@@ -101,6 +101,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     private var lastMsg: CMessage.Message? = null
     private var workInfo = WorkerInfo()
+    private var lastTimestamp: Timestamp? = null
 
     private var isFirstSend = true
     val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
@@ -533,6 +534,15 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             showTip("初始化SDK")
         }
 
+        //当页面在后台很多个小时之后, reConnectTimer期待为无效的，如果仍然不会null，就需要判断
+        if (reConnectTimer != null && lastTimestamp != null){
+            val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+            if (((curTimestamp.seconds - lastTimestamp?.seconds!!) ?: 0) > 10){
+                lastTimestamp = null
+                Log.d(TAG, "reConnectTimer 已经无效")
+            }
+        }
+
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         if(reConnectTimer == null) {
         reConnectTimer?.cancel()
@@ -549,6 +559,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             Log.d(TAG, "SDK连接中")
                             chatLib?.makeConnect()
                         }
+                    lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
         } else{
