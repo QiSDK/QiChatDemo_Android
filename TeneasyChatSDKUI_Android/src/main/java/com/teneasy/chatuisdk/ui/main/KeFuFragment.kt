@@ -524,6 +524,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     //开一个定时器每隔几秒检查连接状态
     private fun startTimer() {
+        //当页面在后台很多个小时之后, reConnectTimer期待为无效，如果仍然不为null，就需要判断并强制为null以边重新初始化
+        if (reConnectTimer != null && lastTimestamp != null){
+            val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+            Log.d(TAG, "时间间隔：${(curTimestamp.seconds - lastTimestamp?.seconds!!)}")
+            if (((lastTimestamp?.seconds!!  -  curTimestamp.seconds) ?: 0) > 10){
+                lastTimestamp = null
+                Log.d(TAG, "reConnectTimer 已经无效")
+            }
+        }
+
         Log.i(TAG, "检查连接状态:${isConnected}")
         if(isConnected) {
             Log.i(TAG, "startTimer return")
@@ -532,15 +542,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
         if (isFirstLoad) {
             showTip("初始化SDK")
-        }
-
-        //当页面在后台很多个小时之后, reConnectTimer期待为无效的，如果仍然不会null，就需要判断
-        if (reConnectTimer != null && lastTimestamp != null){
-            val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
-            if (((curTimestamp.seconds - lastTimestamp?.seconds!!) ?: 0) > 10){
-                lastTimestamp = null
-                Log.d(TAG, "reConnectTimer 已经无效")
-            }
         }
 
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
