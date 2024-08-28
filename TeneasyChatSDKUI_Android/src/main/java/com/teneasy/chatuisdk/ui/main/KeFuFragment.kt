@@ -528,7 +528,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         if (reConnectTimer != null && lastTimestamp != null){
             val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
             Log.d(TAG, "时间间隔：${(curTimestamp.seconds - lastTimestamp?.seconds!!)}")
-            if (((lastTimestamp?.seconds!!  -  curTimestamp.seconds) ?: 0) > 10){
+            if (((curTimestamp.seconds - lastTimestamp?.seconds!! ) ?: 0) > 10){
                 lastTimestamp = null
                 Log.d(TAG, "reConnectTimer 已经无效")
             }
@@ -560,6 +560,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             Log.d(TAG, "SDK连接中")
                             chatLib?.makeConnect()
                         }
+                    if (lastTimestamp == null)
                     lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
