@@ -35,8 +35,8 @@ data class AutoReply(
         val replyMsgID: String,
         val msgOp: String,
         val worker: Long,
-        val autoReplyFlag: Any? = null,
-        val msgFmt: String,
+       // val autoReplyFlag: Any? = null,
+      //  val msgFmt: String,
         val consultID: String,
         val content: Content,
         val image: Audio

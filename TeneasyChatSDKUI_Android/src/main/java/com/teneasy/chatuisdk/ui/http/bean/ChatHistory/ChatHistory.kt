@@ -21,8 +21,8 @@ data class list (
 
   val msgOp: String,
   val worker: Long,
-  val autoReplyFlag: AutoReplyFlag,
-  val msgFmt: String,
+  //val autoReplyFlag: AutoReplyFlag,
+  //val msgFmt: String,
 
   val consultID: String,
 
