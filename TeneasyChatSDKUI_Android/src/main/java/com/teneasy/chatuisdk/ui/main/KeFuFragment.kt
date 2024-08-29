@@ -530,6 +530,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             Log.d(TAG, "时间间隔：${(curTimestamp.seconds - lastTimestamp?.seconds!!)}")
             if (((curTimestamp.seconds - lastTimestamp?.seconds!! ) ?: 0) > 10){
                 lastTimestamp = null
+                reConnectTimer = null
                 Log.d(TAG, "reConnectTimer 已经无效")
             }
         }
@@ -560,8 +561,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             Log.d(TAG, "SDK连接中")
                             chatLib?.makeConnect()
                         }
-                    if (lastTimestamp == null)
-                    lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+                   lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
         } else{
@@ -831,8 +831,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
-
-        //withAutoReplyU = null
     }
 
     /**
@@ -850,8 +848,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
-
-        withAutoReplyU = null
     }
 
     fun sendVideoMsg(url: String) {
@@ -865,8 +861,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
-
-        withAutoReplyU = null
     }
 
     //聊天sdk连接成功的回调
@@ -946,6 +940,8 @@ code: 1002 无效的Token
             //切记，这里的msgId不是从消息体里面来的，而是从这个函数的第三个参数来的
             item.msgId = msgId
             viewModel.mlMsgList.value?.set(index, item)
+            //第一条发出去成功之后，把自动回复设置为null
+            withAutoReplyU = null
         }
 
         Handler(Looper.getMainLooper()).postDelayed(
