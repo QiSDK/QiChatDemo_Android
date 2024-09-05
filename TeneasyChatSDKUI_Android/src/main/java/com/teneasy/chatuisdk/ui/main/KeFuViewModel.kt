@@ -407,13 +407,6 @@ class KeFuViewModel() : ViewModel() {
     }
 
     fun handleUnSendMsg(list: ArrayList<MessageItem>, chatLib: ChatLib): Boolean {
-//        if (list.size == 0) {
-//            return false
-//        }
-//
-//        val filteredList =
-//            list.filter { it.sendStatus != MessageSendState.发送成功 && it.isLeft == false }
-       // val filteredList =  unSentMessage[CONSULT_ID]
         unSentMessage[CONSULT_ID]?.let {
             Log.i(TAG, "handleUnSendMsg: " + it.size)
             for (item in it) {

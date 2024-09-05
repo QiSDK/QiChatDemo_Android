@@ -106,6 +106,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private var isFirstSend = true
     val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
 
+    private var lastActiveDateTime = Date()
+
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -525,14 +527,20 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     //开一个定时器每隔几秒检查连接状态
     private fun startTimer() {
         //当页面在后台很多个小时之后, reConnectTimer期待为无效，如果仍然不为null，就需要判断并强制为null以边重新初始化
-        if (reConnectTimer != null && lastTimestamp != null){
-            val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
-            Log.d(TAG, "时间间隔：${(curTimestamp.seconds - lastTimestamp?.seconds!!)}")
-            if (((curTimestamp.seconds - lastTimestamp?.seconds!! ) ?: 0) > 10){
-                lastTimestamp = null
-                reConnectTimer = null
-                Log.d(TAG, "reConnectTimer 已经无效")
-            }
+//        if (reConnectTimer != null && lastTimestamp != null){
+//            val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+//            Log.d(TAG, "时间间隔：${(curTimestamp.seconds - lastTimestamp?.seconds!!)}")
+//            if (((curTimestamp.seconds - lastTimestamp?.seconds!! ) ?: 0) > 10){
+//                lastTimestamp = null
+//                reConnectTimer = null
+//                Log.d(TAG, "reConnectTimer 已经无效")
+//            }
+//        }
+
+        //当页面在后台很多个小时之后, reConnectTimer期待为无效，如果仍然不为null，就需要判断并强制为null以边重新初始化
+        Log.d(TAG, "时间间隔：${(Utils().differenceInMinutes(lastActiveDateTime, Date()))}")
+        if (Utils().differenceInMinutes(lastActiveDateTime, Date()) > 60 * 4){
+            reConnectTimer = null
         }
 
         Log.i(TAG, "检查连接状态:${isConnected}")
@@ -547,25 +555,25 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
         if(reConnectTimer == null) {
-        reConnectTimer?.cancel()
-        reConnectTimer?.purge()
+            reConnectTimer?.cancel()
+            reConnectTimer?.purge()
             reConnectTimer = Timer()
             reConnectTimer?.schedule(object : TimerTask() {
                 override fun run() {
-                        if (chatLib == null) {
-                            Log.d(TAG, "SDK重新初始化...")
-                            showTip("初始化SDK...")
-                            initChatSDK(Constants.domain)
-                        } else if (!isConnected){
-                            //showTip("SDK连接中...")
-                            Log.d(TAG, "SDK连接中")
-                            chatLib?.makeConnect()
-                        }
-                   lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+                    if (chatLib == null) {
+                        Log.d(TAG, "SDK重新初始化...")
+                        showTip("初始化SDK...")
+                        initChatSDK(Constants.domain)
+                    } else if (!isConnected){
+                        //showTip("SDK连接中...")
+                        Log.d(TAG, "SDK连接中")
+                        chatLib?.makeConnect()
+                    }
+                    lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
         } else{
-                showTip("...")
+                showTip("请稍等...")
         }
     }
 
@@ -831,6 +839,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+        lastActiveDateTime = Date()
     }
 
     /**
@@ -848,6 +857,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+        lastActiveDateTime = Date()
     }
 
     fun sendVideoMsg(url: String) {
@@ -861,6 +871,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+        lastActiveDateTime = Date()
     }
 
     //聊天sdk连接成功的回调

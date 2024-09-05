@@ -11,6 +11,8 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
@@ -98,24 +100,6 @@ class Utils {
     fun differenceInMinutes(date1: Date, date2: Date): Long {
         val diffInMillis = date2.time - date1.time
         return TimeUnit.MILLISECONDS.toMinutes(diffInMillis)
-    }
-
-
-    fun isMessageTimeDifferenceValid(
-        lastMsgTime: Date?,
-        sendingMsgTime: Date?,
-        minutesDifference: Int
-    ): Boolean {
-        if (lastMsgTime == null || sendingMsgTime == null) {
-            return false
-        }
-
-        // Calculate the time 5 minutes before lastMsgTime
-        val fiveMinutesInMillis = minutesDifference * 60 * 1000
-        val lastMsgTimeMinusFiveMinutes = Date(lastMsgTime.time - fiveMinutesInMillis)
-
-        // Compare the adjusted lastMsgTime with sendingMsgTime
-        return lastMsgTimeMinusFiveMinutes > sendingMsgTime
     }
 
     fun sessionTimeout(lastMsgTime: Date?, sendingMsgTime: Date?, secondsDifference: Int): Boolean {
@@ -375,6 +359,18 @@ class Utils {
                 }
             }
             return@launch
+        }
+    }
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        return when {
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            else -> false
         }
     }
 }
