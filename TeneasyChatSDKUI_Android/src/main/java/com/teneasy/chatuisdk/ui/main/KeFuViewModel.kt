@@ -413,7 +413,7 @@ class KeFuViewModel() : ViewModel() {
                 if (item.sendStatus != MessageSendState.发送成功) {
                     runBlocking {
                         launch {
-                            delay(300L)
+                            delay(400L)
                             item.cMsg?.let {
                                 Log.i(TAG, "resend payloadId:" + item.payLoadId)
                                 chatLib.resendMSg(it, item.payLoadId)
