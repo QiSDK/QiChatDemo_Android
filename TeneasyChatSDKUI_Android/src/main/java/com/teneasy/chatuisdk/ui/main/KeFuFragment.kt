@@ -833,7 +833,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             }
 
         }
-        //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
+        //说明至少已经发送成功1条消息，无需再附带自动回复消息
+        if (lastMsg != null){
+            withAutoReplyU = null
+        }
         chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId, withAutoReplyU)
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
@@ -851,7 +854,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             return
         }
 
-        //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
+        //说明至少已经发送成功1条消息，无需再附带自动回复消息
+        if (lastMsg != null){
+            withAutoReplyU = null
+        }
+
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID, 0, withAutoReplyU)
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
@@ -864,6 +871,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         if(chatLib == null){
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
+        }
+
+        //说明至少已经发送成功1条消息，无需再附带自动回复消息
+        if (lastMsg != null){
+            withAutoReplyU = null
         }
         //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
         chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_VIDEO, Constants.CONSULT_ID, 0, withAutoReplyU)
