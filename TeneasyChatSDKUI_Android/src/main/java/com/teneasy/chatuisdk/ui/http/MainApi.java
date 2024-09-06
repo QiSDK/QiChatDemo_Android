@@ -7,6 +7,7 @@ import com.teneasy.chatuisdk.ui.http.bean.AutoReply;
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem;
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory;
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request;
+import com.teneasy.chatuisdk.ui.http.bean.ErrorReport;
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo;
 
 import java.util.List;
@@ -47,6 +48,9 @@ public class MainApi {
 
         @POST("v1/api/chat/mark-read")
         Observable<ReturnData<Object>> markRead(@Body JsonObject param);
+
+        @POST("v1/api/error-report/upload")
+        Observable<ReturnData<Object>> reportError(@Body ErrorReport param);
 
         @Multipart
         @POST("/v1/assets/upload/")

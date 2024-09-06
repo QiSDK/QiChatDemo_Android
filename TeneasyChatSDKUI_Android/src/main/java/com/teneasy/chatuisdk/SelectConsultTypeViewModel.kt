@@ -8,11 +8,13 @@ import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
+import com.teneasy.chatuisdk.ui.http.bean.DataItem
+import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
 
-class SelectConsultTypeViewModel : ViewModel() {
+class SelectConsultTypeViewModel : BaseViewModel() {
      var consultList = MutableLiveData<ArrayList<Consults>>()
     //获取咨询类型列表
     fun queryEntrance() {
@@ -34,7 +36,10 @@ class SelectConsultTypeViewModel : ViewModel() {
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     consultList.value = ArrayList()
-                    println(e)
+
+                    var errorReport = ErrorReport(listOf(DataItem(request.url.toString(), 0, "", 3, "")))
+                    //println(e)
+                    reportError(errorReport)
                 }
             })
     }
@@ -64,4 +69,7 @@ class SelectConsultTypeViewModel : ViewModel() {
                 }
             })
     }
+
+
+
 }

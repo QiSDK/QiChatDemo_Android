@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.NetworkInterface
 
 class Utils {
 
@@ -372,5 +373,24 @@ class Utils {
             networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
             else -> false
         }
+    }
+
+
+    fun getIPAddress(): String? {
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        while (interfaces.hasMoreElements()) {
+            val networkInterface = interfaces.nextElement()
+            if (!networkInterface.isUp || networkInterface.isLoopback || networkInterface.isVirtual) {
+                continue
+            }
+            val addresses = networkInterface.inetAddresses
+            while (addresses.hasMoreElements()) {
+                val address = addresses.nextElement()
+                if (!address.isLoopbackAddress) { // IPv4 and not loopback
+                    return address.hostAddress
+                }
+            }
+        }
+        return null
     }
 }
