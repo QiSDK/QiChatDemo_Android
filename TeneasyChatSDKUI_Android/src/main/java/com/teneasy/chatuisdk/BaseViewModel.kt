@@ -12,6 +12,7 @@ import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
+import java.util.UUID
 
 open class BaseViewModel : ViewModel() {
     //获取咨询列表之后调用，清除未读数
@@ -23,6 +24,7 @@ open class BaseViewModel : ViewModel() {
         }else {
             request.headers("X-Token", Constants.cert)
         }
+        request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .reportError(error),
             object : ProgressLoadingCallBack<ReturnData<Any>>(null) {
