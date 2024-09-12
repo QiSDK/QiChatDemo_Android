@@ -1,10 +1,10 @@
 package com.teneasy.chatuisdk.ui.http.bean
 
 data class ErrorReport(
-    val data: List<DataItem>
+    val data: ArrayList<ErrorItem>
 )
 
-data class DataItem(
+data class ErrorItem(
     val url: String,
     val code: Int,
     val payload: String,
@@ -13,3 +13,8 @@ data class DataItem(
     val created_at: String
 )
 
+class ErrorPayload  (
+    val header: String?,
+    val request: String?,
+    val body: String?
+)

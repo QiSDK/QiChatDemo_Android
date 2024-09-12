@@ -6,9 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.errorReport
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.DataItem
+import com.teneasy.chatuisdk.ui.http.bean.ErrorItem
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
@@ -37,8 +39,8 @@ class SelectConsultTypeViewModel : BaseViewModel() {
                     super.onError(e)
                     consultList.value = ArrayList()
 
-                    var errorReport = ErrorReport(listOf(DataItem(request.url.toString(), 0, "", 3, "")))
-                    //println(e)
+                   var errorItem =  ErrorItem(request.url.toString(), 0, "", 3, "")))
+                    errorReport.data.add(errorItem)
                     reportError(errorReport)
                 }
             })

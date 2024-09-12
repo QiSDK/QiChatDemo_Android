@@ -1,5 +1,6 @@
 package com.teneasy.chatuisdk.ui.base
 
+import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
 
@@ -78,6 +79,7 @@ class Constants {
 
         //var withAutoReplyU = CMessage.WithAutoReply.newBuilder()
         var withAutoReplyU: CMessage.WithAutoReply? = null
+        var errorReport = ErrorReport(listOf())
 
         //self.autoReply.qa.removeAll()
 
