@@ -5,16 +5,16 @@ data class ErrorReport(
 )
 
 data class ErrorItem(
-    val url: String,
-    val code: Int,
-    val payload: String,
+    var url: String,
+    var code: Int,
+    var payload: String = "",
     //val ip: String,
-    val platform: Int,
-    val created_at: String
+    var platform: Int,
+    var created_at: String
 )
 
 class ErrorPayload  (
-    val header: String?,
-    val request: String?,
-    val body: String?
+    var header: String? = "",
+    var request: String? = "",
+    var body: String? = ""
 )

@@ -4,12 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.errorReport
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
-import com.teneasy.chatuisdk.ui.http.bean.DataItem
 import com.teneasy.chatuisdk.ui.http.bean.ErrorItem
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
@@ -23,25 +23,27 @@ class SelectConsultTypeViewModel : BaseViewModel() {
         val param = JsonObject()
         val request = XHttp.custom().accessToken(false)
         //这里需要用cert
+        var token = Constants.cert
         if (Constants.xToken.length > 0){
-            request.headers("X-Token", Constants.xToken)
-        }else {
-            request.headers("X-Token", Constants.cert)
+            token =  Constants.xToken
         }
+        request.headers("X-Token", token)
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryEntrance(param),
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
                 override fun onSuccess(res: ReturnData<Entrance>) {
                     consultList.value = res.data.consults
+
+                    if (res.code != 0){
+                        val resp = Gson().toJson(res)
+                        logError(res.code, "", "x-token " + token, resp, request.url)
+                    }
                 }
 
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     consultList.value = ArrayList()
-
-                   var errorItem =  ErrorItem(request.url.toString(), 0, "", 3, "")))
-                    errorReport.data.add(errorItem)
-                    reportError(errorReport)
+                    logError(101, "", "x-token " + token, e?.message?: "", request.url )
                 }
             })
     }

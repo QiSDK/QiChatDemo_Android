@@ -79,7 +79,7 @@ class Constants {
 
         //var withAutoReplyU = CMessage.WithAutoReply.newBuilder()
         var withAutoReplyU: CMessage.WithAutoReply? = null
-        var errorReport = ErrorReport(listOf())
+        var errorReport = ErrorReport(arrayListOf())
 
         //self.autoReply.qa.removeAll()
 
