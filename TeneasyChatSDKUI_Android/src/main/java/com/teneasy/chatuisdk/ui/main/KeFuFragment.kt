@@ -817,6 +817,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             showTip("SDK还未初始化")
             return
         }
+
+        if (txt.isEmpty()){
+            Toast.makeText(requireContext(), "请输入内容", Toast.LENGTH_SHORT).show()
+            return
+        }
          /*
             用户发送消息，要先比对上一条时间 ，超过配置的时间就分配新客服
          */
