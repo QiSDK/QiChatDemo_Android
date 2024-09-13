@@ -417,8 +417,11 @@ class KeFuViewModel() : BaseViewModel() {
                     res.data?.replyList?.let {
                         mReplyList = it as ArrayList<list>
                     }
-                    val resp = Gson().toJson(res)
-                    logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
+
+                    if (res.code != 0) {
+                        val resp = Gson().toJson(res)
+                        logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
+                    }
                 }
 
                 override fun onError(e: ApiException?) {

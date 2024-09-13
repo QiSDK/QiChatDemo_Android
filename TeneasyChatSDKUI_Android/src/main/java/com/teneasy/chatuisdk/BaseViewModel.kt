@@ -48,7 +48,9 @@ open class BaseViewModel : ViewModel() {
 
         errorReport.data.add(errorItem)
 
-        reportError(errorReport)
+        if (errorReport.data.size > 0) {
+            reportError(errorReport)
+        }
     }
 
     //获取咨询列表之后调用，清除未读数
@@ -69,6 +71,7 @@ open class BaseViewModel : ViewModel() {
             .reportError(error),
             object : ProgressLoadingCallBack<ReturnData<Any>>(null) {
                 override fun onSuccess(res: ReturnData<Any>) {
+                    errorReport.data.clear()
                     Log.d("reportError", "上报成功")
                 }
                 override fun onError(e: ApiException?) {

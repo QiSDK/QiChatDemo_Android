@@ -30,6 +30,9 @@ class SelectConsultTypeViewModel : BaseViewModel() {
         }
         request.headers("X-Token", token)
         request.headers("x-trace-id", UUID.randomUUID().toString())
+
+        val requestUrl = Constants.baseUrlApi() + "/" + "v1/api/query-entrance"
+
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryEntrance(param),
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
@@ -38,14 +41,14 @@ class SelectConsultTypeViewModel : BaseViewModel() {
 
                     if (res.code != 0){
                         val resp = Gson().toJson(res)
-                        logError(res.code, "", "x-token " + token, resp, request.url)
+                        logError(res.code, "", "x-token " + token, resp, requestUrl)
                     }
                 }
 
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     consultList.value = ArrayList()
-                    logError(e?.code?:500, "", "x-token " + token, e?.message?: "", request.url )
+                    logError(e?.code?:500, "", "x-token " + token, e?.message?: "", requestUrl )
                 }
             })
     }
