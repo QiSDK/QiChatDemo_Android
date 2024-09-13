@@ -62,16 +62,22 @@ class SelectConsultTypeViewModel : BaseViewModel() {
         }else {
             request.headers("X-Token", Constants.cert)
         }
+
+        val requestUrl = Constants.baseUrlApi() + "/" + "v1/api/chat/mark-read"
+
         request.call(request.create(MainApi.IMainTask::class.java)
             .markRead(param),
             object : ProgressLoadingCallBack<ReturnData<Any>>(null) {
                 override fun onSuccess(res: ReturnData<Any>) {
                     Log.d("Consult_ChatLib", "清零成功")
+                    //val resp = Gson().toJson(res)
+                    //logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
                 }
 
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", requestUrl)
                 }
             })
     }

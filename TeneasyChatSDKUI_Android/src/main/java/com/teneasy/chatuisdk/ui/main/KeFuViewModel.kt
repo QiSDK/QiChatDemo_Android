@@ -303,6 +303,8 @@ class KeFuViewModel() : BaseViewModel() {
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.headers("x-trace-id", UUID.randomUUID().toString())
+
+        val requestUrl = Constants.baseUrlApi() + "/" + "/v1/api/query-worker"
         request.call(request.create(MainApi.IMainTask::class.java)
             .assignWorker(param),
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
@@ -310,13 +312,13 @@ class KeFuViewModel() : BaseViewModel() {
                     mlAssignWorker.postValue(res.data)
                     if (res.code != 0){
                         val resp = Gson().toJson(res)
-                        logError(res.code, "", "x-token " + Constants.xToken, resp, request.url)
+                        logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
                     }
                 }
 
                 override fun onError(e: ApiException?) {
                     super.onError(e)
-                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", request.url )
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", requestUrl )
                 }
             })
     }
@@ -356,13 +358,15 @@ class KeFuViewModel() : BaseViewModel() {
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.headers("x-trace-id", UUID.randomUUID().toString())
+        val requestUrl = Constants.baseUrlApi() + "/" + "v1/api/query-auto-reply"
+
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryAutoReply(param),
             object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
                 override fun onSuccess(res: ReturnData<AutoReply>) {
                         if (res.code != 0 || res.data == null || res.data.autoReplyItem == null){
                             val resp = Gson().toJson(res)
-                            logError(res.code, "", "x-token " + Constants.xToken, resp, request.url)
+                            logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
                             Log.d("AdapterNChatLib", "自动回复为空")
                         }else {
                             res.data.autoReplyItem?.let {
@@ -372,7 +376,7 @@ class KeFuViewModel() : BaseViewModel() {
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)
-                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", request.url )
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", requestUrl )
                 }
             }
         )
@@ -400,6 +404,8 @@ class KeFuViewModel() : BaseViewModel() {
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
         request.headers("x-trace-id", UUID.randomUUID().toString())
+
+        val requestUrl = Constants.baseUrlApi() + "/" + "v1/api/message/sync"
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryChatHistory(param),
             object : ProgressLoadingCallBack<ReturnData<ChatHistory>>(null) {
@@ -411,9 +417,14 @@ class KeFuViewModel() : BaseViewModel() {
                     res.data?.replyList?.let {
                         mReplyList = it as ArrayList<list>
                     }
-                } override fun onError(e: ApiException?) {
+                    val resp = Gson().toJson(res)
+                    logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
+                }
+
+                override fun onError(e: ApiException?) {
                     super.onError(e)
-                    Log.d(TAG, e.toString())
+                    println(e)
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", requestUrl )
                 }
             }
         )
