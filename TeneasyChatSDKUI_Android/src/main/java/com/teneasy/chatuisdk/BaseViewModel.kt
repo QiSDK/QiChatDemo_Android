@@ -31,8 +31,8 @@ open class BaseViewModel : ViewModel() {
         errorItem.url = url
             // Platform_IOS: 1; Platform_ANDROID: 2; Platform_H5: 4;
         errorItem.platform = 1
-        errorItem.created_at = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
+        errorItem.created_at = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+08:00", Locale.getDefault()).apply {
+                timeZone = TimeZone.getTimeZone("GMT")
             }.format(Date())
 
         val errorPayload = ErrorPayload().apply {

@@ -3,8 +3,10 @@ package com.teneasy.chatuisdk.ui.main
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.protobuf.Timestamp
+import com.teneasy.chatuisdk.BaseViewModel
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
@@ -38,7 +40,7 @@ import java.util.Date
 /**
  * 客户界面的viewModel，主要UI层的数据。例如：socket消息发送、聊天数据。
  */
-class KeFuViewModel() : ViewModel() {
+class KeFuViewModel() : BaseViewModel() {
     // TODO: Implement the ViewModel
 
     val mlSendMsg = MutableLiveData<String>()
@@ -304,14 +306,17 @@ class KeFuViewModel() : ViewModel() {
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
                 override fun onSuccess(res: ReturnData<AssignWorker>) {
                     mlAssignWorker.postValue(res.data)
-                    print(res.data)
-                } override fun onError(e: ApiException?) {
-                    super.onError(e)
-                    println(e)
-                    Log.d(TAG, "assignWorker error")
+                    if (res.code != 0){
+                        val resp = Gson().toJson(res)
+                        logError(res.code, "", "x-token " + Constants.xToken, resp, request.url)
+                    }
                 }
-            }
-        )
+
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", request.url )
+                }
+            })
     }
 
     /**
@@ -352,6 +357,8 @@ class KeFuViewModel() : ViewModel() {
             object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
                 override fun onSuccess(res: ReturnData<AutoReply>) {
                         if (res.code != 0 || res.data == null || res.data.autoReplyItem == null){
+                            val resp = Gson().toJson(res)
+                            logError(res.code, "", "x-token " + Constants.xToken, resp, request.url)
                             Log.d("AdapterNChatLib", "自动回复为空")
                         }else {
                             res.data.autoReplyItem?.let {
@@ -361,6 +368,7 @@ class KeFuViewModel() : ViewModel() {
                 } override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", request.url )
                 }
             }
         )

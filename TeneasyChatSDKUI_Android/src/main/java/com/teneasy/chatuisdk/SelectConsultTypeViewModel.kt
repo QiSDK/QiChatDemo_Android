@@ -43,7 +43,7 @@ class SelectConsultTypeViewModel : BaseViewModel() {
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     consultList.value = ArrayList()
-                    logError(101, "", "x-token " + token, e?.message?: "", request.url )
+                    logError(e?.code?:500, "", "x-token " + token, e?.message?: "", request.url )
                 }
             })
     }
