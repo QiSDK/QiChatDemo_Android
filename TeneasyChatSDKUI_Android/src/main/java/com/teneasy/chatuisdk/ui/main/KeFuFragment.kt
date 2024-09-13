@@ -47,6 +47,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -69,6 +70,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import java.io.IOException
+import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -170,11 +172,18 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private fun initChatSDK(baseUrl: String){
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
-        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc")
+        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, "%7B%22username%22%3A%22xiaoming%22%7D")
         chatLib?.listener = this
         Log.i(TAG, "开始初始化SDK")
         chatLib?.makeConnect()
     }
+
+    /* 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
+            var custom = Custom()
+        custom.username = "xiaoming"
+        val cust = Gson().toJson(custom)
+         val ENCODED_cust = URLEncoder.encode(cust, "utf-8")
+     */
 
     override fun onResume() {
         super.onResume()
