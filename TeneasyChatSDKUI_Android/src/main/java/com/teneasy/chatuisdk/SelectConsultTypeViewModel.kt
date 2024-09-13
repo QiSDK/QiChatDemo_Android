@@ -15,6 +15,7 @@ import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
+import java.util.UUID
 
 class SelectConsultTypeViewModel : BaseViewModel() {
      var consultList = MutableLiveData<ArrayList<Consults>>()
@@ -28,6 +29,7 @@ class SelectConsultTypeViewModel : BaseViewModel() {
             token =  Constants.xToken
         }
         request.headers("X-Token", token)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryEntrance(param),
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {

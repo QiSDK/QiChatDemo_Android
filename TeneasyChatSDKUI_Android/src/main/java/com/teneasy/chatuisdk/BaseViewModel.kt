@@ -24,6 +24,7 @@ import java.util.UUID
 
 open class BaseViewModel : ViewModel() {
 
+    private val TAG = "BaseViewModel"
     fun logError(code: Int, request: String, header: String, resp: String,  url: String) {
         // 无可用线路是大事件，需要上报
         var errorItem = ErrorItem(url, code, "", 1, "")
@@ -42,6 +43,7 @@ open class BaseViewModel : ViewModel() {
         }
 
         var bodyStr = Gson().toJson(errorPayload)
+        Log.d(TAG, "bodyStr: $bodyStr")
         errorItem.payload = bodyStr
 
         errorReport.data.add(errorItem)
@@ -58,6 +60,10 @@ open class BaseViewModel : ViewModel() {
         }else {
             request.headers("X-Token", Constants.cert)
         }
+
+        var errorStr = Gson().toJson(error)
+        Log.d(TAG, "errorReport: $errorStr")
+
         request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .reportError(error),

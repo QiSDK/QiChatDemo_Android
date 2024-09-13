@@ -35,6 +35,7 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.internal.filterList
 import java.util.Calendar
 import java.util.Date
+import java.util.UUID
 
 
 /**
@@ -301,6 +302,7 @@ class KeFuViewModel() : BaseViewModel() {
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .assignWorker(param),
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
@@ -328,6 +330,7 @@ class KeFuViewModel() : BaseViewModel() {
         param.addProperty("consultId", consultId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .assignWorker(param),
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {
@@ -352,6 +355,7 @@ class KeFuViewModel() : BaseViewModel() {
         param.addProperty("workerId", workerId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryAutoReply(param),
             object : ProgressLoadingCallBack<ReturnData<AutoReply>>(null) {
@@ -395,6 +399,7 @@ class KeFuViewModel() : BaseViewModel() {
         param.addProperty("userId", Constants.userId)
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
             .queryChatHistory(param),
             object : ProgressLoadingCallBack<ReturnData<ChatHistory>>(null) {
