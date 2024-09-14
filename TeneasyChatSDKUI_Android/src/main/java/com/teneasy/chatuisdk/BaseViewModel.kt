@@ -46,22 +46,25 @@ open class BaseViewModel : ViewModel() {
         Log.d(TAG, "bodyStr: $bodyStr")
         errorItem.payload = bodyStr
 
-        errorReport.data.add(errorItem)
-
         if (errorReport.data.size > 0) {
-            reportError(errorReport)
+            //避免太多重复的日志，最新1条的日志，跟数组里面的最后一条做比较，如果不同，则添加
+            if (errorItem.url != errorReport.data[0].url && errorItem.code != errorReport.data[0].code){
+                errorReport.data.add(errorItem)
+            }
+        }else{
+            errorReport.data.add(errorItem)
         }
+        reportError(errorReport)
     }
 
     //获取咨询列表之后调用，清除未读数
     fun reportError(error: ErrorReport) {
         val request = XHttp.custom().accessToken(false)
-        //这里需要用cert
-        if (Constants.xToken.length > 0){
-            request.headers("X-Token", Constants.xToken)
-        }else {
-            request.headers("X-Token", Constants.cert)
-        }
+//        if (Constants.xToken.length > 0){
+//            request.headers("X-Token", Constants.xToken)
+//        }else {
+//            request.headers("X-Token", Constants.cert)
+//        }
 
         var errorStr = Gson().toJson(error)
         Log.d(TAG, "errorReport: $errorStr")

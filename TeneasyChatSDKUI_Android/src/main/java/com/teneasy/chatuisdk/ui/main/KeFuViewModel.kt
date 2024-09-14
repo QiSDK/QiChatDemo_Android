@@ -304,7 +304,7 @@ class KeFuViewModel() : BaseViewModel() {
         request.headers("X-Token", Constants.xToken)
         request.headers("x-trace-id", UUID.randomUUID().toString())
 
-        val requestUrl = Constants.baseUrlApi() + "/" + "/v1/api/query-worker"
+        val requestUrl = Constants.baseUrlApi() + "/" + "v1/api/assign-worker"
         request.call(request.create(MainApi.IMainTask::class.java)
             .assignWorker(param),
             object : ProgressLoadingCallBack<ReturnData<AssignWorker>>(null) {

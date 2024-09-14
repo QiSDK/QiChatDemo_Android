@@ -947,7 +947,12 @@ code: 1002 无效的Token
         }else{
             showTip("")
         }
-        Log.i(TAG, msg.msg)
+
+        //可选：如果断开连接，可以上报日志
+        val wssUrl = "wss://" + Constants.domain + "/v1/gateway/h5?"
+        //连接SDK时候所使用的参数
+        val param = "(S$Constants.cert , S$Constants.xToken, S$wssUrl, S$Constants.userId, \"9zgd9YUc\",  0L, \"%7B%22username%22%3A%22xiaoming%22%7D\")"
+        viewModel.logError(msg.code, param, Constants.xToken, msg.msg, wssUrl)
     }
 
     //对方删除了消息，会回调这个函数
