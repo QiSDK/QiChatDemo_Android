@@ -1,5 +1,7 @@
 package com.teneasy.chatuisdk
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +10,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.errorReport
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.reportTimes
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.ErrorItem
@@ -16,6 +19,10 @@ import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import okhttp3.internal.http2.Http2Reader
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,13 +34,14 @@ open class BaseViewModel : ViewModel() {
     private val TAG = "BaseViewModel"
     fun logError(code: Int, request: String, header: String, resp: String,  url: String) {
         // 无可用线路是大事件，需要上报
-        var errorItem = ErrorItem(url, code, "", 1, "")
+        var errorItem = ErrorItem(url, code, "", 2, "")
         errorItem.code = code
         errorItem.url = url
             // Platform_IOS: 1; Platform_ANDROID: 2; Platform_H5: 4;
-        errorItem.platform = 1
+        errorItem.platform = 2
         errorItem.created_at = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+08:00", Locale.getDefault()).apply {
-                timeZone = TimeZone.getTimeZone("GMT")
+                timeZone = TimeZone.getDefault()
+            //timeZone = TimeZone.getTimeZone("GMT")
             }.format(Date())
 
         val errorPayload = ErrorPayload().apply {
@@ -53,8 +61,33 @@ open class BaseViewModel : ViewModel() {
             }
         }else{
             errorReport.data.add(errorItem)
+
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed({
+                reportError(errorReport)
+            }, 3000) // 500 milliseconds delay
         }
-        reportError(errorReport)
+
+//        if (reportTimes == 0 || reportTimes % 10 == 0){
+//            Thread.sleep(500)
+//            reportError(errorReport)
+//        }
+
+//        GlobalScope.launch {
+//            delay(3000) // Non-blocking delay
+//            reportError(errorReport)
+//        }
+
+
+
+
+//        handler=new Handler();
+//Runnable r=new Runnable() {
+//    public void run() {
+//        //what ever you do here will be done after 3 seconds delay.
+//    }
+//};
+//handler.postDelayed(r, 3000);
     }
 
     //获取咨询列表之后调用，清除未读数
