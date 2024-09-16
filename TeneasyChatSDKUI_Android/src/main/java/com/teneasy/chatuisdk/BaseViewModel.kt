@@ -62,32 +62,16 @@ open class BaseViewModel : ViewModel() {
         }else{
             errorReport.data.add(errorItem)
 
-            val handler = Handler(Looper.getMainLooper())
-            handler.postDelayed({
+//            val handler = Handler(Looper.getMainLooper())
+//            handler.postDelayed({
+//                reportError(errorReport)
+//            }, 3000) // 500 milliseconds delay
+
+            GlobalScope.launch {
+                delay(3000) // Non-blocking delay
                 reportError(errorReport)
-            }, 3000) // 500 milliseconds delay
+            }
         }
-
-//        if (reportTimes == 0 || reportTimes % 10 == 0){
-//            Thread.sleep(500)
-//            reportError(errorReport)
-//        }
-
-//        GlobalScope.launch {
-//            delay(3000) // Non-blocking delay
-//            reportError(errorReport)
-//        }
-
-
-
-
-//        handler=new Handler();
-//Runnable r=new Runnable() {
-//    public void run() {
-//        //what ever you do here will be done after 3 seconds delay.
-//    }
-//};
-//handler.postDelayed(r, 3000);
     }
 
     //获取咨询列表之后调用，清除未读数
