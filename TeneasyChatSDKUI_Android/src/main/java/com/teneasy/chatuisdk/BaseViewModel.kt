@@ -10,7 +10,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.errorReport
-import com.teneasy.chatuisdk.ui.base.Constants.Companion.reportTimes
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.teneasy.chatuisdk.ui.http.bean.ErrorItem
@@ -37,6 +36,7 @@ open class BaseViewModel : ViewModel() {
         var errorItem = ErrorItem(url, code, "", 2, "")
         errorItem.code = code
         errorItem.url = url
+        errorItem.tenantId = Constants.merchantId
             // Platform_IOS: 1; Platform_ANDROID: 2; Platform_H5: 4;
         errorItem.platform = 2
         errorItem.created_at = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+08:00", Locale.getDefault()).apply {
