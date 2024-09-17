@@ -172,7 +172,13 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private fun initChatSDK(baseUrl: String){
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
-        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, "%7B%22username%22%3A%22xiaoming%22%7D")
+
+        // 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
+        var custom = Custom()
+        custom.username = "xiaoming"
+        val cust = Gson().toJson(custom)
+        val c = URLEncoder.encode(cust, "utf-8")
+        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, c)
         chatLib?.listener = this
         Log.i(TAG, "开始初始化SDK")
         chatLib?.makeConnect()
@@ -183,6 +189,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         custom.username = "xiaoming"
         val cust = Gson().toJson(custom)
          val ENCODED_cust = URLEncoder.encode(cust, "utf-8")
+
      */
 
     override fun onResume() {
