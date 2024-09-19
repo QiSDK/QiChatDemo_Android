@@ -39,6 +39,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
@@ -55,6 +56,7 @@ import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
+import com.teneasyChat.api.common.CEntrance
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
@@ -173,12 +175,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
 
-        // 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
-        var custom = Custom()
-        custom.username = "xiaoming"
-        val cust = Gson().toJson(custom)
-        val c = URLEncoder.encode(cust, "utf-8")
-        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, c)
+
+        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, getCustomParam())
         chatLib?.listener = this
         Log.i(TAG, "开始初始化SDK")
         chatLib?.makeConnect()
@@ -958,7 +956,7 @@ code: 1002 无效的Token
         //可选：如果断开连接，可以上报日志
         val wssUrl = "wss://" + Constants.domain + "/v1/gateway/h5?"
         //连接SDK时候所使用的参数
-        val param = "(S$Constants.cert , S$Constants.xToken, S$wssUrl, S$Constants.userId, \"9zgd9YUc\",  0L, \"%7B%22username%22%3A%22xiaoming%22%7D\")"
+        val param = Constants.cert + " token:" +  Constants.xToken + " tenantId:" + Constants.merchantId + " CONSULT_ID:" + Constants.CONSULT_ID  + " userid:" + Constants.userId + "custom:" + getCustomParam()
         viewModel.logError(msg.code, param, Constants.xToken, msg.msg, wssUrl)
     }
 

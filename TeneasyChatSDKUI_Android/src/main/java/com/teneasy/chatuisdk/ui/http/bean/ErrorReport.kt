@@ -17,5 +17,5 @@ data class ErrorItem(
 class ErrorPayload  (
     var header: String? = "",
     var request: String? = "",
-    var body: String? = ""
+    var resp: String? = ""
 )

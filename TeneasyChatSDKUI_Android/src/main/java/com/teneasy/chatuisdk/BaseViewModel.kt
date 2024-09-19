@@ -1,13 +1,8 @@
 package com.teneasy.chatuisdk
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.errorReport
 import com.teneasy.chatuisdk.ui.http.MainApi
@@ -21,7 +16,6 @@ import com.xuexiang.xhttp2.exception.ApiException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.http2.Http2Reader
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,7 +40,7 @@ open class BaseViewModel : ViewModel() {
 
         val errorPayload = ErrorPayload().apply {
             this.request = request
-            this.body = resp
+            this.resp = resp
             this.header = header
         }
 

@@ -17,6 +17,7 @@ import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.Result
@@ -92,6 +93,15 @@ class SelectConsultTypeFragment : Fragment(){
                 println(error.msg)
                 activity?.runOnUiThread {
                     binding?.tvLine?.text = "无可用线路"
+                    if (error.code == 1008) {
+                        viewModel.logError(
+                            error.code,
+                            Constants.lines,
+                            "",
+                            error.msg,
+                            Constants.lines
+                        )
+                    }
                 }
             }
         }, Constants.merchantId) //123是商户号

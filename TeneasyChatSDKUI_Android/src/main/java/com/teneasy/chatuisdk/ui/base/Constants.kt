@@ -1,8 +1,11 @@
 package com.teneasy.chatuisdk.ui.base
 
+import com.google.gson.Gson
+import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
+import java.net.URLEncoder
 
 
 const val PARAM_USER_ID = "USER_ID"
@@ -87,6 +90,15 @@ class Constants {
         fun baseUrlApi() : String {
             val baseUrlApi = "https://" + domain
             return baseUrlApi
+        }
+
+        fun getCustomParam() : String {
+            // 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
+            var custom = Custom()
+            custom.username = "xiaoming";
+            val cust = Gson().toJson(custom)
+            val c = URLEncoder.encode(cust, "utf-8")
+            return c
         }
     }
 
