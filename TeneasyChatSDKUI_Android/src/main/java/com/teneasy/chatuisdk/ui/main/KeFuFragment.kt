@@ -204,6 +204,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     override fun onPause() {
         super.onPause()
         viewModel.getUnSendMsg()
+        viewModel.reportError()
     }
 
     // UI初始化

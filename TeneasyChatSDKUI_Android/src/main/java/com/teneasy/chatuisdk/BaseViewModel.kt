@@ -30,10 +30,10 @@ open class BaseViewModel : ViewModel() {
         var errorItem = ErrorItem(url, code, "", 2, "")
         errorItem.code = code
         errorItem.url = url
-        errorItem.tenantId = Constants.merchantId
+        //errorItem.tenantId = Constants.merchantId
             // Platform_IOS: 1; Platform_ANDROID: 2; Platform_H5: 4;
         errorItem.platform = 2
-        errorItem.created_at = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+08:00", Locale.getDefault()).apply {
+        errorItem.created_at = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+08:00", Locale.getDefault()).apply {
                 timeZone = TimeZone.getDefault()
             //timeZone = TimeZone.getTimeZone("GMT")
             }.format(Date())
@@ -61,15 +61,20 @@ open class BaseViewModel : ViewModel() {
 //                reportError(errorReport)
 //            }, 3000) // 500 milliseconds delay
 
+
             GlobalScope.launch {
                 delay(3000) // Non-blocking delay
-                reportError(errorReport)
+                reportError()
             }
         }
     }
 
     //获取咨询列表之后调用，清除未读数
-    fun reportError(error: ErrorReport) {
+    fun reportError() {
+        if (errorReport.data.count() == 0){
+            return
+        }
+        Log.d(TAG, "开始上报日志")
         val request = XHttp.custom().accessToken(false)
 //        if (Constants.xToken.length > 0){
 //            request.headers("X-Token", Constants.xToken)
@@ -77,20 +82,21 @@ open class BaseViewModel : ViewModel() {
 //            request.headers("X-Token", Constants.cert)
 //        }
 
-        var errorStr = Gson().toJson(error)
+        var errorStr = Gson().toJson(errorReport)
         Log.d(TAG, "errorReport: $errorStr")
 
         request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
-            .reportError(error),
+            .reportError(errorReport),
             object : ProgressLoadingCallBack<ReturnData<Any>>(null) {
                 override fun onSuccess(res: ReturnData<Any>) {
                     errorReport.data.clear()
-                    Log.d("reportError", "上报成功")
+                    Log.d("reportError", "错误上报成功")
                 }
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)
+                    Log.d(TAG, "上报日志出错")
                 }
             })
     }

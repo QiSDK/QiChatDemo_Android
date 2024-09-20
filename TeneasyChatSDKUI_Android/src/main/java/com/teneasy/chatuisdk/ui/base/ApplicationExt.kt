@@ -29,6 +29,9 @@ class ApplicationExt: Application(){
         XHttpSDK.debug()
 //        }
         //设置网络请求的全局基础地址
+        if (Constants.domain.isEmpty()) {
+            Constants.domain = "https://localhost"
+        }
         XHttpSDK.setBaseUrl(Constants.domain)
     }
 }

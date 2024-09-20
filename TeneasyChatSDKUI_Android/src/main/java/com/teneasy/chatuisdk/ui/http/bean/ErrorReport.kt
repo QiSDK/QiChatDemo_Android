@@ -11,7 +11,7 @@ data class ErrorItem(
     //val ip: String,
     var platform: Int,
     var created_at: String,
-    var tenantId: Int = 0
+    //var tenantId: Int = 0
 )
 
 class ErrorPayload  (
