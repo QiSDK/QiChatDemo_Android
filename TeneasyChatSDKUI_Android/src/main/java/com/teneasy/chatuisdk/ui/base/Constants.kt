@@ -15,6 +15,7 @@ const val PARAM_XTOKEN = "HTTPTOKEN"
 const val PARAM_LINES = "LINES"
 const val PARAM_DOMAIN = "wssBaseUrl"
 const val PARAM_IMAGEBASEURL = "baseUrlImage"
+const val PARAM_USERNAME = "USER_NAME"
 
 ////这几个是需要在设置里面配置
 //var lines = ""
@@ -43,6 +44,7 @@ class Constants {
         var merchantId = 230
         var userId = 666688//1125324
         var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
+        var userName = "Wang Wu"
 
 
 //        var lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xyz"
@@ -95,7 +97,8 @@ class Constants {
         fun getCustomParam() : String {
             // 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
             var custom = Custom()
-            custom.username = "xiaoming";
+            custom.username = userName;
+            custom.platform = 2;
             val cust = Gson().toJson(custom)
             val c = URLEncoder.encode(cust, "utf-8")
             return c

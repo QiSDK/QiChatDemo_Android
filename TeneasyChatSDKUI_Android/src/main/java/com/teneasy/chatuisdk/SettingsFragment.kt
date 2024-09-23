@@ -15,6 +15,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_CERT
 import com.teneasy.chatuisdk.ui.base.PARAM_IMAGEBASEURL
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
 import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
+import com.teneasy.chatuisdk.ui.base.PARAM_USERNAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
@@ -49,6 +50,8 @@ var binding: FragmentSettingsBinding? = null
                 this.etUserId?.setText(Constants.userId.toString())
             }
 
+            this.etUserName?.setText(Constants.userName)
+
             this.etBaseImgUrl?.setText(Constants.baseUrlImage)
             this.btnSave.setOnClickListener {
                 Constants.lines = this.etLine.text.toString().trim()
@@ -58,6 +61,7 @@ var binding: FragmentSettingsBinding? = null
                 Constants.merchantId =  this.etMerchanId.text.toString().trim().toIntOrZero()
                 Constants.userId =  this.etUserId.text.toString().trim().toIntOrZero()
                 Constants.baseUrlImage = this.etBaseImgUrl.text.toString().trim()
+                Constants.userName = this.etUserName.text.toString().trim()
 
                 UserPreferences().putString(PARAM_CERT, Constants.cert)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
@@ -65,6 +69,7 @@ var binding: FragmentSettingsBinding? = null
                 UserPreferences().putString(PARAM_LINES, Constants.lines)
                 UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
                 UserPreferences().putString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
+                UserPreferences().putString(PARAM_USERNAME, Constants.userName)
                 ToastUtils.showToast(requireContext(), "保存成功")
             }
 
