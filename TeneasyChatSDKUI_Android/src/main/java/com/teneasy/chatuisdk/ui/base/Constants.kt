@@ -16,6 +16,7 @@ const val PARAM_LINES = "LINES"
 const val PARAM_DOMAIN = "wssBaseUrl"
 const val PARAM_IMAGEBASEURL = "baseUrlImage"
 const val PARAM_USERNAME = "USER_NAME"
+const val PARAM_MAXSESSIONMINS = "MAXSESSIONMINS"
 
 ////这几个是需要在设置里面配置
 //var lines = ""
@@ -45,6 +46,7 @@ class Constants {
         var userId = 666688//1125324
         var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
         var userName = "Wang Wu"
+        var maxSessionMins = 19999999
 
 
 //        var lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xyz"

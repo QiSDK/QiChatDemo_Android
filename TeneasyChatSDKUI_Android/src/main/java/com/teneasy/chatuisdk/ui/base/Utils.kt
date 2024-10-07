@@ -72,6 +72,7 @@ class Utils {
         Constants.cert = UserPreferences().getString(PARAM_CERT, Constants.cert)
         Constants.baseUrlImage =
             UserPreferences().getString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
+        Constants.maxSessionMins = UserPreferences().getInt(PARAM_MAXSESSIONMINS, Constants.maxSessionMins);
     }
 
     fun closeSoftKeyboard(view: View?) {

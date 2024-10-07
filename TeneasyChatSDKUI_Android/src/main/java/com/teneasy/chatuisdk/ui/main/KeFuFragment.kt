@@ -176,7 +176,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
 
 
-        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, getCustomParam())
+        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, getCustomParam(), Constants.maxSessionMins)
         chatLib?.listener = this
         Log.i(TAG, "开始初始化SDK")
         chatLib?.makeConnect()
@@ -931,17 +931,21 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         code: 1010 在别处登录了
 code: 1002 无效的Token
          */
+        Log.i(TAG, msg.msg)
         if (msg.code in 1000..1010) {
             isConnected = false
         }
-        if (msg.code == 1002 || msg.code == 1010) {
+        if (msg.code == 1002 || msg.code == 1010 || msg.code == 1005) {
             if (msg.code == 1002){
                 //showTip("无效的Token")
                 //有时候服务器反馈的这个消息不准，可忽略它
                 //toast("无效的Token ")
             }else {
+                //1010
                 //showTip("在别处登录了")
-                toast("在别处登录了")
+
+                //1005，会话超时
+                toast(msg.msg)
                 //禁掉重试机制
                 runOnUiThread{
                     mIProgressLoader?.dismissLoading()
@@ -949,6 +953,7 @@ code: 1002 无效的Token
                     //返回到上个页面
                     findNavController().popBackStack()
                 }
+                Log.i(TAG, "返回页面")
             }
         }else{
             showTip("")

@@ -14,6 +14,7 @@ import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.PARAM_CERT
 import com.teneasy.chatuisdk.ui.base.PARAM_IMAGEBASEURL
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
+import com.teneasy.chatuisdk.ui.base.PARAM_MAXSESSIONMINS
 import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USERNAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
@@ -53,6 +54,7 @@ var binding: FragmentSettingsBinding? = null
             this.etUserName?.setText(Constants.userName)
 
             this.etBaseImgUrl?.setText(Constants.baseUrlImage)
+            this.etMaxSessionMins?.setText(Constants.maxSessionMins.toString())
             this.btnSave.setOnClickListener {
                 Constants.lines = this.etLine.text.toString().trim()
                 //配置更改后，要清除Token
@@ -62,6 +64,7 @@ var binding: FragmentSettingsBinding? = null
                 Constants.userId =  this.etUserId.text.toString().trim().toIntOrZero()
                 Constants.baseUrlImage = this.etBaseImgUrl.text.toString().trim()
                 Constants.userName = this.etUserName.text.toString().trim()
+                Constants.maxSessionMins = this.etMaxSessionMins.text.toString().trim().toIntOrZero()
 
                 UserPreferences().putString(PARAM_CERT, Constants.cert)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
@@ -70,6 +73,8 @@ var binding: FragmentSettingsBinding? = null
                 UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
                 UserPreferences().putString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
                 UserPreferences().putString(PARAM_USERNAME, Constants.userName)
+                UserPreferences().putInt(PARAM_MAXSESSIONMINS, Constants.maxSessionMins)
+
                 ToastUtils.showToast(requireContext(), "保存成功")
             }
 
