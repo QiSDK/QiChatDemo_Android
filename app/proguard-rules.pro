@@ -1,21 +1,69 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+-dontwarn java.lang.reflect.AnnotatedType
+-dontwarn org.slf4j.impl.StaticMDCBinder
+-dontwarn org.slf4j.impl.StaticMarkerBinder
+-dontwarn org.slf4j.impl.StaticLoggerBinder
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-keep class com.teneasy.** { *; }
+-keep class com.teneasyChat.** { *; }
+-keep class com.google.protobuf.** { *; }
+-keep class com.teneasy.chatuisdk.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Retrofit
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Exceptions#XHt
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# RxJava RxAndroid
+-dontwarn sun.misc.**
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+    long producerIndex;
+    long consumerIndex;
+}
+
+# fastjson
+-dontwarn com.alibaba.fastjson.**
+-keep class com.alibaba.fastjson.** { *; }
+-keepattributes Signature
+
+# xpage
+-keep class com.xuexiang.xpage.annotation.** { *; }
+
+# xaop
+-keep @com.xuexiang.xaop.annotation.* class * {*;}
+-keep class * {
+    @com.xuexiang.xaop.annotation.* <fields>;
+}
+-keepclassmembers class * {
+    @com.xuexiang.xaop.annotation.* <methods>;
+}
+
+#XHttp2
+-keep class com.xuexiang.xhttp2.model.** { *; }
+-keep class com.xuexiang.xhttp2.cache.model.** { *; }
+-keep class com.xuexiang.xhttp2.cache.stategy.**{*;}
+-keep class com.xuexiang.xhttp2.annotation.** { *; }
+
+#okhttp
+-dontwarn com.squareup.okhttp3.**
+-keep class com.squareup.okhttp3.** { *;}
+-dontwarn okio.**
+-dontwarn javax.annotation.Nullable
+-dontwarn javax.annotation.ParametersAreNonnullByDefault
+-dontwarn javax.annotation.**
+
+#如果用到Gson解析包的，直接添加下面这几行就能成功混淆，不然会报错
+-keepattributes Signature
+-keep class com.google.gson.stream.** { *; }
+-keepattributes EnclosingMethod
+-keep class org.xz_sale.entity.**{*;}
+-keep class com.google.gson.** {*;}
+-keep class com.google.**{*;}
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
+-keep class com.google.gson.examples.android.model.** { *; }
+
+# Glide
+-keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
