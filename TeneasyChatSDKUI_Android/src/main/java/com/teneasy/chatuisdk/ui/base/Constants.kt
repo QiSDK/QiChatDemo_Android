@@ -17,6 +17,7 @@ const val PARAM_DOMAIN = "wssBaseUrl"
 const val PARAM_IMAGEBASEURL = "baseUrlImage"
 const val PARAM_USERNAME = "USER_NAME"
 const val PARAM_MAXSESSIONMINS = "MAXSESSIONMINS"
+const val PARAM_USER_LEVEL = "USER_LEVEL"
 
 ////这几个是需要在设置里面配置
 //var lines = ""
@@ -47,6 +48,7 @@ class Constants {
         var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
         var userName = "Wang Wu"
         var maxSessionMins = 19999999
+        var userLevel = 88
 
 
 //        var lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xyz"
@@ -101,7 +103,7 @@ class Constants {
             var custom = Custom()
             custom.username = userName;
             custom.platform = 2;
-            custom.user_level = 10
+            custom.user_level = userLevel
             val cust = Gson().toJson(custom)
             val c = URLEncoder.encode(cust, "utf-8")
             return c

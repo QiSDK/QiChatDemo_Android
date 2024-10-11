@@ -45,8 +45,10 @@
         android:hint="最长会话时间，单位分钟"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-
+    <EditText android:id="@+id/et_UserLevel"
+        android:hint="用户级别"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/btn_Save"
