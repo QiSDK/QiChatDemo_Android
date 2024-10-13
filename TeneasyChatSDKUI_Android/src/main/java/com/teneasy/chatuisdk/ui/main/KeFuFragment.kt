@@ -175,7 +175,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
         Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
 
-
         chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, getCustomParam(), Constants.maxSessionMins)
         chatLib?.listener = this
         Log.i(TAG, "开始初始化SDK")

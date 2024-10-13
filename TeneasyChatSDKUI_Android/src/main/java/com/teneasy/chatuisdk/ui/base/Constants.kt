@@ -103,7 +103,7 @@ class Constants {
             var custom = Custom()
             custom.username = userName;
             custom.platform = 2;
-            custom.user_level = userLevel
+            custom.userLevel = userLevel
             val cust = Gson().toJson(custom)
             val c = URLEncoder.encode(cust, "utf-8")
             return c
