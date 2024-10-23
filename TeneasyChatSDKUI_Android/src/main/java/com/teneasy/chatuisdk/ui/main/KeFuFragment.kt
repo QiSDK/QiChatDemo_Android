@@ -552,10 +552,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 //        }
 
         //当页面在后台很多个小时之后, reConnectTimer期待为无效，如果仍然不为null，就需要判断并强制为null以边重新初始化
-        Log.d(TAG, "时间间隔：${(Utils().differenceInMinutes(lastActiveDateTime, Date()))}")
-        if (Utils().differenceInMinutes(lastActiveDateTime, Date()) > 60 * 4){
-            reConnectTimer = null
-        }
+//        Log.d(TAG, "时间间隔：${(Utils().differenceInMinutes(lastActiveDateTime, Date()))}")
+//        if (Utils().differenceInMinutes(lastActiveDateTime, Date()) > 60 * 4){
+//            reConnectTimer = null
+//        }
 
         Log.i(TAG, "检查连接状态:${isConnected}")
         if(isConnected) {
