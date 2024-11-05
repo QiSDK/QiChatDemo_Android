@@ -102,13 +102,19 @@ class KeFuViewModel() : BaseViewModel() {
     }
 
     fun removeMsgItem(payLoadId: Long, msgId: Long){
-        val newList = mlMsgList.value?.toMutableList() ?: mutableListOf()
-        for (item in newList) {
-            if (item.payLoadId == payLoadId || item.cMsg?.msgId == msgId) {
-                newList.remove(item)
-                mlMsgList.postValue(newList as ArrayList<MessageItem>?)
-                return
-            }
+//        val newList = mlMsgList.value?.toMutableList() ?: mutableListOf()
+//        for (item in newList) {
+//            if (item.payLoadId == payLoadId || item.cMsg?.msgId == msgId) {
+//                newList.remove(item)
+//                mlMsgList.postValue(newList as ArrayList<MessageItem>?)
+//                return
+//            }
+//        }
+
+        var index = mlMsgList.value?.indexOfFirst { it.payLoadId == payLoadId || it.cMsg?.msgId == msgId}
+        if (index != null && index != -1){
+            mlMsgList.value?.removeAt(index)
+            mlMsgList.postValue(mlMsgList.value)
         }
     }
 
