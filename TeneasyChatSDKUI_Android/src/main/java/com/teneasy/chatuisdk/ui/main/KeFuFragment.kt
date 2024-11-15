@@ -961,7 +961,7 @@ code: 1002 无效的Token
         //可选：如果断开连接，可以上报日志
         val wssUrl = "wss://" + Constants.domain + "/v1/gateway/h5?"
         //连接SDK时候所使用的参数
-        val param = Constants.cert + " token:" +  Constants.xToken + " tenantId:" + Constants.merchantId + " CONSULT_ID:" + Constants.CONSULT_ID  + " userid:" + Constants.userId + "custom:" + getCustomParam()
+        val param = Constants.cert + " token:" +  Constants.xToken + " x-trace-id" + UUID.randomUUID().toString() + " tenantId:" + Constants.merchantId + " CONSULT_ID:" + Constants.CONSULT_ID  + " userid:" + Constants.userId + "custom:" + getCustomParam()
         viewModel.logError(msg.code, param, Constants.xToken, msg.msg, wssUrl)
     }
 
