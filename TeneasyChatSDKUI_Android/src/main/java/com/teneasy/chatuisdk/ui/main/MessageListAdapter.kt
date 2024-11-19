@@ -191,21 +191,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     }
                     holder.ivRightPlay.visibility = View.GONE
                 }
-
-//                Glide.with(act).load(meidaUrl).dontAnimate()
-//                    .skipMemoryCache(true)
-//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-//                    .into(holder.ivRightImg)
-
-//                Glide.with(act)
-//                    .asBitmap()
-//                    .load(meidaUrl)
-//                    .into(object : SimpleTarget<Bitmap>() {
-//                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-//                            // Handle the loaded bitmap
-//                        }
-//                    })
-
                 Glide.with(act)
                     .load(meidaUrl)
                     .apply(
@@ -390,39 +375,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     val reply = text.substring(text.indexOf("回复：")+3)
                     holder.tvRightReply.text = reply
                     holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
-
-                    // Create a SpannableString from the text
-                  /*  val spannableString = SpannableString(text)
-
-// Define the range of the text that you want to apply the background color to
-                    val start = 0
-                    val end = text.indexOf("回复")
-
-// Apply the BackgroundColorSpan to the specified range
-                    spannableString.setSpan(
-                        BackgroundColorSpan(ContextCompat.getColor(act, R.color.white)),
-                        start,
-                        end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannableString.setSpan(
-                        ForegroundColorSpan(ContextCompat.getColor(act, R.color.black)),
-                        start,
-                        end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    holder.tvRightMsg.text = spannableString*/
                 }
-
-
-
-                //客户头像
-                /*val url = Constants.baseUrlImage + Constants.workerAvatar
-                print("avatar:$url")
-                Glide.with(holder.ivRightImage).load(url).dontAnimate()
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(holder.ivRightImage)*/
             } else {
                 holder.tvLeftMsg.tag = position
                 holder.tvLeftTime.text = localTime
@@ -438,9 +391,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivRightImage.visibility = View.GONE
                 holder.ivRightChatarrow.visibility = View.GONE
 
-
-                    holder.tvLeftMsg.visibility = View.VISIBLE
-                    //holder.tvLeftMsg.text = item.cMsg!!.content.data
+                holder.tvLeftMsg.visibility = View.VISIBLE
 
                 holder.llRightReply.visibility = View.GONE
                 val text = item.cMsg!!.content.data
@@ -455,32 +406,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     val reply = text.substring(text.indexOf("回复：")+3)
                     holder.tvLeftReply.text = reply
                     holder.tvLeftReplyOrigin.text = text.substring(0,text.indexOf("回复："))
-
-                    /*
-                    // Create a SpannableString from the text
-                    val spannableString = SpannableString(text)
-
-// Define the range of the text that you want to apply the background color to
-                    val start = 0
-                    val end = text.indexOf("回复")
-
-// Apply the BackgroundColorSpan to the specified range
-                    spannableString.setSpan(
-                        BackgroundColorSpan(ContextCompat.getColor(act, R.color.white)),
-                        start,
-                        end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannableString.setSpan(
-                        ForegroundColorSpan(ContextCompat.getColor(act, R.color.black)),
-                        start,
-                        end,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-
-                    holder.tvLeftMsg.text = spannableString
-                    */
-
                 }
 
 
@@ -773,8 +698,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     .show()
                 false
             })
-
-
             // 必须在事件发生前，调用这个方法来监视View的触摸
             val builder4: XPopup.Builder = XPopup.Builder(act)
                 .watchView(ivRightImg)
