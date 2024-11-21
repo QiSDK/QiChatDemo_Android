@@ -517,7 +517,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                             val uAnswer = CMessage.MessageUnion.newBuilder()
                             val uQC = CMessage.MessageImage.newBuilder()
-                            uQC.uri = txtAnswer
+                            uQC.uri = it
                             uAnswer.image = uQC.build()
                             withAutoReplyBuilder.addAnswers(uAnswer)
                         }
