@@ -49,6 +49,7 @@ interface MessageItemOperateListener {
     fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
     fun onPlayVideo(url: String)
     fun onPlayImage(url: String)
+    fun onDownload(position: Int)
 }
 
 data class QADisplayedEvent(val tag: Int)
@@ -704,7 +705,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             ivRightImg.setOnLongClickListener(OnLongClickListener {
                 builder4.asAttachList(
                     //"删除"前端App不需要
-                    arrayOf<String>("回复"), null,
+                    arrayOf<String>("回复", "下载"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
@@ -713,14 +714,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                                     listener?.onQuote(it.tag as Int)
                                 }
 
-                                1 -> {
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
-                                }
-                                2 -> {
+                             1 -> {
                                     //删除
-                                    println("删除")
-                                    listener?.onDelete(it.tag as Int)
+                                    println("下载")
+                                    listener?.onDownload(it.tag as Int)
                                 }
                             }
                         }

@@ -1,7 +1,9 @@
 package com.teneasy.chatuisdk.ui.base
 
+import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -15,6 +17,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -41,6 +45,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.InputStream
 import java.net.NetworkInterface
 
 class Utils {
@@ -397,4 +404,73 @@ class Utils {
         }
         return null
     }
+
+    fun downloadVideo(url: String, onProgress: (progress: Int) -> Unit) {
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        Thread {
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) {
+                onProgress(-1)
+                throw Exception("Failed to download file: ${response.code}")
+            }
+
+            var fileName = url.split("/").last();
+
+            var outputFilePath = Environment.DIRECTORY_DOWNLOADS + "/" + fileName
+            val body = response.body ?: throw Exception("Response body is null")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    //put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+
+                val resolver = ApplicationExt.context?.contentResolver
+                val uri = resolver?.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+                uri?.let { downloadUri ->
+                    resolver.openOutputStream(downloadUri)?.use { outputStream ->
+                        outputStream.write(body.bytes())
+                        onProgress(100)
+                    }
+                }
+            }
+
+           /* val inputStream: InputStream = body.byteStream()
+            val outputFile = File(outputFilePath)
+            val outputStream = FileOutputStream(outputFile)
+
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            var totalBytesRead: Long = 0
+            val contentLength = body.contentLength()
+
+            try {
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                    totalBytesRead += bytesRead
+                    val progress = ((totalBytesRead * 100) / contentLength).toInt()
+                    onProgress(progress)
+                }
+            }catch (e: Exception){
+                print(e.printStackTrace())
+                onProgress(-1)
+            }
+            finally {
+                inputStream.close()
+                outputStream.close()
+            }
+            println("Video downloaded to: $outputFilePath")
+
+            */
+
+        }.start()
+    }
+
 }

@@ -284,6 +284,33 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     }
                 }
 
+                //长按消息，引用消息并回复
+                override fun onDownload(position: Int) {
+                    val msg = msgAdapter.msgList?.get(position)?.cMsg
+                    var url = ""
+                    if ((msg?.image?.uri?: "").isNotEmpty()){
+                        url = Constants.baseUrlImage + msg?.image?.uri?: ""
+                    }else if ((msg?.video?.uri?: "").isNotEmpty()){
+                        url = Constants.baseUrlImage + msg?.video?.uri?: ""
+                    }
+                    this@KeFuFragment.mIProgressLoader?.showLoading()
+                    Utils().downloadVideo( url, object :
+                            (Int) -> Unit {
+                        override fun invoke(progress: Int) {
+                            Log.d(TAG, "下载进度：$progress")
+                            if (progress == 100) {
+                                this@KeFuFragment.mIProgressLoader?.dismissLoading()
+                                ToastUtils.showToast(this@KeFuFragment.requireContext(), "下载成功！");
+                            }else if(progress == -1){
+                                this@KeFuFragment.mIProgressLoader?.dismissLoading()
+                                ToastUtils.showToast(this@KeFuFragment.requireContext(), "下载失败！");
+                                return
+                            }
+                            //this@KeFuFragment.mIProgressLoader?.updateMessage("下载进度：$progress");
+                        }
+                    });
+                }
+
                 //这里实现自动回复的功能，属于本地消息
                 override fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String) {
 
