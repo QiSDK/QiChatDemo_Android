@@ -670,8 +670,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .watchView(ivLeftImg)
             ivLeftImg.setOnLongClickListener(OnLongClickListener {
                 builder2.asAttachList(
-                    //"撤回", "编辑" 前端App不需要
-                    arrayOf<String>("回复"), null,
+                    arrayOf<String>("回复", "下载"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
@@ -681,18 +680,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                                 }
 
                                 1 -> {
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
-                                }
-                                2 -> {
                                     //删除
-                                    println("删除")
-                                    listener?.onDelete(it.tag as Int)
-                                } 3 -> {
-                                //删除
-                                println("编辑")
-                                listener?.onReSend(it.tag as Int)
-                            }
+                                    println("下载")
+                                    listener?.onDownload(it.tag as Int)
+                                }
                             }
                         }
                     })
