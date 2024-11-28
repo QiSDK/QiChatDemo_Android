@@ -233,9 +233,9 @@ class Utils {
                 return mediaMetadataRetriever.frameAtTime
             }
         } catch (ex: Exception) {
-            Toast
-                .makeText(context, "从图像获取缩略图失败", Toast.LENGTH_SHORT)
-                .show()
+//            Toast
+//                .makeText(context, "从图像获取缩略图失败", Toast.LENGTH_SHORT)
+//                .show()
         }
         return null
 
