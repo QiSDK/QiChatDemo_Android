@@ -291,6 +291,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     }else if ((msg?.video?.uri?: "").isNotEmpty()){
                         url = Constants.baseUrlImage + msg?.video?.uri?: ""
                     }
+                    this@KeFuFragment.mIProgressLoader?.updateMessage("请稍等...")
                     this@KeFuFragment.mIProgressLoader?.showLoading()
                     Utils().downloadVideo( url, object :
                             (Int) -> Unit {
@@ -768,6 +769,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     override fun onFailure(call: Call, e: IOException) {
                         // 上传失败
                         toast("上传失败" + e.localizedMessage)
+                        mIProgressLoader?.updateMessage("");
                         mIProgressLoader?.dismissLoading()
                     }
 
