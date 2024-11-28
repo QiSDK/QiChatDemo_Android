@@ -22,7 +22,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        //ndk { abiFilters  "armeabi-v7a", "arm64-v8a"}// 其他忽略,  "x86_64", "x86"
+        ndk { abiFilters  "armeabi-v7a", "arm64-v8a"}// 其他忽略,  "x86_64", "x86"
     }
 
     //project.ext.versionCodes = ['armeabi-v7a': 81, 'arm64-v8a': 82, 'x86': 83, 'x86_64': 84]
