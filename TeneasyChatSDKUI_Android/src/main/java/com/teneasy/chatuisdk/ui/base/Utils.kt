@@ -26,6 +26,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.RelativeLayout
 import android.widget.Toast
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.FFmpegSession
 import com.google.protobuf.Timestamp
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -39,8 +41,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-import com.arthenica.mobileffmpeg.Config
-import com.arthenica.mobileffmpeg.FFmpeg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -322,55 +322,37 @@ class Utils {
     }
 
     suspend fun compressVideo(inputFilePath: String, outputFilePath: String): Int {
+        println("FFmpeg 开始压缩")
         return withContext(Dispatchers.IO) {
+            // Define the FFmpeg command to compress the video
             val command = arrayOf(
                 "-i",
                 inputFilePath,       // Input file path
                 "-c:v",
-                "libx264",         // Video codec (H.264)
+                "libx264",           // Video codec (H.264)
                 "-pix_fmt",
-                "yuv420p",     // Pixel format (yuv420p is widely compatible)
+                "yuv420p",           // Pixel format (yuv420p is widely compatible)
                 "-crf",
-                "28",              // Compression level (lower value = higher quality, larger file)
+                "28",                // Compression level (lower value = higher quality, larger file)
                 "-preset",
-                "fast",         // Compression speed
-                outputFilePath             // Output file path
+                "fast",              // Compression speed
+                outputFilePath       // Output file path
             )
 
-            //-movflags faststart
+            // Execute the command
+            val session: FFmpegSession = FFmpegKit.execute(command.joinToString(" "))
 
-            //ffmpeg -i input.mov -c:v libx264 -pix_fmt yuv420p output.mp4
+            // Capture the result of the execution
+            val returnCode = session.returnCode
 
-            FFmpeg.execute(command)
-
-            // Execute FFmpeg command
-//            val rc = FFmpeg.execute(command)
-//
-//            if (rc == Config.RETURN_CODE_SUCCESS) {
-//                println("Video compression succeeded")
-//            } else {
-//                println("Video compression failed with return code $rc")
-//                Config.printLastCommandOutput(Log.INFO)
-//            }
-        }
-    }
-
-
-    fun startCompression(inputFilePath: String, outputFilePath: String) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val resultCode = compressVideo(inputFilePath, outputFilePath)
-
-            withContext(Dispatchers.Main) {
-                if (resultCode == Config.RETURN_CODE_SUCCESS) {
-                    println("Video compression succeeded")
-                    // If you need to update the UI, do it here
-                } else {
-                    println("Video compression failed with return code $resultCode")
-                    Config.printLastCommandOutput(Log.INFO)
-                    // If you need to update the UI, do it here
-                }
+            // Check if the command was successful
+            if (returnCode.isValueSuccess) {
+                0  // Success
+            } else {
+                // Log the error message or handle it accordingly
+                println("FFmpeg 压缩失败: $returnCode")
+                -1  // Failure
             }
-            return@launch
         }
     }
 

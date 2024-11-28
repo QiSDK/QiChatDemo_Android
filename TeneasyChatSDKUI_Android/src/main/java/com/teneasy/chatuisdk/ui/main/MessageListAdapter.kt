@@ -264,7 +264,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.ivPlay.visibility = View.GONE
                 }
 
-                Log.d("AdapterNChatLib", "videoUrl:" + meidaUrl)
+                Log.d("AdapterNChatLib", "meidaUrl:" + meidaUrl)
 //                Glide.with(act).load(meidaUrl).dontAnimate()
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)

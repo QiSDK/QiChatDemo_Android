@@ -17,8 +17,6 @@ import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.arthenica.mobileffmpeg.Config
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.gson.Gson
@@ -636,7 +634,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     }
 
     fun beforeUpload(filePath: String){
-        mIProgressLoader?.updateMessage("上传中。。。")
+        println("分析文件。。。")
+        mIProgressLoader?.updateMessage("分析文件。。。")
         mIProgressLoader?.showLoading()
 
         //val filePath = Utils().encodeFilePath(mediaPath)
@@ -680,12 +679,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }else{
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
-
+            mIProgressLoader?.updateMessage("正在压缩。。。")
             CoroutineScope(Dispatchers.Main).launch {
                 val resultCode = Utils().compressVideo(file.absolutePath.toString(), newFilePath)
 
                 withContext(Dispatchers.Main) {
-                    if (resultCode == RETURN_CODE_SUCCESS) {
+                    if (resultCode == 0) {
                         Log.i(TAG, "原始文件大小:" + file.length() )
                         Log.i(TAG, "Video compression succeeded")
                         // If you need to update the UI, do it here
@@ -702,7 +701,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
                         val videoThumbnail = Utils().getVideoThumb(requireContext(), Uri.fromFile(file))
                         if (videoThumbnail == null){
-                            ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
+                            //ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
                            // mIProgressLoader?.dismissLoading()
                             //return@withContext
                         }
@@ -711,7 +710,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         Log.i(TAG, "上传文件大小:" + file.length() )
                     } else {
                         Log.i(TAG, "Video compression failed with return code $resultCode")
-                        Config.printLastCommandOutput(Log.INFO)
+                        //Config.printLastCommandOutput(Log.INFO)
                         if (file.length() >= 30000 * 10 * 1000){
                             ToastUtils.showToast(requireContext(), "视频/文件限制300M")
                             mIProgressLoader?.dismissLoading()
@@ -746,6 +745,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      */
     //这个函数可以上传图片和视频
      fun uploadFile(file: File) {
+        mIProgressLoader?.updateMessage("上传中。。。")
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()

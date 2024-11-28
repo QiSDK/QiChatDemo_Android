@@ -10,7 +10,13 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.ui.PlayerView
 import androidx.navigation.fragment.findNavController
 import com.teneasy.chatuisdk.databinding.FragmentSettingsBinding
@@ -27,14 +33,14 @@ const val ARG_KEFUNAME = "KEFUNAME"
  */
 class VideoFragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private var videoUrl: String? = ""
+    private var videoUrl: String = ""
     private var kefuName: String? = ""
     var binding: FragmentVideoBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            videoUrl = it.getString(ARG_VIDEOURL)
+            videoUrl = it.getString(ARG_VIDEOURL) ?: "http://test.teneasy.com/test.mp4"
             kefuName = it.getString(ARG_KEFUNAME)
         }
 
@@ -55,11 +61,26 @@ class VideoFragment : Fragment() {
             findNavController().popBackStack()
         }
         binding?.playerView?.let {
-            val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(991).setUri(videoUrl).build()
+            //val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(991).setUri(videoUrl).build()
+
+            // Create a simple cache
+            val simpleCache = SimpleCache(requireContext().cacheDir,
+                LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024)
+            )
+
+// Create a CacheDataSourceFactory
+            val cacheDataSourceFactory: DataSource.Factory =
+                CacheDataSource.Factory()
+                .setCache(simpleCache)
+                .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+            // Create a DASH media source
+            val dashMediaSource = DashMediaSource.Factory(cacheDataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(videoUrl))
             val player = ExoPlayer.Builder(requireContext()).build()
 
             it.player = player
-            player.setMediaItem(mediaItem)
+            player.setMediaSource(dashMediaSource)
+            //player.setMediaItem(mediaItem)
             it.setShowPreviousButton(false)
             it.setShowNextButton(false)
             it.controllerHideOnTouch = true
