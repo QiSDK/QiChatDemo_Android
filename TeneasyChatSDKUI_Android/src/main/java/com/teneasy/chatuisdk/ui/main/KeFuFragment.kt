@@ -46,6 +46,8 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.http.UploadListener
+import com.teneasy.chatuisdk.ui.http.UploadUtil
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
@@ -79,7 +81,7 @@ import kotlin.collections.ArrayList
 /**
  * 客服主界面fragment
  */
-class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
+class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
     //消息列表的Adapter
     private lateinit var msgAdapter: MessageListAdapter
@@ -635,8 +637,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     }
 
     fun beforeUpload(filePath: String){
-        println("分析文件。。。")
-        mIProgressLoader?.updateMessage("分析文件。。。")
+        println("开始上传。。。")
+        mIProgressLoader?.updateMessage("开始上传。。。")
         mIProgressLoader?.showLoading()
 
         //val filePath = Utils().encodeFilePath(mediaPath)
@@ -650,33 +652,13 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         val ext = file.absoluteFile.extension
 
         if (imageTypes.contains(ext.lowercase())){
-            /*  // Step 1: Load the image，读取图片
-               val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-               // Step 2: Compress the image，图片压缩
-               val compressedData = Utils().compressBitmap(bitmap, 60)
-               //获取文件扩展名
-
-               val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
-               val newFile = File(newFilePath)
-               // Step 3: Save the compressed image to a file，压缩图片
-               Utils().saveCompressedBitmapToFile(compressedData, newFile)
-
-               //if (BuildConfig.DEBUG){
-                  var newBitmap = BitmapFactory.decodeFile(newFile.absolutePath)
-                   println(newBitmap.width)
-               //}
-               if (newFile.exists()){
-                   file = newFile
-               }else{
-                    //toast("压缩失败")
-               }
-   */
             if (file.length() >= 2000 * 10 * 1000){
                 ToastUtils.showToast(requireContext(), "图片限制20M")
                 mIProgressLoader?.dismissLoading()
                 return
             }
-            uploadFile(file)
+            //uploadFile(file)
+            UploadUtil(this).uploadFile(file)
         }else{
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
@@ -706,8 +688,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                            // mIProgressLoader?.dismissLoading()
                             //return@withContext
                         }
-
-                        uploadFile(file)
+                        UploadUtil(this@KeFuFragment).uploadFile(file)
+                        //uploadFile(file)
                         Log.i(TAG, "上传文件大小:" + file.length() )
                     } else {
                         Log.i(TAG, "Video compression failed with return code $resultCode")
@@ -718,32 +700,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             return@withContext
                         }
                         Log.i(TAG, "上传文件大小:" + file.length() )
-                        uploadFile(file)
+                        UploadUtil(this@KeFuFragment).uploadFile(file)
+                        //uploadFile(file)
                     }
                 }
 
             }
-            //不压缩，直接上传
-            //uploadFile(file)
         }
     }
 
-    /**
-     * 上传图片。上传成功后，会直接调用socket进行消息发送。
-     *  @param filePath
-     *  // 文件类型类型 0 ～ 4
-     * enum AssetKind {
-     *   ASSET_KIND_NONE = 0;
-     *   // 商户公共文件
-     *   ASSET_KIND_PUBLIC = 1;
-     *   // 商户私有文件
-     *   ASSET_KIND_PRIVATE = 2;
-     *   // 头像
-     *   ASSET_KIND_AVATAR = 3;
-     *   // 会话私有文件
-     *   ASSET_KIND_SESSION = 4;
-     * }
-     */
+
     //这个函数可以上传图片和视频
      fun uploadFile(file: File) {
         mIProgressLoader?.updateMessage("上传中。。。")
@@ -1194,5 +1160,25 @@ code: 1002 无效的Token
         cMsg.setContent(cMContent)
 
         return cMsg.build()
+    }
+
+    override fun uploadSuccess(path: String, isVideo: Boolean) {
+        if (isVideo) {
+            sendVideoMsg(path)//Constants.baseUrlImage +
+        } else {
+            // 发送图片
+            sendImgMsg(path)
+        }
+        mIProgressLoader?.updateMessage("")
+        mIProgressLoader?.dismissLoading()
+    }
+
+    override fun uploadProgress(progress: Int) {
+        mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
+    }
+
+    override fun uploadFailed(msg: String) {
+        ToastUtils.showToast(requireContext(), msg)
+        mIProgressLoader?.dismissLoading()
     }
 }

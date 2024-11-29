@@ -2,6 +2,7 @@ package com.teneasy.chatuisdk.ui.http
 
 import android.util.Log
 import com.google.gson.Gson
+import com.teneasy.chatuisdk.FilePath
 import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.ui.base.Constants
 import okhttp3.Call
@@ -17,9 +18,21 @@ import java.io.IOException
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-class UploadUtil {
+interface UploadListener {
+    fun uploadSuccess(path: String, isVideo: Boolean);
+    fun uploadProgress(progress: Int)
+    fun uploadFailed(msg: String);
+}
+
+class UploadUtil(lis: UploadListener) {
+    private var listener: UploadListener? = null
     private val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
     private var TAG = "UploadUtil"
+
+    init {
+        listener = lis
+    }
+
     /**
      * 上传图片。上传成功后，会直接调用socket进行消息发送。
      *  @param filePath
@@ -46,6 +59,7 @@ class UploadUtil {
                     .addFormDataPart("type", "4")
                     .build()// + file.extension
 
+                println("上传地址：" + Constants.baseUrlApi() + "/v1/assets/upload-v4")
                 val request2 = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload-v3")
                     .addHeader("X-Token", Constants.xToken)
                     .post(multipartBody).build()
@@ -58,7 +72,7 @@ class UploadUtil {
                 val call = okHttpClient.newCall(request2)
                 call.enqueue(object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
-
+                        listener?.uploadFailed(e.message ?: "上传失败");
                     }
 
                     override fun onResponse(call: Call, response: Response) {
@@ -66,79 +80,45 @@ class UploadUtil {
                         if(response.code == 200 && body != null) {
                             val path = response.body!!.string()
                             val gson = Gson()
-                            val result = gson.fromJson(path, ReturnData<String>()::class.java)
-
-                            if (result.code == 0 || result.code == 200) {
-                               //uploadFileStep2(result.data, file.extension)
-                                subscribeToSSE(Constants.baseUrlApi() + "/v1/assets/upload-v4?uploadId=" + result.data, file.extension)
-                            } else {
-                                //toast(result.message?: "上传失败");
-                            }
-                        } else {
-                            //toast("上传失败 Code:" + response.code)
-                        }
-                        //Utils().closeSoftKeyboard(view)
-                    }
-                })
-
-            }
-        }).start()
-    }
-
-    fun uploadFileStep2(uploadId: String, ext: String) {
-        Thread(Runnable {
-            kotlin.run {
-                val request = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload-v4?uploadId=" + uploadId)
-                    .addHeader("X-Token", Constants.xToken)
-                    //.addHeader("Content-Type", "application/json")
-                    .addHeader("Accept", "text/event-stream")
-                    .build()
-
-                val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
-                    .connectTimeout(50, TimeUnit.SECONDS)
-                    .writeTimeout(50, TimeUnit.MINUTES)
-                    .readTimeout(50, TimeUnit.MINUTES)
-                    .build()
-                val call = okHttpClient.newCall(request)
-                call.enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        val body = response.body
-                        if(response.code == 200 && body != null) {
-                            val path = response.body!!.string()
-                            val gson = Gson()
-                            val result = gson.fromJson(path, UploadPercent::class.java)
-
-                            if (result.percentage == 100) {
-                                if (imageTypes.contains(ext)) {
-                                    // 发送图片
-                                    //sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
-                                } else {
-                                    //sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
+                            val result = gson.fromJson(path, ReturnData<Any>()::class.java)
+                            if (result.code == 200 || result.code == 202) {
+                                if (result.code == 200){
+                                    var path = (result.data as FilePath).filepath ?: "";
+                                    if (path.isEmpty()){
+                                        listener?.uploadFailed("上传失败，path为空");
+                                        return;
+                                    }else {
+                                        listener?.uploadSuccess(
+                                            (result.data as FilePath).filepath ?: "",
+                                            imageTypes.contains(file.extension)
+                                        )
+                                    }
+                                }else {
+                                    subscribeToSSE(
+                                        Constants.baseUrlApi() + "/v1/assets/upload-v4?uploadId=" + result.data,
+                                        file.extension
+                                    )
                                 }
-                                Log.i(TAG, ("上传成功" + result.path))
+                            } else {
+                                listener?.uploadFailed(result.msg?: "上传失败");
                             }
                         } else {
-                            // toast("上传失败 Code:" + response.code)
+                            listener?.uploadFailed("上传失败 " + response.code)
                         }
-                        //Utils().closeSoftKeyboard(view)
                     }
                 })
 
             }
         }).start()
-
     }
 
-    fun subscribeToSSE(url: String, ext: String) {
+   private fun subscribeToSSE(url: String, ext: String) {
          val client = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)  // Set timeouts as needed
             .readTimeout(0, TimeUnit.SECONDS)      // Set readTimeout to 0 for long-lived connections
             .build()
 
+       println("上传监听地址：" + url)
         val request = Request.Builder()
             .addHeader("X-Token", Constants.xToken)
             //.addHeader("Content-Type", "application/json")
@@ -149,11 +129,11 @@ class UploadUtil {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 // Handle failure
+                listener?.uploadFailed("上传失败 Code:" + e.message)
                 e.printStackTrace()
             }
 
             override fun onResponse(call: Call, response: Response) {
-                // Handle server-sent events
                 if (response.isSuccessful) {
                     val body = response.body
                     if(response.code == 200 && body != null) {
@@ -165,16 +145,21 @@ class UploadUtil {
                             if (imageTypes.contains(ext)) {
                                 // 发送图片
                                 //sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
+                                listener?.uploadSuccess(result.path?: "", imageTypes.contains(ext))
+                                Log.i(TAG, ("上传成功" + result.path))
                             } else {
                                 //sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
+                                listener?.uploadProgress(result.percentage)
+                                Log.i(TAG, ("上传进度 " + result.percentage))
                             }
-                            Log.i(TAG, ("上传成功" + result.path))
                         }
                     } else {
                         // toast("上传失败 Code:" + response.code)
+                        listener?.uploadFailed("上传失败 Code:" + response.code)
                     }
                 } else {
-                    println("Failed to connect to SSE stream")
+                    listener?.uploadFailed("Failed to connect to SSE stream")
+                    //println("Failed to connect to SSE stream")
                 }
             }
         })
