@@ -71,6 +71,7 @@ dependencies {
     implementation 'androidx.emoji2:emoji2-bundled:1.4.0'
     implementation 'androidx.emoji2:emoji2-views:1.4.0'
     implementation libs.prdownloader
+    implementation libs.androidx.media3.exoplayer.hls
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

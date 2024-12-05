@@ -9,6 +9,7 @@ appcompat = "1.7.0"
 material = "1.12.0"
 navigationFragmentKtx = "2.7.7"
 prdownloader = "1.0.1"
+media3ExoplayerHls = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -20,6 +21,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 prdownloader = { group = "com.github.amitshekhariitbhu", name = "PRDownloader", version.ref = "prdownloader" }
+androidx-media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3ExoplayerHls" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

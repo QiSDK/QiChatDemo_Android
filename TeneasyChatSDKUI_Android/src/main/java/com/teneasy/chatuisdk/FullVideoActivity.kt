@@ -9,11 +9,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.annotation.OptIn
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.dash.DashMediaSource
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import com.teneasy.chatuisdk.databinding.FragmentVideoBinding
 
  //const val ARG_IMAGEURL = "IMAGEURL"
@@ -28,7 +36,6 @@ class FullVideoActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         videoUrl = intent.getStringExtra(ARG_VIDEOURL)
             kefuName = intent.getStringExtra(ARG_KEFUNAME)
-
         binding = FragmentVideoBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
@@ -38,11 +45,37 @@ class FullVideoActivity : FragmentActivity() {
            finish()
         }
         binding?.playerView?.let {
+            //仅测试
+            videoUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
             val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(991).setUri(videoUrl).build()
-            val player = ExoPlayer.Builder(this).build()
 
+            // Create a simple cache
+//            val simpleCache = SimpleCache(this.cacheDir,
+//                LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024)
+//            )
+
+
+
+// Create a CacheDataSourceFactory
+//            val cacheDataSourceFactory: DataSource.Factory =
+//                CacheDataSource.Factory()
+//                  //  .setCache(simpleCache)
+//                    .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+//            // Create a DASH media source
+//            val dashMediaSource = DashMediaSource.Factory(cacheDataSourceFactory)
+//                .createMediaSource(MediaItem.fromUri(videoUrl!!))
+
+            // Prepare the HLS source and prepare the player
+            val dataSourceFactory = DefaultHttpDataSource.Factory()
+            val hlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(mediaItem)
+
+            val player = ExoPlayer.Builder(this).build()
+            player.setMediaSource(hlsMediaSource)
+            // Start playing the video
+            player.playWhenReady = true
             it.player = player
-            player.setMediaItem(mediaItem)
+            //player.setMediaItem(mediaItem)
             it.setShowPreviousButton(false)
             it.setShowNextButton(false)
             it.controllerHideOnTouch = true
