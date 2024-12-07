@@ -140,17 +140,29 @@ class UploadUtil(lis: UploadListener) {
                 if (response.isSuccessful) {
                     val body = response.body
                     if(response.code == 200 && body != null) {
-                        val path = response.body!!.string()
-                        val gson = Gson()
-                        val result = gson.fromJson(path, UploadPercent::class.java)
+                        val strData = response.body!!.string()
+                        val lines = strData.split("\n");
+                        var event = ""
+                        var data = ""
 
-                        if (result.percentage == 100) {
-                            if (imageTypes.contains(ext)) {
-                                listener?.uploadSuccess(result.path?: "", !imageTypes.contains(ext))
-                                Log.i(TAG, ("上传成功" + result.path))
-                            } else {
-                                listener?.uploadProgress(result.percentage)
-                                Log.i(TAG, ("上传进度 " + result.percentage))
+                        for (line in lines) {
+                            if (line.startsWith("event:", ignoreCase = true))  {
+                                event = line.replace("event:", "")
+                            } else if (line.startsWith("data:", ignoreCase = true)) {
+                                data = line.replace("data:", "")
+                                val gson = Gson()
+                                val result = gson.fromJson(data, UploadPercent::class.java)
+
+                                if (result.percentage == 100) {
+                                    listener?.uploadSuccess(
+                                        result.path ?: "",
+                                        !imageTypes.contains(ext)
+                                    )
+                                    Log.i(TAG, ("上传成功" + result.path))
+                                } else {
+                                    listener?.uploadProgress(result.percentage)
+                                    Log.i(TAG, ("上传进度 " + result.percentage))
+                                }
                             }
                         }
                     } else {
