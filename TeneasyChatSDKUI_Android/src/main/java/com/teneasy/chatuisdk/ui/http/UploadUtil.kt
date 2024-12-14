@@ -79,10 +79,10 @@ class UploadUtil(lis: UploadListener) {
 
                     override fun onResponse(call: Call, response: Response) {
                         val body = response.body
-                        if(response.code == 200 && body != null) {
+                        if(response.code == 200 || response.code == 202 && body != null) {
                             val bodyStr = response.body!!.string()
                             val gson = Gson()
-                            if (bodyStr.contains("code\":200")){
+                            if (response.code == 200){//bodyStr.contains("code\":200")
                                 val type: Type = object : TypeToken<ReturnData<FilePath>>() {}.getType()
                                 val b: ReturnData<FilePath> = gson.fromJson(bodyStr, type)
 
@@ -96,7 +96,7 @@ class UploadUtil(lis: UploadListener) {
                                         !imageTypes.contains(file.extension)
                                     )
                                 }
-                            }else if (bodyStr.contains("code\":202")){
+                            }else if (response.code == 202){
                                 var b = gson.fromJson(bodyStr, ReturnData<String>()::class.java)
                                 subscribeToSSE(
                                     Constants.baseUrlApi() + "/v1/assets/upload-v4?uploadId=" + b.data,
@@ -140,10 +140,17 @@ class UploadUtil(lis: UploadListener) {
                 if (response.isSuccessful) {
                     val body = response.body
                     if(response.code == 200 && body != null) {
-                        val strData = response.body!!.string()
+                        val strData = body.string()
                         val lines = strData.split("\n");
                         var event = ""
                         var data = ""
+
+                        print("上传监听返回 " + strData);
+
+                        if (lines.size <= 0){
+                            listener?.uploadFailed("数据为空，上传失败")
+                            return
+                        }
 
                         for (line in lines) {
                             if (line.startsWith("event:", ignoreCase = true))  {

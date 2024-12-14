@@ -46,7 +46,7 @@ class FullVideoActivity : FragmentActivity() {
         }
         binding?.playerView?.let {
             //仅测试
-            videoUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+            //videoUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
             val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(991).setUri(videoUrl).build()
 
             // Create a simple cache

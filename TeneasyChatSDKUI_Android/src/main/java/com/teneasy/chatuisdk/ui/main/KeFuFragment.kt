@@ -662,7 +662,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         }else{
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
-            mIProgressLoader?.updateMessage("正在压缩。。。")
+            mIProgressLoader?.updateMessage("正在上传。。。")
             CoroutineScope(Dispatchers.Main).launch {
                 val resultCode = Utils().compressVideo(file.absolutePath.toString(), newFilePath)
 
@@ -1169,16 +1169,22 @@ code: 1002 无效的Token
             // 发送图片
             sendImgMsg(path)
         }
-        mIProgressLoader?.updateMessage("")
-        mIProgressLoader?.dismissLoading()
+        runOnUiThread {
+            mIProgressLoader?.updateMessage("")
+            mIProgressLoader?.dismissLoading()
+        }
     }
 
     override fun uploadProgress(progress: Int) {
-        mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
+        runOnUiThread {
+         mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
+        }
     }
 
     override fun uploadFailed(msg: String) {
-        ToastUtils.showToast(requireContext(), msg)
-        mIProgressLoader?.dismissLoading()
+        runOnUiThread {
+            ToastUtils.showToast(requireContext(), msg)
+            mIProgressLoader?.dismissLoading()
+        }
     }
 }
