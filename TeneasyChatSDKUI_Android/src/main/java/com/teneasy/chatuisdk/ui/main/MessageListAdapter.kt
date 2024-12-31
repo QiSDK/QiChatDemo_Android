@@ -180,9 +180,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 holder.ivRightImg.visibility = View.VISIBLE
 
-                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
+                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri.replace("index.mp4", "thumb.jpg")
                 holder.ivRightImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl)
+                    listener?.onPlayVideo(meidaUrl.replace("thumb.jpg", "master.m3u8"));
                 }
 
                 if (item.cMsg!!.image.uri.isNotEmpty()) {
@@ -251,9 +251,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivRightPlay.visibility = View.GONE
 
                 holder.ivLeftImg.visibility = View.VISIBLE
-                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
+                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri.replace("index.mp4", "thumb.jpg")
                 holder.ivLeftImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl)
+                    listener?.onPlayVideo(meidaUrl.replace("thumb.jpg", "master.m3u8"));
                 }
 
                 if (item.cMsg!!.image.uri.isNotEmpty()) {

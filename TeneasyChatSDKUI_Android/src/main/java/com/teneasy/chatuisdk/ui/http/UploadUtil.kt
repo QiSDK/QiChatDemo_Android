@@ -162,10 +162,10 @@ class UploadUtil(lis: UploadListener) {
 
                                 if (result.percentage == 100) {
                                     listener?.uploadSuccess(
-                                        result.path ?: "",
+                                        result.data?.origin_url ?: "",
                                         !imageTypes.contains(ext)
                                     )
-                                    Log.i(TAG, ("上传成功" + result.path))
+                                    Log.i(TAG, ("上传成功" + result.data?.origin_url))
                                 } else {
                                     listener?.uploadProgress(result.percentage)
                                     Log.i(TAG, ("上传进度 " + result.percentage))
@@ -191,5 +191,21 @@ class UploadUtil(lis: UploadListener) {
 */
 class UploadPercent {
     var percentage: Int = 0
-    var path: String? = ""
+    var data: Urls? = null
 }
+
+class Urls {
+    var origin_url: String? = ""
+    var hls_master_url: String? = ""
+    var thumbnail_url = ""
+}
+
+/*
+class Urls: HandyJSON {
+    var origin_url: String? = ""
+    var hls_master_url: String? = ""
+    var thumbnail_url = ""
+    required init() {}
+}
+
+ */
