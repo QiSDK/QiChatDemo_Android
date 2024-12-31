@@ -663,48 +663,47 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
             mIProgressLoader?.updateMessage("正在上传。。。")
-            CoroutineScope(Dispatchers.Main).launch {
-                val resultCode = Utils().compressVideo(file.absolutePath.toString(), newFilePath)
 
-                withContext(Dispatchers.Main) {
-                    if (resultCode == 0) {
-                        Log.i(TAG, "原始文件大小:" + file.length() )
-                        Log.i(TAG, "Video compression succeeded")
-                        // If you need to update the UI, do it here
-                        if (newFile.length() >= 30000 * 10 * 1000){
-                            ToastUtils.showToast(requireContext(), "视频/文件限制300M")
-                            mIProgressLoader?.dismissLoading()
-                            return@withContext
-                        }
+            //如果小于30M就不压缩
+            if (file.length() <= 3000 * 10 * 1000){
+                UploadUtil(this@KeFuFragment).uploadFile(file)
+            }else {
+                CoroutineScope(Dispatchers.Main).launch {
+                    val resultCode =
+                        Utils().compressVideo(file.absolutePath.toString(), newFilePath)
 
-                        if (newFile.length() > 0) {
-                            file = newFile
-                        }
+                    withContext(Dispatchers.Main) {
+                        if (resultCode == 0) {
+                            Log.i(TAG, "原始文件大小:" + file.length())
+                            Log.i(TAG, "Video compression succeeded")
+                            // If you need to update the UI, do it here
+                            if (newFile.length() >= 30000 * 10 * 1000) {
+                                ToastUtils.showToast(requireContext(), "视频/文件限制300M")
+                                mIProgressLoader?.dismissLoading()
+                                return@withContext
+                            }
 
-
-                        val videoThumbnail = Utils().getVideoThumb(requireContext(), Uri.fromFile(file))
-                        if (videoThumbnail == null){
-                            //ToastUtils.showToast(requireContext(), "获取视频缩略图失败")
-                           // mIProgressLoader?.dismissLoading()
-                            //return@withContext
+                            if (newFile.length() > 0) {
+                                file = newFile
+                            }
+                            UploadUtil(this@KeFuFragment).uploadFile(file)
+                            //uploadFile(file)
+                            Log.i(TAG, "上传文件大小:" + file.length())
+                        } else {
+                            Log.i(TAG, "Video compression failed with return code $resultCode")
+                            //Config.printLastCommandOutput(Log.INFO)
+                            if (file.length() >= 30000 * 10 * 1000) {
+                                ToastUtils.showToast(requireContext(), "视频/文件限制300M")
+                                mIProgressLoader?.dismissLoading()
+                                return@withContext
+                            }
+                            Log.i(TAG, "上传文件大小:" + file.length())
+                            UploadUtil(this@KeFuFragment).uploadFile(file)
+                            //uploadFile(file)
                         }
-                        UploadUtil(this@KeFuFragment).uploadFile(file)
-                        //uploadFile(file)
-                        Log.i(TAG, "上传文件大小:" + file.length() )
-                    } else {
-                        Log.i(TAG, "Video compression failed with return code $resultCode")
-                        //Config.printLastCommandOutput(Log.INFO)
-                        if (file.length() >= 30000 * 10 * 1000){
-                            ToastUtils.showToast(requireContext(), "视频/文件限制300M")
-                            mIProgressLoader?.dismissLoading()
-                            return@withContext
-                        }
-                        Log.i(TAG, "上传文件大小:" + file.length() )
-                        UploadUtil(this@KeFuFragment).uploadFile(file)
-                        //uploadFile(file)
                     }
-                }
 
+                }
             }
         }
     }

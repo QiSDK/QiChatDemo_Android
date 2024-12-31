@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teneasy.chatuisdk.FilePath
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Utils
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -16,7 +17,11 @@ import okhttp3.Response
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Type
+import java.util.Calendar
+import java.util.Date
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 
 interface UploadListener {
@@ -53,11 +58,13 @@ class UploadUtil(lis: UploadListener) {
     //Date().time.toString() + "." + file.extension
     //这个函数可以上传图片和视频
     fun uploadFile(file: File) {
+        val calendar = Calendar.getInstance()
+        var mSec = calendar.timeInMillis.toString()
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("myFile", file.path,  RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file))
+                    .addFormDataPart("myFile",  mSec + "myVideo.mp4",  RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file))
                     .addFormDataPart("type", "4")
                     .build()// + file.extension
 
@@ -75,6 +82,7 @@ class UploadUtil(lis: UploadListener) {
                 call.enqueue(object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
                         listener?.uploadFailed(e.message ?: "上传失败");
+                        print(e.message ?: "上传失败")
                     }
 
                     override fun onResponse(call: Call, response: Response) {
@@ -103,10 +111,13 @@ class UploadUtil(lis: UploadListener) {
                                     file.extension
                                 )
                             }else{
+                                print("上传失败：" + response.code + "")
+
                                 listener?.uploadFailed("上传失败 " + bodyStr)
                             }
                         } else {
                             listener?.uploadFailed("上传失败 " + response.code)
+                            print("上传失败 " + response.code)
                         }
                     }
                 })
@@ -132,12 +143,13 @@ class UploadUtil(lis: UploadListener) {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 // Handle failure
-                listener?.uploadFailed("上传失败 Code:" + e.message)
+                listener?.uploadFailed("SSE 上传失败 Code:" + e.message)
                 e.printStackTrace()
             }
 
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
+                    print("上传成功：" + response.code + "")
                     val body = response.body
                     if(response.code == 200 && body != null) {
                         val strData = body.string()
@@ -166,14 +178,16 @@ class UploadUtil(lis: UploadListener) {
                                         !imageTypes.contains(ext)
                                     )
                                     Log.i(TAG, ("上传成功" + result.data?.origin_url))
+                                    Log.i(TAG, (Date().toString() + "上传进度 " + result.percentage))
                                 } else {
                                     listener?.uploadProgress(result.percentage)
-                                    Log.i(TAG, ("上传进度 " + result.percentage))
+                                    Log.i(TAG, (Date().toString() + "上传进度 " + result.percentage))
                                 }
                             }
                         }
                     } else {
-                        listener?.uploadFailed("上传失败 Code:" + response.code)
+                        listener?.uploadFailed("SSE 上传失败 Code:" + response.code)
+                        print("SSE 上传失败 Code:" + response.code)
                     }
                 } else {
                     listener?.uploadFailed("Failed to connect to SSE stream")
