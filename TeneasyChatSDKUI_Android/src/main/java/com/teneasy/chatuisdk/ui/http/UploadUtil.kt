@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 
 interface UploadListener {
-    fun uploadSuccess(path: String, isVideo: Boolean);
+    fun uploadSuccess(path: Urls, isVideo: Boolean);
     fun uploadProgress(progress: Int)
     fun uploadFailed(msg: String);
 }
@@ -99,10 +99,13 @@ class UploadUtil(lis: UploadListener) {
                                     listener?.uploadFailed("上传失败，path为空");
                                     return;
                                 }else {
+                                    val urls = Urls()
+                                    urls.uri = b.data?.filepath?: ""
                                     listener?.uploadSuccess(
-                                        b.data?.filepath ?:"",
+                                        urls,
                                         !imageTypes.contains(file.extension)
                                     )
+                                    return;
                                 }
                             }else if (response.code == 202){
                                 var b = gson.fromJson(bodyStr, ReturnData<String>()::class.java)
@@ -172,12 +175,12 @@ class UploadUtil(lis: UploadListener) {
                                 val gson = Gson()
                                 val result = gson.fromJson(data, UploadPercent::class.java)
 
-                                if (result.percentage == 100) {
+                                if (result.percentage == 100 && result.data != null) {
                                     listener?.uploadSuccess(
-                                        result.data?.origin_url ?: "",
+                                        result.data!!,
                                         !imageTypes.contains(ext)
                                     )
-                                    Log.i(TAG, ("上传成功" + result.data?.origin_url))
+                                    Log.i(TAG, ("上传成功" + result.data?.uri))
                                     Log.i(TAG, (Date().toString() + "上传进度 " + result.percentage))
                                 } else {
                                     listener?.uploadProgress(result.percentage)
@@ -209,9 +212,9 @@ class UploadPercent {
 }
 
 class Urls {
-    var origin_url: String? = ""
-    var hls_master_url: String? = ""
-    var thumbnail_url = ""
+    var uri: String = ""
+    var hlsUri: String = ""
+    var thumbnailUri = ""
 }
 
 /*

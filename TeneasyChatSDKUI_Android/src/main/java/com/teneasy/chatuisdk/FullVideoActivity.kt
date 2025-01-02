@@ -22,6 +22,7 @@ import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.teneasy.chatuisdk.databinding.FragmentVideoBinding
 
  //const val ARG_IMAGEURL = "IMAGEURL"
@@ -45,33 +46,42 @@ class FullVideoActivity : FragmentActivity() {
            finish()
         }
         binding?.playerView?.let {
-            //仅测试
-            //videoUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+            val player = ExoPlayer.Builder(this).build()
+
+// Prepare the media item
             val mediaItem = MediaItem.Builder().setMediaId("ddd").setTag(991).setUri(videoUrl).build()
 
-            // Create a simple cache
-//            val simpleCache = SimpleCache(this.cacheDir,
-//                LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024)
-//            )
+// Create a data source factory
+            val dataSourceFactory = DefaultHttpDataSource.Factory()
 
-
-
-// Create a CacheDataSourceFactory
-//            val cacheDataSourceFactory: DataSource.Factory =
+// Check the URL extension to determine the correct media source
+            if (videoUrl!!.endsWith("m3u8")) {
+                // Use HLS Media Source for .m3u8 URLs (HLS streams)
+                val hlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                player.setMediaSource(hlsMediaSource)
+            } // Check the URL extension to determine the correct media source
+            else {
+                // Use Progressive Media Source for MP4 files
+                val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                player.setMediaSource(progressiveMediaSource)
+            }
+//            else {
+//                val cacheDataSourceFactory: DataSource.Factory =
 //                CacheDataSource.Factory()
 //                  //  .setCache(simpleCache)
 //                    .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
-//            // Create a DASH media source
-//            val dashMediaSource = DashMediaSource.Factory(cacheDataSourceFactory)
-//                .createMediaSource(MediaItem.fromUri(videoUrl!!))
+//                // Use Dash Media Source for other video formats
+//                val dashMediaSource = DashMediaSource.Factory(cacheDataSourceFactory)
+//                    .createMediaSource(mediaItem)
+//                player.setMediaSource(dashMediaSource)
+//            }
 
-            // Prepare the HLS source and prepare the player
-            val dataSourceFactory = DefaultHttpDataSource.Factory()
-            val hlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(mediaItem)
+// Prepare the player with the media source and start playback
+            player.prepare()
+            player.play()
 
-            val player = ExoPlayer.Builder(this).build()
-            player.setMediaSource(hlsMediaSource)
             // Start playing the video
             player.playWhenReady = true
             it.player = player

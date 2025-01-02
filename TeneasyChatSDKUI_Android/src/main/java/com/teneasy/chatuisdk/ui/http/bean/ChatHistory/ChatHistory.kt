@@ -1,5 +1,7 @@
 package com.teneasy.chatuisdk.ui.http.bean.ChatHistory
 
+import com.teneasy.chatuisdk.ui.http.Urls
+
 data class ChatHistory (
   val request: Request,
   val list: List<list>,
@@ -29,7 +31,7 @@ data class list (
   val content: Content?,
   val image: Audio?,
   val audio: Audio?,
-  val video: Audio?,
+  val video: Urls?,
   val geo: Geo,
   val file: File?,
   val workerTrans: WorkerTrans,

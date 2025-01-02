@@ -48,6 +48,7 @@ import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.UploadListener
 import com.teneasy.chatuisdk.ui.http.UploadUtil
+import com.teneasy.chatuisdk.ui.http.Urls
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
@@ -709,7 +710,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     }
 
 
-    //这个函数可以上传图片和视频
+    //upload-v3, 这个函数可以上传图片和视频
      fun uploadFile(file: File) {
         mIProgressLoader?.updateMessage("上传中。。。")
         Thread(Runnable {
@@ -751,7 +752,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                                     // 发送图片
                                     sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 } else {
-                                    sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
+                                //    sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
                                 }
                                 Log.i(TAG, ("上传成功" + result.data?.filepath))
                             } else {
@@ -880,7 +881,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         lastActiveDateTime = Date()
     }
 
-    fun sendVideoMsg(url: String) {
+    fun sendVideoMsg(urls: Urls) {
         if(chatLib == null){
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
@@ -891,7 +892,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             withAutoReplyU = null
         }
         //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
-        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_VIDEO, Constants.CONSULT_ID, 0, withAutoReplyU)
+        chatLib?.sendVideoMessage(urls.uri, urls.thumbnailUri, urls.hlsUri, Constants.CONSULT_ID, 0, withAutoReplyU)
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
@@ -1161,12 +1162,12 @@ code: 1002 无效的Token
         return cMsg.build()
     }
 
-    override fun uploadSuccess(path: String, isVideo: Boolean) {
+    override fun uploadSuccess(urls: Urls, isVideo: Boolean) {
         if (isVideo) {
-            sendVideoMsg(path)//Constants.baseUrlImage +
+            sendVideoMsg(urls)//Constants.baseUrlImage +
         } else {
             // 发送图片
-            sendImgMsg(path)
+            sendImgMsg(urls.uri)
         }
         runOnUiThread {
             mIProgressLoader?.updateMessage("")

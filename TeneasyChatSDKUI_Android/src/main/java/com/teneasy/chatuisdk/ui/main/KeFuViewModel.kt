@@ -194,6 +194,8 @@ class KeFuViewModel() : BaseViewModel() {
         }
         else if (history?.video != null) {
             cMContent.uri = history.video.uri
+            cMContent.hlsUri = history.video.hlsUri
+            cMContent.thumbnailUri = history.video.thumbnailUri
         }else{
             cMContent.uri = ""
         }

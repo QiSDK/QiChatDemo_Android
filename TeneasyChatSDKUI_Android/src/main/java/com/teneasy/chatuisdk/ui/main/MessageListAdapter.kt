@@ -180,9 +180,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 holder.ivRightImg.visibility = View.VISIBLE
 
-                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri.replace("index.mp4", "thumb.jpg")
+                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
+                if (item.cMsg!!.video.hlsUri.isNotEmpty()){
+                    meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.hlsUri
+                }
                 holder.ivRightImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl.replace("thumb.jpg", "master.m3u8"));
+                    listener?.onPlayVideo(meidaUrl)
+                    print(meidaUrl)
                 }
 
                 if (item.cMsg!!.image.uri.isNotEmpty()) {
@@ -192,8 +196,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     }
                     holder.ivRightPlay.visibility = View.GONE
                 }
+                var thumb = meidaUrl
+                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()){
+                    thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                }
                 Glide.with(act)
-                    .load(meidaUrl)
+                    .load(thumb)
                     .apply(
                         RequestOptions()
                             .placeholder(com.teneasy.chatuisdk.R.drawable.loading_animation)
@@ -251,9 +259,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivRightPlay.visibility = View.GONE
 
                 holder.ivLeftImg.visibility = View.VISIBLE
-                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri.replace("index.mp4", "thumb.jpg")
+                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
+                if (item.cMsg!!.video.hlsUri.isNotEmpty()){
+                    meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.hlsUri
+                }
                 holder.ivLeftImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl.replace("thumb.jpg", "master.m3u8"));
+                    listener?.onPlayVideo(meidaUrl);
+                    print(meidaUrl)
                 }
 
                 if (item.cMsg!!.image.uri.isNotEmpty()) {
@@ -269,9 +281,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 //                    .into(holder.ivLeftImg)
-
+                var thumb = meidaUrl
+                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()){
+                    thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                }
                 Glide.with(act)
-                    .load(meidaUrl)
+                    .load(thumb)
                     .apply(
                         RequestOptions()
                             .placeholder(R.drawable.loading_animation)
