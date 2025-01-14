@@ -132,7 +132,7 @@ class UploadUtil(lis: UploadListener) {
 
    private fun subscribeToSSE(url: String, ext: String) {
          val client = OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)  // Set timeouts as needed
+            .connectTimeout(60, TimeUnit.SECONDS)  // Set timeouts as needed
             .readTimeout(0, TimeUnit.SECONDS)      // Set readTimeout to 0 for long-lived connections
             .build()
 
