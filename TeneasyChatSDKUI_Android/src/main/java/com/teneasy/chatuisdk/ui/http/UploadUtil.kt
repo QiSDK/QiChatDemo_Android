@@ -60,11 +60,12 @@ class UploadUtil(lis: UploadListener) {
     fun uploadFile(file: File) {
         val calendar = Calendar.getInstance()
         var mSec = calendar.timeInMillis.toString()
+
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("myFile",  mSec + "myVideo.mp4",  RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file))
+                    .addFormDataPart("myFile",  mSec + "." + file.extension,  RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file))
                     .addFormDataPart("type", "4")
                     .build()// + file.extension
 
@@ -87,7 +88,7 @@ class UploadUtil(lis: UploadListener) {
 
                     override fun onResponse(call: Call, response: Response) {
                         val body = response.body
-                        if(response.code == 200 || response.code == 202 && body != null) {
+                        if((response.code == 200 || response.code == 202) && body != null) {
                             val bodyStr = response.body!!.string()
                             val gson = Gson()
                             if (response.code == 200){//bodyStr.contains("code\":200")
