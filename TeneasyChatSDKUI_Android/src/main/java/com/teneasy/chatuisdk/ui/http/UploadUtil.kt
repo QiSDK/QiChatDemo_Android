@@ -75,9 +75,9 @@ class UploadUtil(lis: UploadListener) {
                     .post(multipartBody).build()
 
                 val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(1, TimeUnit.MINUTES)
-                    .readTimeout(1, TimeUnit.MINUTES)
+                    .connectTimeout(10, TimeUnit.MINUTES)
+                    .writeTimeout(15, TimeUnit.MINUTES)
+                    .readTimeout(15, TimeUnit.MINUTES)
                     .build()
                 val call = okHttpClient.newCall(request2)
                 call.enqueue(object : Callback {
