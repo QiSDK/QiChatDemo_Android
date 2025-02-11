@@ -1,20 +1,23 @@
 package com.teneasy.chatuisdk.ui.http
 
 import android.util.Log
+import androidx.media3.common.MediaMetadata
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teneasy.chatuisdk.FilePath
 import com.teneasy.chatuisdk.ui.base.Constants
-import com.teneasy.chatuisdk.ui.base.Constants.Companion.uploadProgress
 import com.teneasy.chatuisdk.ui.base.Utils
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import okio.BufferedSink
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.Type
@@ -23,44 +26,30 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 
-interface UploadListener {
-    fun uploadSuccess(path: Urls, isVideo: Boolean);
-    fun uploadProgress(progress: Int)
-    fun uploadFailed(msg: String);
-}
+//interface UploadListener {
+//    fun uploadSuccess(path: Urls, isVideo: Boolean);
+//    fun uploadProgress(progress: Int)
+//    fun uploadFailed(msg: String);
+//}
 
-class UploadUtil(lis: UploadListener) {
+class UploadUtilWithProgress(lis: UploadListener) {
     private var listener: UploadListener? = null
     private val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
     private var TAG = "UploadUtil"
+    private var myProgress = 0
+
     init {
         listener = lis
     }
 
-    /**
-     * 上传图片。上传成功后，会直接调用socket进行消息发送。
-     *  @param filePath
-     *  // 文件类型类型 0 ～ 4
-     * enum AssetKind {
-     *   ASSET_KIND_NONE = 0;
-     *   // 商户公共文件
-     *   ASSET_KIND_PUBLIC = 1;
-     *   // 商户私有文件
-     *   ASSET_KIND_PRIVATE = 2;
-     *   // 头像
-     *   ASSET_KIND_AVATAR = 3;
-     *   // 会话私有文件
-     *   ASSET_KIND_SESSION = 4;
-     * }
-     */
     //Date().time.toString() + "." + file.extension
     //这个函数可以上传图片和视频
     fun uploadFile(file: File) {
+        Constants.domain = "csapi-pc.utigio.com"
+        Constants.xToken = "CAEQARjR9yMgswEoreuy4cwy.FI_bZVwCj-QNqGqOEIjLZ0D3dFRMbzhQ9aOLKJdGjEb2Pu-w6KWcCEQepje7AADJucFWW75TGbQO2HCY-rHwCg"
         val calendar = Calendar.getInstance()
         var mSec = calendar.timeInMillis.toString()
-
-        listener?.uploadProgress(uploadProgress)
-
+        Log.i(TAG, "开始上传。。。")
         Thread(Runnable {
             kotlin.run {
                 val multipartBody = MultipartBody.Builder()
@@ -109,14 +98,8 @@ class UploadUtil(lis: UploadListener) {
                                     return;
                                 }
                             }else if (response.code == 202){
-                                if (uploadProgress < 70){
-                                    uploadProgress = 70
-                                }else{
-                                    uploadProgress += 10
-                                }
-                                listener?.uploadProgress(uploadProgress)
                                 var b = gson.fromJson(bodyStr, ReturnData<String>()::class.java)
-                                subscribeToSSE(
+                                uploadVideoWithProgress(file,
                                     Constants.baseUrlApi() + "/v1/assets/upload-v4?uploadId=" + b.data,
                                     file.extension
                                 )
@@ -136,98 +119,76 @@ class UploadUtil(lis: UploadListener) {
         }).start()
     }
 
-   private fun subscribeToSSE(url: String, ext: String) {
-         val client = OkHttpClient.Builder()
+    fun uploadVideoWithProgress(file: File, url: String, ext: String) {
+        val client = OkHttpClient.Builder()
             .connectTimeout(60, TimeUnit.SECONDS)  // Set timeouts as needed
             .readTimeout(0, TimeUnit.SECONDS)      // Set readTimeout to 0 for long-lived connections
             .build()
+        Log.i(TAG, (Date().toString() + "uploadVideoWithProgress..."))
+        // 创建 RequestBody，用于包装文件并监听进度
+        val requestBody = object : RequestBody() {
+            override fun contentType(): MediaType {
+                return "video/mp4".toMediaType() // 根据文件类型设置
+            }
 
-       println("上传监听地址：" + url)
+            override fun contentLength(): Long {
+                return file.length()
+            }
+
+            override fun writeTo(sink: BufferedSink) {
+                val buffer = sink.buffer()
+                val totalBytes = file.length()
+                var uploadedBytes = 0L
+
+                file.inputStream().use { inputStream ->
+                    val bufferSize = 8192 // 8KB 缓冲区
+                    val bytes = ByteArray(bufferSize)
+                    var read: Int
+                    while (inputStream.read(bytes).also { read = it } != -1) {
+                        buffer.write(bytes, 0, read)
+                        uploadedBytes += read
+                        // 计算并打印上传进度
+                        val progress = (uploadedBytes.toDouble() / totalBytes) * 100
+
+                        if (progress.toInt() != myProgress) {
+                            println("Uploaded: $uploadedBytes / $totalBytes ($progress%)")
+                            listener?.uploadProgress(progress.toInt())
+                            Log.i(
+                                TAG,
+                                (Date().toString() + "上传进度 $uploadedBytes / $totalBytes ($progress%)")
+                            )
+                            myProgress = progress.toInt()
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // .header("Accept", "text/event-stream") // 设置 header
+        // 创建请求
         val request = Request.Builder()
-            .addHeader("X-Token", Constants.xToken)
-            //.addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "text/event-stream")
             .url(url)
+            .post(requestBody)
+            .addHeader("Accept", "text/event-stream")
+            .addHeader("X-Token", Constants.xToken)
             .build()
 
+        // 发送请求
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                // Handle failure
-                listener?.uploadFailed("SSE 上传失败 Code:" + e.message)
+                Log.e(TAG, e.message?:"上传出错了")
                 e.printStackTrace()
             }
 
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
-                    print("上传成功：" + response.code + "")
-                    val body = response.body
-                    if(response.code == 200 && body != null) {
-                        val strData = body.string()
-                        val lines = strData.split("\n");
-                        var event = ""
-                        var data = ""
-
-                        print("上传监听返回 " + strData);
-
-                        if (lines.size <= 0){
-                            listener?.uploadFailed("数据为空，上传失败")
-                            return
-                        }
-
-                        for (line in lines) {
-                            if (line.startsWith("event:", ignoreCase = true))  {
-                                event = line.replace("event:", "")
-                            } else if (line.startsWith("data:", ignoreCase = true)) {
-                                data = line.replace("data:", "")
-                                val gson = Gson()
-                                val result = gson.fromJson(data, UploadPercent::class.java)
-
-                                if (result.percentage == 100 && result.data != null) {
-                                    listener?.uploadSuccess(
-                                        result.data!!,
-                                        !imageTypes.contains(ext)
-                                    )
-                                    Log.i(TAG, ("上传成功" + result.data?.uri))
-                                    Log.i(TAG, (Date().toString() + "上传进度 " + result.percentage))
-                                } else {
-                                    listener?.uploadProgress(result.percentage)
-                                    Log.i(TAG, (Date().toString() + "上传进度 " + result.percentage))
-                                }
-                            }
-                        }
-                    } else {
-                        listener?.uploadFailed("SSE 上传失败 Code:" + response.code)
-                        print("SSE 上传失败 Code:" + response.code)
-                    }
+                    println("Upload successful!")
+                        listener?.uploadSuccess(Urls(), false)
                 } else {
-                    listener?.uploadFailed("Failed to connect to SSE stream")
+                    println("Upload failed: ${response.code} - ${response.message}")
                 }
             }
         })
     }
 }
-
-/*
-{
-"percentage": 0-100,  // 处理进度
-"url": "处理完成后的HLS主文件URL"  // 仅在100%时返回
-}
-*/
-class UploadPercent {
-    var percentage: Int = 0
-    var data: Urls? = null
-}
-
-class Urls {
-    var uri: String = ""
-    var hlsUri: String = ""
-    var thumbnailUri = ""
-}
-
-/*
-```
-图片: jpg, jpeg, png, webp, gif, bmp, jfif
-视频: mp4, avi, mkv, mov, wmv, flv, webm
-文档: docx, doc, pdf, xls, xlsx, csv
-```
- */

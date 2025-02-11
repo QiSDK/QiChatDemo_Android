@@ -39,6 +39,7 @@ import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.uploadProgress
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.GlideEngine
@@ -46,8 +47,10 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.http.UploadImage
 import com.teneasy.chatuisdk.ui.http.UploadListener
 import com.teneasy.chatuisdk.ui.http.UploadUtil
+import com.teneasy.chatuisdk.ui.http.UploadUtilWithProgress
 import com.teneasy.chatuisdk.ui.http.Urls
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
@@ -613,6 +616,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                         chatLib?.makeConnect()
                     }
                     lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+
+                    if (uploadProgress > 0 && (uploadProgress < 67 || uploadProgress >= 70) && uploadProgress < 96){
+                        uploadProgress += 3
+                        uploadProgress(uploadProgress + 3)
+                    }
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
         } else{
@@ -639,8 +647,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
     fun beforeUpload(filePath: String){
         println("开始上传。。。")
-        mIProgressLoader?.updateMessage("开始上传。。。")
+        mIProgressLoader?.updateMessage("正在上传。。。")
         mIProgressLoader?.showLoading()
+        uploadProgress = 0
 
         //val filePath = Utils().encodeFilePath(mediaPath)
         var file = File(filePath)
@@ -659,16 +668,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 return
             }
             //uploadFile(file)
-            UploadUtil(this).uploadFile(file)
+            UploadImage(this).uploadFile(file)
         }else{
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
-            mIProgressLoader?.updateMessage("正在上传。。。")
-
+            uploadProgress = 1
             //如果小于30M就不压缩
             if (file.length() <= 3000 * 10 * 1000){
                 UploadUtil(this@KeFuFragment).uploadFile(file)
             }else {
+                //mIProgressLoader?.updateMessage("开始压缩。。。")
                 CoroutineScope(Dispatchers.Main).launch {
                     val resultCode =
                         Utils().compressVideo(file.absolutePath.toString(), newFilePath)
@@ -687,6 +696,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                             if (newFile.length() > 0) {
                                 file = newFile
                             }
+                            mIProgressLoader?.updateMessage("开始上传。。。")
+                            uploadProgress = 70
                             UploadUtil(this@KeFuFragment).uploadFile(file)
                             //uploadFile(file)
                             Log.i(TAG, "上传文件大小:" + file.length())
@@ -707,66 +718,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 }
             }
         }
-    }
-
-
-    //upload-v3, 这个函数可以上传图片和视频
-     fun uploadFile(file: File) {
-        mIProgressLoader?.updateMessage("上传中。。。")
-        Thread(Runnable {
-            kotlin.run {
-                val multipartBody = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("myFile", Date().time.toString() + "." + file.extension,  RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file))
-                    .addFormDataPart("type", "4")
-                    .build()// + file.extension
-
-                val request2 = Request.Builder().url(Constants.baseUrlApi() + "/v1/assets/upload-v3")
-                    .addHeader("X-Token", Constants.xToken)
-                    .post(multipartBody).build()
-
-                val okHttpClient: OkHttpClient = OkHttpClient().newBuilder()
-                    .connectTimeout(50, TimeUnit.SECONDS)
-                    .writeTimeout(50, TimeUnit.MINUTES)
-                    .readTimeout(50, TimeUnit.MINUTES)
-                    .build()
-                val call = okHttpClient.newCall(request2)
-                call.enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        // 上传失败
-                        toast("上传失败" + e.localizedMessage)
-                        mIProgressLoader?.updateMessage("");
-                        mIProgressLoader?.dismissLoading()
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        mIProgressLoader?.dismissLoading()
-                        val body = response.body
-                        if(response.code == 200 && body != null) {
-                            val path = response.body!!.string()
-                            val gson = Gson()
-                            val result = gson.fromJson(path, UploadResult::class.java)
-
-                            if (result.code == 0 || result.code == 200) {
-                                if (imageTypes.contains(file.absoluteFile.extension.lowercase())) {
-                                    // 发送图片
-                                    sendImgMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
-                                } else {
-                                //    sendVideoMsg(result.data?.filepath?: "")//Constants.baseUrlImage +
-                                }
-                                Log.i(TAG, ("上传成功" + result.data?.filepath))
-                            } else {
-                                toast(result.message?: "上传失败");
-                            }
-                        } else {
-                            toast("上传失败 Code:" + response.code)
-                        }
-                        //Utils().closeSoftKeyboard(view)
-                    }
-                })
-
-            }
-        }).start()
     }
 
     fun toast(string: String){
@@ -1176,6 +1127,7 @@ code: 1002 无效的Token
     }
 
     override fun uploadProgress(progress: Int) {
+        Log.i(TAG, "上传中 " + progress.toString() + "%")
         runOnUiThread {
          mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
         }
