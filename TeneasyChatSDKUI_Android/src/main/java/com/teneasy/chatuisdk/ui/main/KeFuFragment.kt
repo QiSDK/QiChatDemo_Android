@@ -617,9 +617,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     }
                     lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
 
+                    //上传视频的时候，在这里更新上传进度，对接开发人员可以有自己的办法，和聊天sdk无关。
                     if (uploadProgress > 0 && (uploadProgress < 67 || uploadProgress >= 70) && uploadProgress < 96){
                         uploadProgress += 3
-                        uploadProgress(uploadProgress + 3)
+                        uploadProgress(uploadProgress)
                     }
                 }
             }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
