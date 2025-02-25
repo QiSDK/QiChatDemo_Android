@@ -226,7 +226,7 @@ class KeFuViewModel() : BaseViewModel() {
             if (oriMsg != null){
                 if (oriMsg.msgFmt == "MSG_TEXT"){
                     replyText = "$replyText\n回复：${oriMsg.content?.data}"
-                }else if (oriMsg.msgFmt == "MSG_IMAGE"){
+                }else if (oriMsg.msgFmt == "MSG_IMG"){
                     replyText = "$replyText\n回复：[图片]"
                 }else if (oriMsg.msgFmt == "MSG_VIDEO"){
                     replyText = "$replyText\n回复：[视频]"
@@ -244,6 +244,7 @@ class KeFuViewModel() : BaseViewModel() {
             cMContent.data = "历史消息"
         }
         cMsg.setContent(cMContent)
+        cMsg.replyMsgId = replyMsgId
         cMsg.msgId = (history.msgId?: "0").toLong()
         chatModel.cMsg = cMsg.build()
         chatModel.isLeft = isLeft

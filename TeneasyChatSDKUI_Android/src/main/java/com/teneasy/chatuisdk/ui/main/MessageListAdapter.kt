@@ -50,6 +50,7 @@ interface MessageItemOperateListener {
     fun onPlayVideo(url: String)
     fun onPlayImage(url: String)
     fun onDownload(position: Int)
+    fun onShowOriginal(position: Int)
 }
 
 data class QADisplayedEvent(val tag: Int)
@@ -386,10 +387,22 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.tvRightMsg.visibility = View.VISIBLE
                 }else{
                     holder.llRightReply.visibility = View.VISIBLE
+                    //holder.tvRightReply.tag = item.cMsg?.replyMsgId?: 0
                     holder.tvRightMsg.visibility = View.GONE
 
                     val reply = text.substring(text.indexOf("回复：")+3)
+                    //val reply = text
                     holder.tvRightReply.text = reply
+                    holder.tvRightReply.tag = position
+//                    holder.tvRightReply.setOnClickListener {
+//
+//                    }
+                    holder.tvRightReply.setOnClickListener(object : View.OnClickListener {
+                        override fun onClick(v: View?) {
+                            listener?.onShowOriginal(v?.tag as Int)
+                        }
+                    })
+
                     holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
                 }
             } else {

@@ -220,16 +220,17 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             msgAdapter = MessageListAdapter(requireContext(), object : MessageItemOperateListener {
                 //长按消息，删除消息的功能，按实际需求，可能不需要
                 override fun onDelete(position: Int) {
-                   val messageItem = msgAdapter.msgList?.get(position)
+                    val messageItem = msgAdapter.msgList?.get(position)
                     messageItem?.let {
                         chatLib?.deleteMessage(it.cMsg?.msgId ?: 0)
                         viewModel.removeMsgItem(it)
                     }
                 }
+
                 //长按消息，复制文本内容
                 override fun onCopy(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)
-                    val text = messageItem?.cMsg?.content?.data?:""
+                    val text = messageItem?.cMsg?.content?.data ?: ""
                     Utils().copyText(text, requireContext())
                 }
 
@@ -277,12 +278,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     binding?.tvQuotedMsg?.visibility = View.VISIBLE
                     binding?.tvQuotedMsg?.tag = position
                     val msg = msgAdapter.msgList?.get(position)?.cMsg
-                    if ((msg?.image?.uri?: "").isNotEmpty()){
+                    if ((msg?.image?.uri ?: "").isNotEmpty()) {
                         showQuotedMsg("回复：图片")
-                    }else if ((msg?.video?.uri?: "").isNotEmpty()){
+                    } else if ((msg?.video?.uri ?: "").isNotEmpty()) {
                         showQuotedMsg("回复：视频")
-                    }else {
-                        var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data?:" "
+                    } else {
+                        var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data ?: " "
                         txt = txt.split("回复：")[0]
                         showQuotedMsg("回复：" + txt)
                     }
@@ -292,23 +293,29 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 override fun onDownload(position: Int) {
                     val msg = msgAdapter.msgList?.get(position)?.cMsg
                     var url = ""
-                    if ((msg?.image?.uri?: "").isNotEmpty()){
-                        url = Constants.baseUrlImage + msg?.image?.uri?: ""
-                    }else if ((msg?.video?.uri?: "").isNotEmpty()){
-                        url = Constants.baseUrlImage + msg?.video?.uri?: ""
+                    if ((msg?.image?.uri ?: "").isNotEmpty()) {
+                        url = Constants.baseUrlImage + msg?.image?.uri ?: ""
+                    } else if ((msg?.video?.uri ?: "").isNotEmpty()) {
+                        url = Constants.baseUrlImage + msg?.video?.uri ?: ""
                     }
                     this@KeFuFragment.mIProgressLoader?.updateMessage("请稍等...")
                     this@KeFuFragment.mIProgressLoader?.showLoading()
-                    Utils().downloadVideo( url, object :
+                    Utils().downloadVideo(url, object :
                             (Int) -> Unit {
                         override fun invoke(progress: Int) {
                             Log.d(TAG, "下载进度：$progress")
                             if (progress == 100) {
                                 this@KeFuFragment.mIProgressLoader?.dismissLoading()
-                                ToastUtils.showToast(this@KeFuFragment.requireContext(), "下载成功！");
-                            }else if(progress == -1){
+                                ToastUtils.showToast(
+                                    this@KeFuFragment.requireContext(),
+                                    "下载成功！"
+                                );
+                            } else if (progress == -1) {
                                 this@KeFuFragment.mIProgressLoader?.dismissLoading()
-                                ToastUtils.showToast(this@KeFuFragment.requireContext(), "下载失败！");
+                                ToastUtils.showToast(
+                                    this@KeFuFragment.requireContext(),
+                                    "下载失败！"
+                                );
                                 return
                             }
                             //this@KeFuFragment.mIProgressLoader?.updateMessage("下载进度：$progress");
@@ -316,17 +323,38 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     });
                 }
 
+                override fun onShowOriginal(position: Int) {
+                    val curMsg = viewModel.mlMsgList.value?.get(position)
+                    val oriMsg =
+                        viewModel.mlMsgList.value?.firstOrNull { it.msgId == curMsg?.cMsg?.replyMsgId }
+                    if (oriMsg != null) {
+                        if (oriMsg.cellType == CellType.TYPE_Image) {
+                            val url = oriMsg?.cMsg?.image?.uri
+                            if (url != null) {
+                                onPlayImage(Constants.baseUrlImage + url)
+                            }
+                        } else if (oriMsg.cellType == CellType.TYPE_VIDEO) {
+                            val url = oriMsg?.cMsg?.video?.uri
+                            if (url != null) {
+                                onPlayVideo(Constants.baseUrlImage + url)
+                            }
+                        }
+                    }
+                }
+
                 //这里实现自动回复的功能，属于本地消息
                 override fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String) {
 
                     if (msgType == "MSG_TEXT") {
                         this@KeFuFragment.sendLocalMsg(msg, isLeft)
-                    }else if (msgType == "MSG_IMG") {
+                    } else if (msgType == "MSG_IMG") {
                         this@KeFuFragment.sendLocalImgMsg(msg, isLeft)
                     }
 
                 }
-            } )
+            })
+
+
             //初始化一个空的列表给adapter
             if (viewModel.mlMsgList.value?.isEmpty() == true) {
                 msgAdapter.setList(ArrayList())
@@ -669,7 +697,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 return
             }
             //uploadFile(file)
-            UploadImage(this).uploadFile(file)
+            //UploadImage(this).uploadFile(file)
+            uploadProgress = 1
+            UploadUtil(this@KeFuFragment).uploadFile(file)
         }else{
             val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
             val newFile = File(newFilePath)
@@ -966,12 +996,6 @@ code: 1002 无效的Token
                     3000 // value in milliseconds
                 )
             }
-
-//            runOnUiThread(
-//                Runnable {
-//                    Toast.makeText(context, "其他客服有新消息！", Toast.LENGTH_SHORT).show()
-//                }
-//            )
         }else {
 
             //把收到的消息插入到列表
@@ -1096,10 +1120,10 @@ code: 1002 无效的Token
             referText = "回复：[图片]"
         }
         val newText = "${model.cMsg?.content?.data}\n$referText"
-        model.cMsg = composATextMessage(newText.trim(), newMsgId)
+        model.cMsg = composATextMessage(newText.trim(), newMsgId, referMsg.msgId)
     }
 
-    fun composATextMessage(textMsg: String, msgId: Long) : CMessage.Message{
+    fun composATextMessage(textMsg: String, msgId: Long, replyMsgId: Long = 0) : CMessage.Message{
         //第一层
         var cMsg = CMessage.Message.newBuilder()
         //第二层
@@ -1107,6 +1131,7 @@ code: 1002 无效的Token
 
         //d.t = msgDate.time
         cMsg.msgId = msgId
+        cMsg.replyMsgId = replyMsgId
         cMsg.msgTime = Utils().getNowTimeStamp()
         cMContent.data = textMsg
         cMsg.setContent(cMContent)
