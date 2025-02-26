@@ -31,6 +31,11 @@ interface UploadListener {
 
 class UploadUtil(lis: UploadListener) {
     private var listener: UploadListener? = null
+    /*
+   ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".jfif", ".heic": // 图片
+   ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm": // 视频
+   ".docx", ".doc", ".pdf", ".xls", ".xlsx", ".csv": // 文件
+   */
     private val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
     private var TAG = "UploadUtil"
     init {
