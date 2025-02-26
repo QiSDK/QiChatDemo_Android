@@ -37,6 +37,7 @@ class UploadUtil(lis: UploadListener) {
    ".docx", ".doc", ".pdf", ".xls", ".xlsx", ".csv": // 文件
    */
     private val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
+    private val fileTypes = arrayOf("docx","doc","pdf", "xls", "xlsx", "csv")
     private var TAG = "UploadUtil"
     init {
         listener = lis
@@ -99,7 +100,6 @@ class UploadUtil(lis: UploadListener) {
                             if (response.code == 200){//bodyStr.contains("code\":200")
                                 val type: Type = object : TypeToken<ReturnData<FilePath>>() {}.getType()
                                 val b: ReturnData<FilePath> = gson.fromJson(bodyStr, type)
-
                                 //var b = gson.fromJson(bodyStr, ReturnData<FilePath>()::class.java)
                                 if (b.data.filepath == null || (b.data?.filepath ?:"").isEmpty()){
                                     listener?.uploadFailed("上传失败，path为空");
@@ -109,7 +109,7 @@ class UploadUtil(lis: UploadListener) {
                                     urls.uri = b.data?.filepath?: ""
                                     listener?.uploadSuccess(
                                         urls,
-                                        !imageTypes.contains(file.extension)
+                                        false
                                     )
                                     return;
                                 }
@@ -190,7 +190,7 @@ class UploadUtil(lis: UploadListener) {
                                 if (result.percentage == 100 && result.data != null) {
                                     listener?.uploadSuccess(
                                         result.data!!,
-                                        !imageTypes.contains(ext)
+                                        true
                                     )
                                     Log.i(TAG, ("上传成功" + result.data?.uri))
                                     Log.i(TAG, (Date().toString() + "上传进度 " + result.percentage))

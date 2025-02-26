@@ -3,6 +3,7 @@ package com.teneasy.chatuisdk.ui.base
 import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -19,6 +20,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -423,36 +425,54 @@ class Utils {
                     }
                 }
             }
-
-           /* val inputStream: InputStream = body.byteStream()
-            val outputFile = File(outputFilePath)
-            val outputStream = FileOutputStream(outputFile)
-
-            val buffer = ByteArray(8192)
-            var bytesRead: Int
-            var totalBytesRead: Long = 0
-            val contentLength = body.contentLength()
-
-            try {
-                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
-                    totalBytesRead += bytesRead
-                    val progress = ((totalBytesRead * 100) / contentLength).toInt()
-                    onProgress(progress)
-                }
-            }catch (e: Exception){
-                print(e.printStackTrace())
-                onProgress(-1)
-            }
-            finally {
-                inputStream.close()
-                outputStream.close()
-            }
-            println("Video downloaded to: $outputFilePath")
-
-            */
-
         }.start()
     }
 
+    @Throws(IOException::class)
+     fun uriToFile(context: Context, uri: Uri, fileName: String): File {
+        val contentResolver = context.contentResolver
+        val TEMP_FILE_PREFIX = "temp_file_"
+        val TEMP_FILE_SUFFIX = "." + fileName.split(".").last() //".tmp"
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
+        val tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, context.cacheDir)
+        tempFile.deleteOnExit()
+
+        inputStream?.use { input ->
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output)
+            }
+        } ?: throw IOException("Could not open input stream for URI: $uri")
+
+        return tempFile
+    }
+
+    /**
+     * Retrieves and prints the display name of a file from a given URI using ContentResolver.
+     *
+     * @param contentResolver The ContentResolver instance to use for querying.
+     * @param fileUri The URI of the file to query.
+     */
+    fun getFileNameFromUri(contentResolver: ContentResolver, fileUri: Uri) : String {
+        // Define the projection (columns to retrieve) explicitly.
+        val projection = arrayOf(OpenableColumns.DISPLAY_NAME)
+        // Use a try-with-resources equivalent (use) for proper cursor management.
+        contentResolver.query(fileUri, projection, null, null, null)?.use { cursor ->
+            // Check if the cursor is valid and has at least one row.
+            if (cursor.moveToFirst()) {
+                // Get the column index safely.
+                val displayNameColumnIndex = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME)
+                // Retrieve the display name.
+                val displayName = cursor.getString(displayNameColumnIndex)
+                // Log the file name.
+                println("Selected file: $displayName")
+                return displayName
+            } else {
+                println("No file found at the specified URI.")
+                return ""
+            }
+        } ?: run {
+            println("Failed to query the content resolver for the given URI.")
+            return ""
+        }
+    }
 }

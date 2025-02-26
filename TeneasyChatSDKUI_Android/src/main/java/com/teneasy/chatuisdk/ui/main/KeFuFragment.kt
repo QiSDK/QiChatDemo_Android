@@ -1,11 +1,16 @@
 package com.teneasy.chatuisdk.ui.main;
 
+import android.app.Activity
+import android.app.Activity.RESULT_OK
+import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -14,6 +19,9 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -71,11 +79,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.*
+import okhttp3.MediaType.Companion.get
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -110,11 +121,13 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     private var lastMsg: CMessage.Message? = null
     private var workInfo = WorkerInfo()
     private var lastTimestamp: Timestamp? = null
+    private val PICK_FILE_REQUEST_CODE = 1001
 
     private var isFirstSend = true
     val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
 
     private var lastActiveDateTime = Date()
+    private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
 
     private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,6 +150,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
         //初始化进度条
         mIProgressLoader = getProgressLoader()
+        initializePickFileLauncher()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -171,6 +185,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
         binding?.ivClose?.setOnClickListener {
             hidetvQuotedMsg()
+        }
+
+        binding?.ivFile?.setOnClickListener {
+            openFilePicker()
         }
     }
 
@@ -240,15 +258,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 }
 
                 override fun onPlayVideo(url: String) {
-//                    val bundle = Bundle()
-//                    bundle.putString(ARG_VIDEOURL, url)
-//                    bundle.putString(ARG_KEFUNAME, workInfo.workerName)
-//                    findNavController().navigate(R.id.frg_video_full, bundle)
-                    // 单张图片场景
-//                    XPopup.Builder(requireContext())
-//                        .asCustom(VideoPlayView(requireContext(), url))
-//                        .show()
-
                     val intent = Intent(requireContext(), FullVideoActivity::class.java)
                     intent.putExtra(ARG_VIDEOURL, url)
                     intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
@@ -353,7 +362,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
                 }
             })
-
 
             //初始化一个空的列表给adapter
             if (viewModel.mlMsgList.value?.isEmpty() == true) {
@@ -488,6 +496,49 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             }
             else -> {
                 dialogBottomMenu.dismiss()
+            }
+        }
+    }
+
+    private fun initializePickFileLauncher() {
+        pickFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { fileUri ->
+                    val fileName = Utils().getFileNameFromUri(requireContext().contentResolver, fileUri)
+                    var myFile = Utils().uriToFile(requireContext(), fileUri, fileName)
+                    UploadUtil(this).uploadFile(myFile)
+                }
+            } else {
+                Log.w(TAG, "File selection cancelled or failed.")
+            }
+        }
+    }
+
+    fun openFilePicker() {
+        val ALLOWED_MIME_TYPES = arrayOf(
+            "application/msword", // .doc
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+            "application/pdf", // .pdf
+            "application/vnd.ms-excel", // .xls
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+            "text/csv" // .csv
+        )
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*" // Set a general type to allow filtering
+            putExtra(Intent.EXTRA_MIME_TYPES, ALLOWED_MIME_TYPES) // Filter by allowed MIME types
+        }
+        pickFileLauncher.launch(intent)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
+            data?.data?.let { fileUri ->
+                val fileName = Utils().getFileNameFromUri(requireContext().contentResolver, fileUri)
+                var myFile = Utils().uriToFile(requireContext(), fileUri, fileName)
+                UploadUtil(this).uploadFile(myFile)
             }
         }
     }
