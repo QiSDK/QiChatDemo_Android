@@ -45,7 +45,9 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.imageTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.uploadProgress
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
@@ -124,7 +126,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     private val PICK_FILE_REQUEST_CODE = 1001
 
     private var isFirstSend = true
-    val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
+    //val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
 
     private var lastActiveDateTime = Date()
     private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
@@ -510,6 +512,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 result.data?.data?.let { fileUri ->
                     val fileName = Utils().getFileNameFromUri(requireContext().contentResolver, fileUri)
                     var myFile = Utils().uriToFile(requireContext(), fileUri, fileName)
+
+                    mIProgressLoader?.updateMessage("正在上传。。。")
+                    mIProgressLoader?.showLoading()
+                    uploadProgress = 1
+
                     UploadUtil(this).uploadFile(myFile)
                 }
             } else {
@@ -915,7 +922,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             withAutoReplyU = null
         }
 
-        chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID, 0, withAutoReplyU)
+        val ext = url.split(".").last()
+        if (imageTypes.contains(ext.lowercase())){
+            chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID, 0, withAutoReplyU)
+        }else if (fileTypes.contains(ext.lowercase())){
+            chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_FILE, Constants.CONSULT_ID, 0, withAutoReplyU)
+        }else{
+            Toast.makeText(requireContext(), "不支持的文件类型", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val messageItem = MessageItem()
         messageItem.cMsg = chatLib?.sendingMessage
         messageItem.isLeft = false
@@ -1203,7 +1219,7 @@ code: 1002 无效的Token
         if (isVideo) {
             sendVideoMsg(urls)//Constants.baseUrlImage +
         } else {
-            // 发送图片
+            // 发送图片或文件
             sendImgMsg(urls.uri)
         }
         runOnUiThread {

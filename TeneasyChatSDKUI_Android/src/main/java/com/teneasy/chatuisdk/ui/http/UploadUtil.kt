@@ -36,8 +36,7 @@ class UploadUtil(lis: UploadListener) {
    ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm": // 视频
    ".docx", ".doc", ".pdf", ".xls", ".xlsx", ".csv": // 文件
    */
-    private val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
-    private val fileTypes = arrayOf("docx","doc","pdf", "xls", "xlsx", "csv")
+
     private var TAG = "UploadUtil"
     init {
         listener = lis

@@ -77,7 +77,9 @@ class KeFuViewModel() : BaseViewModel() {
 
         if (newItem.cMsg?.video != null && newItem.cMsg!!.video.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_VIDEO
-        }else if  (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
+        }else if (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
+            newItem.cellType = CellType.TYPE_Image
+        }else if (newItem.cMsg?.file != null && newItem.cMsg!!.file.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_Image
         }else{
             //对方已经编辑信息，做对应个更新

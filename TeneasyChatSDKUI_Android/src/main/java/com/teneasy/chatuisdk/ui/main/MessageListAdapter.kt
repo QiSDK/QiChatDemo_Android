@@ -183,23 +183,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivRightImg.visibility = View.VISIBLE
 
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
-                if (item.cMsg!!.video.hlsUri.isNotEmpty()){
-                    meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.hlsUri
-                }
-                holder.ivRightImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl)
-                    print(meidaUrl)
-                }
 
-                if (item.cMsg!!.image.uri.isNotEmpty()) {
-                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
-                    holder.ivRightImg.setOnClickListener {
-                        listener?.onPlayImage(meidaUrl)
-                    }
-                    holder.ivRightPlay.visibility = View.GONE
-                }
-
-                if (item.cMsg?.msgFmt == CMessage.MessageFormat.MSG_FILE){
+                if ((item.cMsg?.file?.uri?:"").isNotEmpty()){
                     val ext = item.cMsg?.file?.uri?.split(".")?.last()
                     holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
                     holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -209,6 +194,23 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     }
                     holder.ivRightPlay.visibility = View.GONE
                 }else {
+
+                    if (item.cMsg!!.video.hlsUri.isNotEmpty()){
+                        meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.hlsUri
+                    }
+                    holder.ivRightImg.setOnClickListener {
+                        listener?.onPlayVideo(meidaUrl)
+                        print(meidaUrl)
+                    }
+
+                    if (item.cMsg!!.image.uri.isNotEmpty()) {
+                        meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
+                        holder.ivRightImg.setOnClickListener {
+                            listener?.onPlayImage(meidaUrl)
+                        }
+                        holder.ivRightPlay.visibility = View.GONE
+                    }
+
                     var thumb = meidaUrl
                     if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
                         thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri

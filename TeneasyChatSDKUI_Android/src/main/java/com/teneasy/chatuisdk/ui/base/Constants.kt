@@ -111,12 +111,8 @@ class Constants {
             val c = URLEncoder.encode(cust, "utf-8")
             return c
         }
+
+        val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
+        val fileTypes = arrayOf("docx","doc","pdf", "xls", "xlsx", "csv")
     }
-
-    /*
-    安卓demo问题：
-
-    1.无法接受起聊发送过来的视频，显示空消息
-
-     */
 }
