@@ -50,7 +50,7 @@ public class MainApi {
         Observable<ReturnData<Object>> markRead(@Body JsonObject param);
 
         @POST("v1/api/error-report/upload")
-        Observable<ReturnData<Object>> reportError(@Body ErrorReport param);
+        Observable<ReturnData<Object>> repError(@Body ErrorReport param);
 
         @Multipart
         @POST("/v1/assets/upload/")

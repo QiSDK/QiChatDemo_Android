@@ -489,8 +489,11 @@ class Utils {
         try {
             // Create an intent to view the PDF file.
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                //setDataAndType(pdfUri, "application/pdf")
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                data = pdfUri
+                //setDataAndType(pdfUri, getMimeType(pdfUri.path?.split(".")?.lastOrNull() ?: "*/*"))
+                //setDataAndType(pdfUri, getMimeType(pdfUri.path?.split(".")?.lastOrNull() ?: ""))
+                //flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_TASK
             }
 
             // Check if there's an app that can handle the intent.
@@ -500,14 +503,36 @@ class Utils {
             } else {
                 // No app found to handle the intent.
                 Log.e(TAG, "No PDF viewer app found.")
+                Toast.makeText(context, "No viewer app found.", Toast.LENGTH_SHORT).show()
                 // Optionally, you can show a message to the user here.
             }
         } catch (e: ActivityNotFoundException) {
             Log.e(TAG, "No PDF viewer app found.", e)
+            Toast.makeText(context, "No viewer app found.", Toast.LENGTH_SHORT).show()
             // Optionally, you can show a message to the user here.
         } catch (e: Exception) {
             Log.e(TAG, "Error opening PDF in browser.", e)
             // Optionally, you can show a message to the user here.
+        }
+    }
+
+    private fun getMimeType2(ext: String): String {
+        return "application/octet-stream";
+//        return when (ext.lowercase()) {
+//            "pdf" -> "application/pdf"
+//            "doc", "docx" -> "application/msword"
+//            "xls", "xlsx" -> "application/vnd.ms-excel"
+//            "ppt", "pptx" -> "application/vnd.ms-powerpoint"
+//            else -> "application/octet-stream" // Default MIME type
+//        }
+    }
+
+    private fun getMimeType(ext: String): String {
+        return when (ext.lowercase()) {
+            "pdf" -> "application/pdf"
+            "doc", "docx" -> "application/msword"
+            "xls", "xlsx" -> "application/vnd.ms-excel"
+            else -> "*/*"
         }
     }
 }

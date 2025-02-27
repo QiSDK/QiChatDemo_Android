@@ -87,7 +87,7 @@ open class BaseViewModel : ViewModel() {
 
         request.headers("x-trace-id", UUID.randomUUID().toString())
         request.call(request.create(MainApi.IMainTask::class.java)
-            .reportError(errorReport),
+            .repError(errorReport),
             object : ProgressLoadingCallBack<ReturnData<Any>>(null) {
                 override fun onSuccess(res: ReturnData<Any>) {
                     errorReport.data.clear()

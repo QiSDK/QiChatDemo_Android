@@ -312,6 +312,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                         url = Constants.baseUrlImage + msg?.image?.uri ?: ""
                     } else if ((msg?.video?.uri ?: "").isNotEmpty()) {
                         url = Constants.baseUrlImage + msg?.video?.uri ?: ""
+                    }else if ((msg?.file?.uri ?: "").isNotEmpty()) {
+                        url = Constants.baseUrlImage + msg?.file?.uri ?: ""
                     }
                     this@KeFuFragment.mIProgressLoader?.updateMessage("请稍等...")
                     this@KeFuFragment.mIProgressLoader?.showLoading()
