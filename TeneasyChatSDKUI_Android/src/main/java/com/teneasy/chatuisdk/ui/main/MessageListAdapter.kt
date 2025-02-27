@@ -51,6 +51,7 @@ interface MessageItemOperateListener {
     fun onPlayImage(url: String)
     fun onDownload(position: Int)
     fun onShowOriginal(position: Int)
+    fun onOpenFile(url: String)
 }
 
 data class QADisplayedEvent(val tag: Int)
@@ -197,53 +198,65 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     }
                     holder.ivRightPlay.visibility = View.GONE
                 }
-                var thumb = meidaUrl
-                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()){
-                    thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
-                }
-                Glide.with(act)
-                    .load(thumb)
-                    .apply(
-                        RequestOptions()
-                            .placeholder(com.teneasy.chatuisdk.R.drawable.loading_animation)
-                            .dontAnimate().skipMemoryCache(true)
-                    )
-                    .listener(object : RequestListener<Drawable?> {
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable?>,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            return false
-                        }
 
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            model: Any,
-                            target: Target<Drawable?>?,
-                            dataSource: DataSource,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            val bitmap = Utils().drawableToBitmap(resource);
-                            print(bitmap.width)
-                            if (bitmap.height > bitmap.width) {
-                                Utils().updateLayoutParams(
-                                    holder.rlImagecontainer,
-                                    Utils().dp2px(106.0f),
-                                    Utils().dp2px(176.0f)
-                                )
-                            }else{
-                                Utils().updateLayoutParams(
-                                    holder.rlImagecontainer,
-                                    Utils().dp2px(176.0f),
-                                    Utils().dp2px(106.0f)
-                                )
+                if (item.cMsg?.msgFmt == CMessage.MessageFormat.MSG_FILE){
+                    val ext = item.cMsg?.file?.uri?.split(".")?.last()
+                    holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
+                    holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
+                    holder.ivRightImg.setOnClickListener {
+                        listener?.onOpenFile(meidaUrl)
+                    }
+                    holder.ivRightPlay.visibility = View.GONE
+                }else {
+                    var thumb = meidaUrl
+                    if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
+                        thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                    }
+                    Glide.with(act)
+                        .load(thumb)
+                        .apply(
+                            RequestOptions()
+                                .placeholder(com.teneasy.chatuisdk.R.drawable.loading_animation)
+                                .dontAnimate().skipMemoryCache(true)
+                        )
+                        .listener(object : RequestListener<Drawable?> {
+                            override fun onLoadFailed(
+                                e: GlideException?,
+                                model: Any?,
+                                target: Target<Drawable?>,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                return false
                             }
-                            return false
-                        }
-                    })
-                    .into(holder.ivRightImg)
+
+                            override fun onResourceReady(
+                                resource: Drawable,
+                                model: Any,
+                                target: Target<Drawable?>?,
+                                dataSource: DataSource,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                val bitmap = Utils().drawableToBitmap(resource);
+                                print(bitmap.width)
+                                if (bitmap.height > bitmap.width) {
+                                    Utils().updateLayoutParams(
+                                        holder.rlImagecontainer,
+                                        Utils().dp2px(106.0f),
+                                        Utils().dp2px(176.0f)
+                                    )
+                                } else {
+                                    Utils().updateLayoutParams(
+                                        holder.rlImagecontainer,
+                                        Utils().dp2px(176.0f),
+                                        Utils().dp2px(106.0f)
+                                    )
+                                }
+                                return false
+                            }
+                        })
+                        .into(holder.ivRightImg)
+                }
             } else {
                 holder.ivLeftImg.tag = position
                 holder.tvLeftTime.text = localTime
@@ -282,55 +295,59 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 //                    .skipMemoryCache(true)
 //                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
 //                    .into(holder.ivLeftImg)
-                var thumb = meidaUrl
-                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()){
-                    thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
-                }
-                Glide.with(act)
-                    .load(thumb)
-                    .apply(
-                        RequestOptions()
-                            .placeholder(R.drawable.loading_animation)
-                            .dontAnimate().skipMemoryCache(true)
-                    )
-                    .listener(object : RequestListener<Drawable?> {
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable?>,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            return false
-                        }
 
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            model: Any,
-                            target: Target<Drawable?>?,
-                            dataSource: DataSource,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            val bitmap = Utils().drawableToBitmap(resource);
-                            print(bitmap.width)
-                            if (bitmap.height > bitmap.width) {
-                                Utils().updateLayoutParams(
-                                    holder.rlLeftImagecontainer,
-                                    Utils().dp2px(106.0f),
-                                    Utils().dp2px(176.0f)
-                                )
-                            }else{
-                                Utils().updateLayoutParams(
-                                    holder.rlLeftImagecontainer,
-                                    Utils().dp2px(176.0f),
-                                    Utils().dp2px(106.0f)
-                                )
+                if (item.cMsg?.msgFmt == CMessage.MessageFormat.MSG_FILE){
+                    val ext = item.cMsg?.file?.uri?.split(".")?.last()
+                    holder.ivLeftImg.setImageResource(getFileThumbnail(ext?:"#"))
+                }else {
+                    var thumb = meidaUrl
+                    if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
+                        thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                    }
+                    Glide.with(act)
+                        .load(thumb)
+                        .apply(
+                            RequestOptions()
+                                .placeholder(R.drawable.loading_animation)
+                                .dontAnimate().skipMemoryCache(true)
+                        )
+                        .listener(object : RequestListener<Drawable?> {
+                            override fun onLoadFailed(
+                                e: GlideException?,
+                                model: Any?,
+                                target: Target<Drawable?>,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                return false
                             }
-                            return false
-                        }
-                    })
-                    .into(holder.ivLeftImg)
 
-
+                            override fun onResourceReady(
+                                resource: Drawable,
+                                model: Any,
+                                target: Target<Drawable?>?,
+                                dataSource: DataSource,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                val bitmap = Utils().drawableToBitmap(resource);
+                                print(bitmap.width)
+                                if (bitmap.height > bitmap.width) {
+                                    Utils().updateLayoutParams(
+                                        holder.rlLeftImagecontainer,
+                                        Utils().dp2px(106.0f),
+                                        Utils().dp2px(176.0f)
+                                    )
+                                } else {
+                                    Utils().updateLayoutParams(
+                                        holder.rlLeftImagecontainer,
+                                        Utils().dp2px(176.0f),
+                                        Utils().dp2px(106.0f)
+                                    )
+                                }
+                                return false
+                            }
+                        })
+                        .into(holder.ivLeftImg)
+                }
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
                 print("avatar:$url")
@@ -749,6 +766,22 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
     fun showBigImage(imageView: ImageView, url: String){
         listener?.onPlayImage(url)
+    }
+
+    fun getFileThumbnail(ext: String) : Int{
+        if (ext == "docx" || ext == "doc"){
+            return R.drawable.word_default
+        }else if(ext == "pdf"){
+            return R.drawable.pdf_default
+        }else if(ext == "xls" || ext == "xlsx"){
+            return R.drawable.excel_default
+        }else if (ext == "ppt" || ext == "pptx"){
+            return R.drawable.ppt_default
+        }else if (ext == "mp3" || ext == "m4a"){
+            return R.drawable.audio_default
+        }else{
+            return R.drawable.unknown_default
+        }
     }
 
 }

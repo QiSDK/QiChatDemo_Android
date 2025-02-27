@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.base
 
 import android.app.Application
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ContentResolver
@@ -28,6 +29,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.RelativeLayout
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegSession
 import com.google.protobuf.Timestamp
@@ -56,6 +58,7 @@ class Utils {
 
     companion object {
         var localDateFormat = "yyyy-MM-dd HH:mm:ss"
+        var TAG = "Utils"
     }
 
     fun copyText(text: String, context: Context) {
@@ -473,6 +476,38 @@ class Utils {
         } ?: run {
             println("Failed to query the content resolver for the given URI.")
             return ""
+        }
+    }
+
+    /**
+     * Opens a PDF file from a given URI in an external browser.
+     *
+     * @param context The context to use for launching the intent.
+     * @param pdfUri The URI of the PDF file to open.
+     */
+    fun openPdfInBrowser(context: Context, pdfUri: Uri) {
+        try {
+            // Create an intent to view the PDF file.
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                //setDataAndType(pdfUri, "application/pdf")
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+
+            // Check if there's an app that can handle the intent.
+            if (intent.resolveActivity(context.packageManager) != null) {
+                // Start the activity.
+                ContextCompat.startActivity(context, intent, null)
+            } else {
+                // No app found to handle the intent.
+                Log.e(TAG, "No PDF viewer app found.")
+                // Optionally, you can show a message to the user here.
+            }
+        } catch (e: ActivityNotFoundException) {
+            Log.e(TAG, "No PDF viewer app found.", e)
+            // Optionally, you can show a message to the user here.
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening PDF in browser.", e)
+            // Optionally, you can show a message to the user here.
         }
     }
 }

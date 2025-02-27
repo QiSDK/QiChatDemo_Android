@@ -132,7 +132,7 @@ class KeFuViewModel() : BaseViewModel() {
     fun composeImgMsg(history: list?, isLeft: Boolean, imgPath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         //cMsg.consultId = history?.consultID ?: Constants.CONSULT_ID
-        var cMContent = CMessage.MessageImage.newBuilder()
+        var cMContent = CMessage.MessageFile.newBuilder()
 
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
@@ -151,10 +151,48 @@ class KeFuViewModel() : BaseViewModel() {
         }else {
             cMContent.uri = history?.image?.uri ?: ""
         }
-        cMsg.setImage(cMContent)
+        cMsg.setFile(cMContent)
 
         cMsg.msgId = (history?.msgId?: "0").toLong()
+        cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
 
+        var chatModel = MessageItem()
+        chatModel.cMsg = cMsg.build()
+        chatModel.cellType = CellType.TYPE_Image
+        //chatModel.imgPath = imgPath
+        chatModel.isLeft = isLeft
+        chatModel.sendStatus = MessageSendState.发送成功
+
+        return chatModel
+    }
+
+    fun composeFileMsg(history: list?, isLeft: Boolean, filePath: String = "") : MessageItem{
+        var cMsg = CMessage.Message.newBuilder()
+        //cMsg.consultId = history?.consultID ?: Constants.CONSULT_ID
+        var cMContent = CMessage.MessageFile.newBuilder()
+
+        var d = Timestamp.newBuilder()
+        val cal = Calendar.getInstance()
+        if (history?.msgTime != null) {
+            cal.time = Utils().convertStrToDate(history.msgTime)
+        }else{
+            cal.time = Date()
+        }
+        val millis = cal.timeInMillis
+        d.seconds = (millis * 0.001).toLong()
+        d.nanos = System.nanoTime().toInt();
+        cMsg.msgTime = d.build()
+
+        if (!filePath.isEmpty()){
+            cMContent.uri = filePath
+        }else {
+            cMContent.uri = history?.file?.uri
+        }
+        cMsg.setFile(cMContent)
+
+        cMsg.msgFmt = CMessage.MessageFormat.MSG_FILE
+        cMsg.msgId = (history?.msgId?: "0").toLong()
+        cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
         var chatModel = MessageItem()
         chatModel.cMsg = cMsg.build()
         chatModel.cellType = CellType.TYPE_Image
@@ -186,7 +224,7 @@ class KeFuViewModel() : BaseViewModel() {
         d.seconds = (millis * 0.001).toLong()
         d.nanos = System.nanoTime().toInt();
         cMsg.msgTime = d.build()
-
+        cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
         cMsg.msgId = (history?.msgId?: "0").toLong()
 
         if (!videoPath.isEmpty()){

@@ -265,6 +265,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     requireActivity().startActivity(intent)
                 }
 
+                override fun onOpenFile(url: String) {
+                    Utils().openPdfInBrowser(requireContext(), Uri.parse(url))
+                }
+
                 override fun onPlayImage(url: String) {
 //                    XPopup.Builder(requireContext())
 //
@@ -611,6 +615,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                        historyList.add(historyItem)
                    }else if(item.msgFmt == "MSG_IMG") {
                        val historyItem = viewModel.composeImgMsg(item, isLeft)
+                       historyItem.msgId = (item.msgId?: "0").toLong()
+                       historyItem.cellType = CellType.TYPE_Image
+                       historyList.add(historyItem)
+                   }else if(item.msgFmt == "MSG_FILE") {
+                       val historyItem = viewModel.composeFileMsg(item, isLeft)
                        historyItem.msgId = (item.msgId?: "0").toLong()
                        historyItem.cellType = CellType.TYPE_Image
                        historyList.add(historyItem)
