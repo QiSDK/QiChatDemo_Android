@@ -85,6 +85,7 @@
                 android:layout_marginTop="5dp"
                 android:text="这是三级回答内容"
                 android:textSize="14sp"
+                android:textColor="@color/black"
                 android:layout_marginBottom="5dp"
                 android:visibility="visible" />
 
@@ -97,6 +98,7 @@
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="@dimen/dp_10"
                 android:gravity="left"
+                android:textColor="@color/black"
                 android:padding="3dp"
                 android:text="原始收到的消息"
                 android:textSize="14sp"

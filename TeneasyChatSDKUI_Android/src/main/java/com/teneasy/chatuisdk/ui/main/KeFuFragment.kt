@@ -268,7 +268,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 }
 
                 override fun onOpenFile(url: String) {
-                    Utils().openPdfInBrowser(requireContext(), Uri.parse(url))
+                    //Utils().openPdfInBrowser(requireContext(), Uri.parse(url))
+                    onPlayImage(url)
                 }
 
                 override fun onPlayImage(url: String) {

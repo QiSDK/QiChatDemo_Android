@@ -134,7 +134,7 @@ class KeFuViewModel() : BaseViewModel() {
     fun composeImgMsg(history: list?, isLeft: Boolean, imgPath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         //cMsg.consultId = history?.consultID ?: Constants.CONSULT_ID
-        var cMContent = CMessage.MessageFile.newBuilder()
+        var cMContent = CMessage.MessageImage.newBuilder()
 
         var d = Timestamp.newBuilder()
         val cal = Calendar.getInstance()
@@ -153,7 +153,7 @@ class KeFuViewModel() : BaseViewModel() {
         }else {
             cMContent.uri = history?.image?.uri ?: ""
         }
-        cMsg.setFile(cMContent)
+        cMsg.setImage(cMContent)
 
         cMsg.msgId = (history?.msgId?: "0").toLong()
         cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
@@ -270,6 +270,8 @@ class KeFuViewModel() : BaseViewModel() {
                     replyText = "$replyText\n回复：[图片]"
                 }else if (oriMsg.msgFmt == "MSG_VIDEO"){
                     replyText = "$replyText\n回复：[视频]"
+                }else if (oriMsg.msgFmt == "MSG_FILE"){
+                    replyText = "$replyText\n回复：[文件]"
                 }
             }
             cMContent.data = replyText

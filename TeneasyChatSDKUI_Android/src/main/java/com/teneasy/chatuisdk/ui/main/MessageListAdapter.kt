@@ -454,9 +454,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     val reply = text.substring(text.indexOf("回复：")+3)
                     holder.tvLeftReply.text = reply
                     holder.tvLeftReplyOrigin.text = text.substring(0,text.indexOf("回复："))
+                    holder.tvLeftReply.tag = position
+                    holder.tvLeftReply.setOnClickListener(object : View.OnClickListener {
+                        override fun onClick(v: View?) {
+                            listener?.onShowOriginal(v?.tag as Int)
+                        }
+                    })
                 }
-
-
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
                 print("avatar:$url")
