@@ -43,6 +43,7 @@ import com.teneasy.chatuisdk.FullImageActivity
 import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.UploadResult
+import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
@@ -269,7 +270,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
                 override fun onOpenFile(url: String) {
                     //Utils().openPdfInBrowser(requireContext(), Uri.parse(url))
-                    onPlayImage(url)
+                    //onPlayImage(url)
+
+                    val intent = Intent(requireContext(), WebViewActivity::class.java)
+                    intent.putExtra(ARG_IMAGEURL, url)
+                    //intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
+                    intent.setClass(requireContext(), WebViewActivity::class.java)
+                    requireActivity().startActivity(intent)
+                    //WebViewActivity
                 }
 
                 override fun onPlayImage(url: String) {

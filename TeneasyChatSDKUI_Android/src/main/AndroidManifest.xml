@@ -26,6 +26,9 @@
             android:name=".FullVideoActivity"
             android:exported="false"
             />
+        <activity android:name=".WebViewActivity"
+            android:exported="false">
+        </activity>
     </application>
 
 </manifest>
