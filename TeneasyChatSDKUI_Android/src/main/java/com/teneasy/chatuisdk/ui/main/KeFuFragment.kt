@@ -304,6 +304,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     val msg = msgAdapter.msgList?.get(position)?.cMsg
                     if ((msg?.image?.uri ?: "").isNotEmpty()) {
                         showQuotedMsg("回复：图片")
+                    } else if ((msg?.file?.uri ?: "").isNotEmpty()) {
+                        showQuotedMsg("回复：文件")
                     } else if ((msg?.video?.uri ?: "").isNotEmpty()) {
                         showQuotedMsg("回复：视频")
                     } else {
@@ -1203,6 +1205,8 @@ code: 1002 无效的Token
             referText = "回复：[视频]"
         } else if (!(referMsg.image?.uri ?: "").isEmpty()) {
             referText = "回复：[图片]"
+        }else if (!(referMsg.file?.uri ?: "").isEmpty()) {
+            referText = "回复：[文件]"
         }
         val newText = "${model.cMsg?.content?.data}\n$referText"
         model.cMsg = composATextMessage(newText.trim(), newMsgId, referMsg.msgId)
