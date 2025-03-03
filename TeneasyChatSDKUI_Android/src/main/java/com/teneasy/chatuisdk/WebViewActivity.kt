@@ -33,7 +33,10 @@ class WebViewActivity : AppCompatActivity() {
         binding.myWebView.webChromeClient = WebChromeClient()
 
         //val googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
-        val googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=$imageUrl"
+        var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=$imageUrl"
+        if (imageUrl?.split(".")?.last() == "pdf") {
+            googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
+        }
         // Load a URL
         binding.myWebView.loadUrl(googleDocsUrl) // Replace with your URL
     }

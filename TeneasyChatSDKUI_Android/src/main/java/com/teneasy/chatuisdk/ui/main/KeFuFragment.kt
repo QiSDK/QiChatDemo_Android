@@ -354,16 +354,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     val oriMsg =
                         viewModel.mlMsgList.value?.firstOrNull { it.msgId == curMsg?.cMsg?.replyMsgId }
                     if (oriMsg != null) {
-                        if (oriMsg.cellType == CellType.TYPE_Image) {
-                            val url = oriMsg?.cMsg?.image?.uri
-                            if (url != null) {
-                                onPlayImage(Constants.baseUrlImage + url)
-                            }
-                        } else if (oriMsg.cellType == CellType.TYPE_VIDEO) {
-                            val url = oriMsg?.cMsg?.video?.uri
-                            if (url != null) {
-                                onPlayVideo(Constants.baseUrlImage + url)
-                            }
+                        if ((oriMsg?.cMsg?.image?.uri ?: "").isNotEmpty()) {
+                            onPlayImage(Constants.baseUrlImage + (oriMsg?.cMsg?.image?.uri ?: ""))
+                        }
+                        if ((oriMsg?.cMsg?.video?.uri ?: "").isNotEmpty()) {
+                            onPlayVideo(Constants.baseUrlImage + (oriMsg?.cMsg?.video?.uri ?: ""))
+                        }
+                        if ((oriMsg?.cMsg?.file?.uri ?: "").isNotEmpty()) {
+                            onOpenFile(Constants.baseUrlImage + (oriMsg?.cMsg?.file?.uri ?: ""))
                         }
                     }
                 }

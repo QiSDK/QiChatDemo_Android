@@ -284,6 +284,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     print(meidaUrl)
                 }
 
+                Log.d("AdapterNChatLib", "meidaUrl:" + meidaUrl)
+//                Glide.with(act).load(meidaUrl).dontAnimate()
+//                    .skipMemoryCache(true)
+//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+//                    .into(holder.ivLeftImg)
                 if (item.cMsg!!.image.uri.isNotEmpty()) {
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
                     holder.ivLeftImg.setOnClickListener {
@@ -291,16 +296,15 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     }
                     holder.ivPlay.visibility = View.GONE
                 }
-
-                Log.d("AdapterNChatLib", "meidaUrl:" + meidaUrl)
-//                Glide.with(act).load(meidaUrl).dontAnimate()
-//                    .skipMemoryCache(true)
-//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-//                    .into(holder.ivLeftImg)
-
-                if (item.cMsg?.msgFmt == CMessage.MessageFormat.MSG_FILE){
+                else if ((item.cMsg?.file?.uri?:"").isNotEmpty()){
                     val ext = item.cMsg?.file?.uri?.split(".")?.last()
                     holder.ivLeftImg.setImageResource(getFileThumbnail(ext?:"#"))
+                    holder.ivLeftImg.scaleType = ImageView.ScaleType.CENTER_CROP
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
+                    holder.ivLeftImg.setOnClickListener {
+                        listener?.onOpenFile(meidaUrl)
+                    }
+                    holder.ivPlay.visibility = View.GONE
                 }else {
                     var thumb = meidaUrl
                     if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
