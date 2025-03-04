@@ -195,9 +195,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.ivRightPlay.visibility = View.GONE
                 }else {
 
-                    if (item.cMsg!!.video.hlsUri.isNotEmpty()){
-                        meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.hlsUri
+                    if (item.cMsg!!.video.uri.isNotEmpty()){
+                        meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.uri
                     }
+
                     holder.ivRightImg.setOnClickListener {
                         listener?.onPlayVideo(meidaUrl)
                         print(meidaUrl)
@@ -211,10 +212,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         holder.ivRightPlay.visibility = View.GONE
                     }
 
-                    var thumb = meidaUrl
                     if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
-                        thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                        meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
                     }
+                    var thumb = meidaUrl
                     Glide.with(act)
                         .load(thumb)
                         .apply(

@@ -274,7 +274,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
                     val intent = Intent(requireContext(), WebViewActivity::class.java)
                     intent.putExtra(ARG_IMAGEURL, url)
-                    //intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
+                    intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
                     intent.setClass(requireContext(), WebViewActivity::class.java)
                     requireActivity().startActivity(intent)
                     //WebViewActivity

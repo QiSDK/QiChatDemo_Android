@@ -4,18 +4,22 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.findNavController
 import com.teneasy.chatuisdk.databinding.ActivityWebViewBinding
 
 class WebViewActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWebViewBinding
     private var imageUrl: String? = ""
+    private var kefuName: String? = ""
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         imageUrl = intent.getStringExtra(ARG_IMAGEURL)
+        kefuName = intent.getStringExtra(ARG_KEFUNAME)
 
         // View Binding
         binding = ActivityWebViewBinding.inflate(layoutInflater)
@@ -39,6 +43,10 @@ class WebViewActivity : AppCompatActivity() {
         }
         // Load a URL
         binding.myWebView.loadUrl(googleDocsUrl) // Replace with your URL
+        binding?.tvTitle?.text = kefuName
+        binding?.ivBack?.setOnClickListener {
+            finish()
+        }
     }
 
     override fun onBackPressed() {
