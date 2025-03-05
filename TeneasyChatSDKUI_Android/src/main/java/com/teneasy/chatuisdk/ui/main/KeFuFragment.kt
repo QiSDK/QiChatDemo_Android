@@ -639,7 +639,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                    }else if(item.msgFmt == "MSG_FILE") {
                        val historyItem = viewModel.composeFileMsg(item, isLeft)
                        historyItem.msgId = (item.msgId?: "0").toLong()
-                       historyItem.cellType = CellType.TYPE_Image
+                       historyItem.cellType = CellType.TYPE_File
                        historyList.add(historyItem)
                    }
                }

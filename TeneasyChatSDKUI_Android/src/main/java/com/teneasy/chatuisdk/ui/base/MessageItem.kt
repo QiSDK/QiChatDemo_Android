@@ -14,7 +14,8 @@ enum class CellType(val value: Int) {
         TYPE_Tip(2),
         TYPE_QA(3),
         TYPE_VIDEO(4),
-        TYPE_LastLine(5);
+        TYPE_LastLine(5),
+        TYPE_File(6),;
 }
 
 class MessageItem {//:Serializable

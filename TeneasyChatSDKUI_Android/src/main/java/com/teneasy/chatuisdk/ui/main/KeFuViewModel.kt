@@ -80,7 +80,7 @@ class KeFuViewModel() : BaseViewModel() {
         }else if (newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty()){
             newItem.cellType = CellType.TYPE_Image
         }else if (newItem.cMsg?.file != null && newItem.cMsg!!.file.uri.isNotEmpty()){
-            newItem.cellType = CellType.TYPE_Image
+            newItem.cellType = CellType.TYPE_File
         }else{
             //对方已经编辑信息，做对应个更新
             if (newItem.cMsg?.msgOp == CMessage.MessageOperate.MSG_OP_EDIT){
@@ -197,7 +197,7 @@ class KeFuViewModel() : BaseViewModel() {
         cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
         var chatModel = MessageItem()
         chatModel.cMsg = cMsg.build()
-        chatModel.cellType = CellType.TYPE_Image
+        chatModel.cellType = CellType.TYPE_File
         //chatModel.imgPath = imgPath
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功

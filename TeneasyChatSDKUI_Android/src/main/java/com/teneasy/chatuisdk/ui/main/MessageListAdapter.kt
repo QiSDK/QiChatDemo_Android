@@ -24,6 +24,7 @@ import com.bumptech.glide.request.target.Target
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.databinding.ItemFileMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemLastLineBinding
 import com.teneasy.chatuisdk.databinding.ItemQaListBinding
 import com.teneasy.chatuisdk.databinding.ItemTextMessageBinding
@@ -89,7 +90,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 parent,
                 false)
             return TipMsgViewHolder(binding)
-        }else  if (viewType == CellType.TYPE_Image.value) {
+        }else  if (viewType == CellType.TYPE_Image.value || viewType == CellType.TYPE_VIDEO.value) {
             val binding = ItemVideoImageMessageBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
@@ -102,12 +103,12 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 parent,
                 false)
             return ItemLastLineViewHolder(binding)
-        }else  if (viewType == CellType.TYPE_VIDEO.value) {
-            val binding = ItemVideoImageMessageBinding.inflate(
+        }else  if (viewType == CellType.TYPE_File.value) {
+            val binding = ItemFileMessageBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false)
-            return ItemVideoViewHolder(binding)
+            return ItemFileViewHolder(binding)
         }else {
 
             val binding = ItemTextMessageBinding.inflate(
@@ -146,6 +147,54 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .into(holder.ivKefuImage)
+        }  else if (holder is ItemFileViewHolder) {
+            val item = msgList!![position]
+            if (item.cMsg == null) {
+                return
+            }
+            var localTime = "Time error"
+            item.cMsg?.let {
+                localTime = Utils().timestampToString(it.msgTime)
+            }
+            if (!item.isLeft) {
+                holder.ivRightImg.tag = position
+                holder.tvRightTime.text = localTime
+                holder.llLeftContent.visibility = View.GONE
+                holder.llRightContent.visibility = View.VISIBLE
+
+                if (item.sendStatus != MessageSendState.发送成功) {
+                    holder.ivSendStatus.visibility = View.VISIBLE
+                } else
+                    holder.ivSendStatus.visibility = View.GONE
+
+                holder.tvLeftTime.visibility = View.GONE
+                holder.tvRightTime.visibility = View.VISIBLE
+
+                holder.ivRightImg.visibility = View.VISIBLE
+                val ext = item.cMsg?.file?.uri?.split(".")?.last()
+                holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
+                holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
+                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
+                holder.llRightContent.setOnClickListener {
+                    listener?.onOpenFile(meidaUrl)
+                }
+            } else {
+                holder.ivLeftImg.tag = position
+                holder.tvLeftTime.text = localTime
+
+                holder.llLeftContent.visibility = View.VISIBLE
+                holder.tvLeftTime.visibility = View.VISIBLE
+                holder.tvRightTime.visibility = View.GONE
+                holder.llRightContent.visibility = View.GONE
+
+                val ext = item.cMsg?.file?.uri?.split(".")?.last()
+                holder.ivLeftImg.setImageResource(getFileThumbnail(ext?:"#"))
+                holder.ivLeftImg.scaleType = ImageView.ScaleType.CENTER_CROP
+                var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
+                holder.llLeftContent.setOnClickListener {
+                    listener?.onOpenFile(meidaUrl)
+                }
+            }
         }
        else if (holder is ItemVideoViewHolder) {
             val item = msgList!![position]
@@ -184,16 +233,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
 
-                if ((item.cMsg?.file?.uri?:"").isNotEmpty()){
-                    val ext = item.cMsg?.file?.uri?.split(".")?.last()
-                    holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
-                    holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
-                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
-                    holder.ivRightImg.setOnClickListener {
-                        listener?.onOpenFile(meidaUrl)
-                    }
-                    holder.ivRightPlay.visibility = View.GONE
-                }else {
+
 
                     if (item.cMsg!!.video.uri.isNotEmpty()){
                         meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.uri
@@ -259,7 +299,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             }
                         })
                         .into(holder.ivRightImg)
-                }
             } else {
                 holder.ivLeftImg.tag = position
                 holder.tvLeftTime.text = localTime
@@ -286,10 +325,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 }
 
                 Log.d("AdapterNChatLib", "meidaUrl:" + meidaUrl)
-//                Glide.with(act).load(meidaUrl).dontAnimate()
-//                    .skipMemoryCache(true)
-//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-//                    .into(holder.ivLeftImg)
                 if (item.cMsg!!.image.uri.isNotEmpty()) {
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
                     holder.ivLeftImg.setOnClickListener {
@@ -297,20 +332,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     }
                     holder.ivPlay.visibility = View.GONE
                 }
-                else if ((item.cMsg?.file?.uri?:"").isNotEmpty()){
-                    val ext = item.cMsg?.file?.uri?.split(".")?.last()
-                    holder.ivLeftImg.setImageResource(getFileThumbnail(ext?:"#"))
-                    holder.ivLeftImg.scaleType = ImageView.ScaleType.CENTER_CROP
-                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
-                    holder.ivLeftImg.setOnClickListener {
-                        listener?.onOpenFile(meidaUrl)
-                    }
-                    holder.ivPlay.visibility = View.GONE
-                }else {
-                    var thumb = meidaUrl
-                    if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
-                        thumb = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
-                    }
+                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                }
+                var thumb = meidaUrl
+
                     Glide.with(act)
                         .load(thumb)
                         .apply(
@@ -354,7 +380,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             }
                         })
                         .into(holder.ivLeftImg)
-                }
+
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
                 print("avatar:$url")
@@ -418,9 +444,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     //val reply = text
                     holder.tvRightReply.text = reply
                     holder.tvRightReply.tag = position
-//                    holder.tvRightReply.setOnClickListener {
-//
-//                    }
+
                     holder.tvRightReply.setOnClickListener(object : View.OnClickListener {
                         override fun onClick(v: View?) {
                             listener?.onShowOriginal(v?.tag as Int)
@@ -774,6 +798,81 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             })
         }
     }
+
+    inner class ItemFileViewHolder(binding: ItemFileMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvLeftTime = binding.tvLeftTime
+        var ivLeftImg =  binding.ivFile
+
+        var tvRightTime =  binding.tvRightTime
+        var ivRightImg =  binding.ivRightFile
+
+        var ivArrow =  binding.ivArrow
+        var ivRightChatarrow =  binding.ivRightChatarrow
+
+        var ivKefuImage =  binding.civKefuImage
+        var civKefuRightImage =  binding.civKefuRightImage
+
+
+        var ivSendStatus =  binding.ivSendStatus
+
+        var llLeftContent =  binding.llLeftContent
+        var llRightContent =  binding.llRightContent
+
+        init {
+
+            val builder2: XPopup.Builder = XPopup.Builder(act)
+                .watchView(llLeftContent)
+            llLeftContent.setOnLongClickListener(OnLongClickListener {
+                builder2.asAttachList(
+                    arrayOf<String>("回复", "下载"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
+                                }
+
+                                1 -> {
+                                    //删除
+                                    println("下载")
+                                    listener?.onDownload(it.tag as Int)
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+            // 必须在事件发生前，调用这个方法来监视View的触摸
+            val builder4: XPopup.Builder = XPopup.Builder(act)
+                .watchView(llRightContent)
+            llRightContent.setOnLongClickListener(OnLongClickListener {
+                builder4.asAttachList(
+                    //"删除"前端App不需要
+                    arrayOf<String>("回复", "下载"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
+                                }
+
+                                1 -> {
+                                    //删除
+                                    println("下载")
+                                    listener?.onDownload(it.tag as Int)
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+        }
+    }
+
 
     fun showBigImage(imageView: ImageView, url: String){
         listener?.onPlayImage(url)
