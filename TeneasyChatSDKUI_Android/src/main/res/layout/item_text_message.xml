@@ -58,53 +58,86 @@
             android:textColor="@color/black4848"
             android:layout_marginTop="1dp"
             android:gravity="left"
+
             android:padding="10dp"
             android:text="收到的消息"
+            android:textSize="14sp"
+            android:layout_marginBottom="5dp"
+            android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/ll_left_reply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="fill_horizontal"
+        android:layout_marginBottom="3dp"
+        android:orientation="vertical"
+        >
+
+        <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
+            android:id="@+id/tv_left_reply"
+            android:elevation="2dp"
+            android:background="@drawable/rounded_corner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="200dp"
+            android:layout_gravity="start"
+            android:gravity="start"
+            android:padding="10dp"
+            android:text="这是回复内容"
             android:textSize="14sp"
             android:layout_marginBottom="5dp"
             android:visibility="visible" />
 
         <LinearLayout
+            android:background="@drawable/rounded_corner"
+            android:elevation="2dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ll_left_reply"
-            android:background="@drawable/rounded_corner"
-            android:orientation="vertical"
-            >
-            <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
-                android:id="@+id/tv_left_reply"
-                android:elevation="2dp"
-                android:background="@drawable/rounded_corner"
+            android:maxWidth="230dp"
+            android:padding="5dp"
+            android:orientation="horizontal">
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="200dp"
-                android:gravity="left"
-                android:padding="10dp"
-                android:layout_marginStart="@dimen/dp_10"
-                android:layout_marginEnd="@dimen/dp_10"
-                android:layout_marginTop="5dp"
-                android:text="这是三级回答内容"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginBottom="5dp"
-                android:visibility="visible" />
-
-            <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
-                android:id="@+id/tv_left_reply_origin"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:text="回复："
+                ></TextView>
+            <ImageView
+                android:id="@+id/iv_left_reply_image"
                 android:elevation="2dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/image_default"
+                android:visibility="visible"
+                />
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="200dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="@dimen/dp_10"
-                android:gravity="left"
-                android:textColor="@color/black"
-                android:padding="3dp"
-                android:text="原始收到的消息"
-                android:textSize="14sp"
-                android:visibility="visible" />
+                android:layout_height="wrap_content">
+                <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
+                    android:id="@+id/tv_left_reply_origin"
+                    android:elevation="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="200dp"
+                    android:layout_marginEnd="@dimen/dp_10"
+                    android:gravity="start"
+                    android:padding="3dp"
+                    android:text="文件.jpg"
+                    android:textSize="14sp"
+                    android:visibility="visible" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="200.12KB"
+                    ></TextView>
+            </LinearLayout>
         </LinearLayout>
+    </LinearLayout>
     </LinearLayout>
     <TextView
         android:id="@+id/tv_right_time"
@@ -122,8 +155,8 @@
         android:id="@+id/ly_right_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-android:visibility="gone"
         android:layout_marginEnd="@dimen/dp_10"
+        android:visibility="gone"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_right_time"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -181,7 +214,7 @@ android:visibility="gone"
                 android:textColor="@color/white"
                 android:padding="10dp"
                 android:layout_marginStart="@dimen/dp_10"
-                android:text="这是三级回答内容"
+                android:text="这是回复内容"
                 android:textSize="14sp"
                 android:layout_marginBottom="5dp"
                 android:visibility="visible" />
@@ -191,12 +224,15 @@ android:visibility="gone"
                 android:elevation="2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="200dp"
+                android:maxWidth="230dp"
+                android:padding="5dp"
                 android:orientation="horizontal"
                 android:layout_marginStart="15dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="5dp"
                     android:textColor="@color/white"
                     android:text="回复："
                     ></TextView>
@@ -205,13 +241,17 @@ android:visibility="gone"
                     android:elevation="2dp"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
+                    android:layout_gravity="center_vertical"
                     android:src="@drawable/image_default"
                     android:visibility="visible"
                     />
 
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
                 <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
                     android:id="@+id/tv_right_reply_origin"
-                    android:background="@drawable/rounded_corner_blue"
                     android:elevation="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -223,6 +263,14 @@ android:visibility="gone"
                     android:text="文件.jpg"
                     android:textSize="14sp"
                     android:visibility="visible" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:text="200.12KB"
+                        ></TextView>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

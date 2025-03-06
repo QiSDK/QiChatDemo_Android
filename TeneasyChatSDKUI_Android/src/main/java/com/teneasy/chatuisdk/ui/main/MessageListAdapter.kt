@@ -435,17 +435,15 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val text = item.cMsg!!.content.data
                 //holder.llLeftReply.visibility = View.GONE
                 //holder.llRightReply.visibility = View.GONE
-                if (!text.contains("回复：")){
-                    holder.tvRightMsg.text = text
-                    holder.tvRightMsg.visibility = View.VISIBLE
-                }else{
+                if (item.cMsg!!.replyMsgId > 0){
+
                     holder.llRightReply.visibility = View.VISIBLE
                     //holder.tvRightReply.tag = item.cMsg?.replyMsgId?: 0
                     holder.tvRightMsg.visibility = View.GONE
 
-                    val reply = text.substring(text.indexOf("回复：")+3)
+                    //val reply = text.substring(text.indexOf("回复：")+3)
                     //val reply = text
-                    holder.tvRightReply.text = reply
+                    holder.tvRightReply.text = text
                     holder.tvRightReply.tag = position
 
                     holder.tvRightReply.setOnClickListener(object : View.OnClickListener {
@@ -453,8 +451,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
-
-                    holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
+                    //holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
+                }else{
+                    holder.tvRightMsg.text = text
+                    holder.tvRightMsg.visibility = View.VISIBLE
                 }
             } else {
                 holder.tvLeftMsg.tag = position
@@ -483,23 +483,23 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 //                holder.llRightReply.visibility = View.GONE
 
                 val text = item.cMsg!!.content.data
-                if (!text.contains("回复：")){
-                    holder.tvLeftMsg.text = text
-                    holder.llLeftReply.visibility = View.GONE
-                }else{
+                if (item.cMsg!!.replyMsgId > 0){
                     holder.tvLeftMsg.visibility = View.GONE
                     holder.llLeftReply.visibility = View.VISIBLE
                     holder.tvLeftMsg.visibility = View.GONE
 
-                    val reply = text.substring(text.indexOf("回复：")+3)
-                    holder.tvLeftReply.text = reply
-                    holder.tvLeftReplyOrigin.text = text.substring(0,text.indexOf("回复："))
+//                    val reply = text.substring(text.indexOf("回复：")+3)
+//                    holder.tvLeftReply.text = reply
+//                    holder.tvLeftReplyOrigin.text = text.substring(0,text.indexOf("回复："))
                     holder.tvLeftReply.tag = position
                     holder.tvLeftReply.setOnClickListener(object : View.OnClickListener {
                         override fun onClick(v: View?) {
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
+                }else{
+                    holder.tvLeftMsg.text = text
+                    holder.llLeftReply.visibility = View.GONE
                 }
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
