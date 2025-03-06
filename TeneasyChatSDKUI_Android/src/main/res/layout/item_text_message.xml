@@ -106,17 +106,6 @@
 
         </LinearLayout>
     </LinearLayout>
-    <ImageView
-        android:id="@+id/iv_receive_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/h5_fszhong"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/ly_left_content"
-        app:layout_constraintTop_toTopOf="@+id/ly_left_content"
-        app:layout_constraintBottom_toBottomOf="@+id/ly_left_content"
-        />
     <TextView
         android:id="@+id/tv_right_time"
         android:textSize="10sp"
@@ -130,9 +119,10 @@
         android:text="21:57:52"
         />
     <LinearLayout
-        android:id="@+id/layout_send"
+        android:id="@+id/ly_right_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+android:visibility="gone"
         android:layout_marginEnd="@dimen/dp_10"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_right_time"
@@ -166,7 +156,7 @@
                 android:maxWidth="200dp"
                 android:elevation="2dp"
                 android:text="发出的消息"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/white"
                 android:textSize="14sp"
                 android:visibility="visible" />
 
@@ -174,43 +164,66 @@
             android:id="@+id/ll_right_reply"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corner_blue"
+            android:gravity="fill_horizontal"
+            android:layout_marginBottom="3dp"
             android:orientation="vertical"
             >
 
             <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
                 android:id="@+id/tv_right_reply"
                 android:elevation="2dp"
-                android:background="@drawable/rounded_corner"
+                android:background="@drawable/rounded_corner_blue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxWidth="200dp"
+                android:layout_gravity="end"
                 android:gravity="start"
-                android:textColor="@color/black4848"
+                android:textColor="@color/white"
                 android:padding="10dp"
                 android:layout_marginStart="@dimen/dp_10"
-                android:layout_marginEnd="@dimen/dp_10"
-                android:layout_marginTop="5dp"
                 android:text="这是三级回答内容"
                 android:textSize="14sp"
                 android:layout_marginBottom="5dp"
                 android:visibility="visible" />
-
-            <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
-                android:id="@+id/tv_right_reply_origin"
+            
+            <LinearLayout
+                android:background="@drawable/rounded_corner_blue"
                 android:elevation="2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxWidth="200dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="@dimen/dp_10"
-                android:gravity="start"
-                android:textColor="?android:attr/textColorPrimary"
-                android:padding="3dp"
-                android:text="原始收到的消息"
-                android:textSize="14sp"
-                android:visibility="visible" />
+                android:orientation="horizontal"
+                android:layout_marginStart="15dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:text="回复："
+                    ></TextView>
+                <ImageView
+                    android:id="@+id/iv_right_reply_image"
+                    android:elevation="2dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/image_default"
+                    android:visibility="visible"
+                    />
 
+                <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
+                    android:id="@+id/tv_right_reply_origin"
+                    android:background="@drawable/rounded_corner_blue"
+                    android:elevation="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="200dp"
+                    android:layout_marginEnd="@dimen/dp_10"
+                    android:textColor="@color/white"
+                    android:gravity="start"
+                    android:padding="3dp"
+                    android:text="文件.jpg"
+                    android:textSize="14sp"
+                    android:visibility="visible" />
+            </LinearLayout>
         </LinearLayout>
 
             <ImageView
@@ -232,4 +245,15 @@
                 app:civ_border_color="#80ffffff"
                 android:layout_height="38dp" />
     </LinearLayout>
+    <ImageView
+        android:id="@+id/iv_receive_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:src="@drawable/h5_fszhong"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ly_left_content"
+        app:layout_constraintTop_toTopOf="@+id/ly_left_content"
+        app:layout_constraintBottom_toBottomOf="@+id/ly_left_content"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

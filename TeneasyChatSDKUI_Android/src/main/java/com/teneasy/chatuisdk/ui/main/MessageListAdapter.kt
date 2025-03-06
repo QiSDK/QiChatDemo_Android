@@ -235,70 +235,70 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
 
 
-                    if (item.cMsg!!.video.uri.isNotEmpty()){
-                        meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.uri
-                    }
+                if (item.cMsg!!.video.uri.isNotEmpty()){
+                    meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.uri
+                }
 
+                holder.ivRightImg.setOnClickListener {
+                    listener?.onPlayVideo(meidaUrl)
+                    print(meidaUrl)
+                }
+
+                if (item.cMsg!!.image.uri.isNotEmpty()) {
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
                     holder.ivRightImg.setOnClickListener {
-                        listener?.onPlayVideo(meidaUrl)
-                        print(meidaUrl)
+                        listener?.onPlayImage(meidaUrl)
                     }
+                    holder.ivRightPlay.visibility = View.GONE
+                }
 
-                    if (item.cMsg!!.image.uri.isNotEmpty()) {
-                        meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
-                        holder.ivRightImg.setOnClickListener {
-                            listener?.onPlayImage(meidaUrl)
+                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                }
+                var thumb = meidaUrl
+                Glide.with(act)
+                    .load(thumb)
+                    .apply(
+                        RequestOptions()
+                            .placeholder(com.teneasy.chatuisdk.R.drawable.loading_animation)
+                            .dontAnimate().skipMemoryCache(true)
+                    )
+                    .listener(object : RequestListener<Drawable?> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable?>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            return false
                         }
-                        holder.ivRightPlay.visibility = View.GONE
-                    }
 
-                    if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
-                        meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
-                    }
-                    var thumb = meidaUrl
-                    Glide.with(act)
-                        .load(thumb)
-                        .apply(
-                            RequestOptions()
-                                .placeholder(com.teneasy.chatuisdk.R.drawable.loading_animation)
-                                .dontAnimate().skipMemoryCache(true)
-                        )
-                        .listener(object : RequestListener<Drawable?> {
-                            override fun onLoadFailed(
-                                e: GlideException?,
-                                model: Any?,
-                                target: Target<Drawable?>,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                return false
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable?>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            val bitmap = Utils().drawableToBitmap(resource);
+                            print(bitmap.width)
+                            if (bitmap.height > bitmap.width) {
+                                Utils().updateLayoutParams(
+                                    holder.rlImagecontainer,
+                                    Utils().dp2px(106.0f),
+                                    Utils().dp2px(176.0f)
+                                )
+                            } else {
+                                Utils().updateLayoutParams(
+                                    holder.rlImagecontainer,
+                                    Utils().dp2px(176.0f),
+                                    Utils().dp2px(106.0f)
+                                )
                             }
-
-                            override fun onResourceReady(
-                                resource: Drawable,
-                                model: Any,
-                                target: Target<Drawable?>?,
-                                dataSource: DataSource,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                val bitmap = Utils().drawableToBitmap(resource);
-                                print(bitmap.width)
-                                if (bitmap.height > bitmap.width) {
-                                    Utils().updateLayoutParams(
-                                        holder.rlImagecontainer,
-                                        Utils().dp2px(106.0f),
-                                        Utils().dp2px(176.0f)
-                                    )
-                                } else {
-                                    Utils().updateLayoutParams(
-                                        holder.rlImagecontainer,
-                                        Utils().dp2px(176.0f),
-                                        Utils().dp2px(106.0f)
-                                    )
-                                }
-                                return false
-                            }
-                        })
-                        .into(holder.ivRightImg)
+                            return false
+                        }
+                    })
+                    .into(holder.ivRightImg)
             } else {
                 holder.ivLeftImg.tag = position
                 holder.tvLeftTime.text = localTime
@@ -414,15 +414,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.tvRightMsg.tag = position
                 holder.tvRightTime.text = localTime
                 holder.tvRightTime.visibility = View.VISIBLE
-                holder.tvRightMsg.visibility = View.VISIBLE
-                holder.lySend.visibility = View.VISIBLE
-                holder.ivRightImage.visibility = View.VISIBLE
-                holder.ivRightChatarrow.visibility = View.VISIBLE
-
                 holder.tvLeftTime.visibility = View.GONE
-                holder.tvLeftMsg.visibility = View.GONE
-                holder.ivArrow.visibility = View.GONE
-                holder.ivKefuImage.visibility = View.GONE
+
+//                holder.tvRightMsg.visibility = View.VISIBLE
+//                holder.ivRightImage.visibility = View.VISIBLE
+//                holder.ivRightChatarrow.visibility = View.VISIBLE
+
+//                holder.tvLeftMsg.visibility = View.GONE
+//                holder.ivArrow.visibility = View.GONE
+//                holder.ivKefuImage.visibility = View.GONE
+
+                holder.lyLeftContent.visibility = View.GONE
+                holder.lyRightContent.visibility = View.VISIBLE
 
                 if (item.sendStatus != MessageSendState.发送成功) {
                     holder.ivSendStatus.visibility = View.VISIBLE
@@ -430,8 +433,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.ivSendStatus.visibility = View.GONE
 
                 val text = item.cMsg!!.content.data
-                holder.llLeftReply.visibility = View.GONE
-                holder.llRightReply.visibility = View.GONE
+                //holder.llLeftReply.visibility = View.GONE
+                //holder.llRightReply.visibility = View.GONE
                 if (!text.contains("回复：")){
                     holder.tvRightMsg.text = text
                     holder.tvRightMsg.visibility = View.VISIBLE
@@ -456,21 +459,29 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             } else {
                 holder.tvLeftMsg.tag = position
                 holder.tvLeftTime.text = localTime
-                holder.tvLeftTime.visibility = View.VISIBLE
-                holder.tvLeftMsg.visibility = View.VISIBLE
-                holder.ivArrow.visibility = View.VISIBLE
-                holder.ivKefuImage.visibility = View.VISIBLE
-
                 holder.tvRightTime.visibility = View.GONE
-                holder.tvRightMsg.visibility = View.GONE
-                holder.tvRightMsg.visibility = View.GONE
-                holder.lySend.visibility = View.GONE
-                holder.ivRightImage.visibility = View.GONE
-                holder.ivRightChatarrow.visibility = View.GONE
+                holder.tvLeftTime.visibility = View.VISIBLE
 
-                holder.tvLeftMsg.visibility = View.VISIBLE
 
-                holder.llRightReply.visibility = View.GONE
+                holder.lyLeftContent.visibility = View.VISIBLE
+                holder.lyRightContent.visibility = View.GONE
+
+//                holder.tvLeftMsg.visibility = View.VISIBLE
+//                holder.ivArrow.visibility = View.VISIBLE
+//                holder.ivKefuImage.visibility = View.VISIBLE
+
+//                holder.tvRightTime.visibility = View.GONE
+//                holder.tvRightMsg.visibility = View.GONE
+//                holder.tvRightMsg.visibility = View.GONE
+
+
+//                holder.ivRightImage.visibility = View.GONE
+//                holder.ivRightChatarrow.visibility = View.GONE
+//
+//                holder.tvLeftMsg.visibility = View.VISIBLE
+//
+//                holder.llRightReply.visibility = View.GONE
+
                 val text = item.cMsg!!.content.data
                 if (!text.contains("回复：")){
                     holder.tvLeftMsg.text = text
@@ -629,7 +640,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var tvLeftMsg =  binding.tvLeftMsg
         var tvRightTime =  binding.tvRightTime
         var tvRightMsg =  binding.tvRightMsg
-        var lySend =  binding.layoutSend
         var ivSendStatus =  binding.ivSendStatus
         var ivArrow =  binding.ivArrow
         var ivRightChatarrow =  binding.ivRightChatarrow
@@ -643,6 +653,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var tvRightReply = binding.tvRightReply
         var llRightReply = binding.llRightReply
         var tvRightReplyOrigin = binding.tvRightReplyOrigin
+        var lyLeftContent = binding.lyLeftContent
+        var lyRightContent = binding.lyRightContent
 
         init {
             // 必须在事件发生前，调用这个方法来监视View的触摸
