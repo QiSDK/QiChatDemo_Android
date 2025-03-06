@@ -25,6 +25,7 @@ import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
+import com.teneasy.sdk.ui.ReplyMessageItem
 import com.teneasyChat.api.common.CMessage
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
@@ -261,20 +262,21 @@ class KeFuViewModel() : BaseViewModel() {
         //回复消息
         val replyMsgId = (history.replyMsgId?: "0").toLong()
         if (replyMsgId > 0){
-            var replyText = history.content?.data?: "no txt"
             val oriMsg =  mReplyList.firstOrNull { it.msgId == replyMsgId.toString() }
+            var replyItem = ReplyMessageItem()
             if (oriMsg != null){
                 if (oriMsg.msgFmt == "MSG_TEXT"){
-                    replyText = "$replyText\n回复：${oriMsg.content?.data}"
+                    replyItem.content = oriMsg.content?.data?:""
                 }else if (oriMsg.msgFmt == "MSG_IMG"){
-                    replyText = "$replyText\n回复：[图片]"
+                    replyItem.fileName = oriMsg.image?.uri?:""
                 }else if (oriMsg.msgFmt == "MSG_VIDEO"){
-                    replyText = "$replyText\n回复：[视频]"
+                    replyItem.fileName = oriMsg.video?.uri?:""
                 }else if (oriMsg.msgFmt == "MSG_FILE"){
-                    replyText = "$replyText\n回复：[文件]"
+                    replyItem.size = oriMsg?.file?.size?: 0
+                    replyItem.fileName = oriMsg?.file?.fileName?:""
                 }
             }
-            cMContent.data = replyText
+            chatModel.replyItem = replyItem
         }
         else if (history.workerChanged != null){
             cMContent.data = history.workerChanged.greeting

@@ -157,7 +157,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 localTime = Utils().timestampToString(it.msgTime)
             }
             if (!item.isLeft) {
-                holder.ivRightImg.tag = position
                 holder.tvRightTime.text = localTime
                 holder.llLeftContent.visibility = View.GONE
                 holder.llRightContent.visibility = View.VISIBLE
@@ -175,11 +174,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
                 holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
+                holder.llRightContent.tag = position
                 holder.llRightContent.setOnClickListener {
                     listener?.onOpenFile(meidaUrl)
                 }
             } else {
-                holder.ivLeftImg.tag = position
                 holder.tvLeftTime.text = localTime
 
                 holder.llLeftContent.visibility = View.VISIBLE
@@ -191,6 +190,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivLeftImg.setImageResource(getFileThumbnail(ext?:"#"))
                 holder.ivLeftImg.scaleType = ImageView.ScaleType.CENTER_CROP
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
+                holder.llLeftContent.tag = position
                 holder.llLeftContent.setOnClickListener {
                     listener?.onOpenFile(meidaUrl)
                 }

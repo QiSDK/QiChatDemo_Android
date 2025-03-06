@@ -30,4 +30,12 @@ class MessageItem {//:Serializable
         //var imgPath: String = ""
         var avatar: String = ""
         var cellType: CellType = CellType.TYPE_Text
+        var replyItem: ReplyMessageItem? = null
     }
+
+class ReplyMessageItem {
+        var id: String = ""
+        var fileName: String = ""
+        var size: Long = 0
+        var content: String = ""
+}

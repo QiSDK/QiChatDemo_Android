@@ -71,6 +71,7 @@ import com.teneasy.sdk.TeneasySDKDelegate
 import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
+import com.teneasy.sdk.ui.ReplyMessageItem
 import com.teneasyChat.api.common.CEntrance
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
@@ -1197,8 +1198,8 @@ code: 1002 无效的Token
         binding?.tvQuotedMsg?.text = txt
     }
 
-    fun handleReply(referMsg: CMessage.Message, model: MessageItem, newMsgId: Long){
-        val txt = referMsg.content?.data?.split("回复：")?.get(0) ?: ""
+    fun handleReply(oriMsg: CMessage.Message, model: MessageItem, newMsgId: Long){
+        /*val txt = referMsg.content?.data?.split("回复：")?.get(0) ?: ""
 
         var referText = "回复：$txt"
         if (!(referMsg.video?.uri ?: "").isEmpty()) {
@@ -1210,6 +1211,24 @@ code: 1002 无效的Token
         }
         val newText = "${model.cMsg?.content?.data}\n$referText"
         model.cMsg = composATextMessage(newText.trim(), newMsgId, referMsg.msgId)
+
+         */
+
+        var replyItem = ReplyMessageItem()
+        if (oriMsg != null){
+            if (oriMsg.msgFmt.toString() == "MSG_TEXT"){
+                replyItem.content = oriMsg.content?.data?:""
+            }
+            else if (oriMsg.msgFmt.toString() == "MSG_IMG"){
+                replyItem.fileName = oriMsg.image?.uri?:""
+            }else if (oriMsg.msgFmt.toString() == "MSG_VIDEO"){
+                replyItem.fileName = oriMsg.video?.uri?:""
+            }else if (oriMsg.msgFmt.toString() == "MSG_FILE"){
+                replyItem.size = (oriMsg?.file?.size?: 0).toLong()
+                replyItem.fileName = oriMsg?.file?.fileName?:""
+            }
+        }
+        model.replyItem = replyItem
     }
 
     fun composATextMessage(textMsg: String, msgId: Long, replyMsgId: Long = 0) : CMessage.Message{
