@@ -1199,21 +1199,6 @@ code: 1002 无效的Token
     }
 
     fun handleReply(oriMsg: CMessage.Message, model: MessageItem, newMsgId: Long){
-        /*val txt = referMsg.content?.data?.split("回复：")?.get(0) ?: ""
-
-        var referText = "回复：$txt"
-        if (!(referMsg.video?.uri ?: "").isEmpty()) {
-            referText = "回复：[视频]"
-        } else if (!(referMsg.image?.uri ?: "").isEmpty()) {
-            referText = "回复：[图片]"
-        }else if (!(referMsg.file?.uri ?: "").isEmpty()) {
-            referText = "回复：[文件]"
-        }
-        val newText = "${model.cMsg?.content?.data}\n$referText"
-        model.cMsg = composATextMessage(newText.trim(), newMsgId, referMsg.msgId)
-
-         */
-
         var replyItem = ReplyMessageItem()
         if (oriMsg != null){
             if (oriMsg.msgFmt.toString() == "MSG_TEXT"){

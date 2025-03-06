@@ -147,7 +147,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .into(holder.ivKefuImage)
-        }  else if (holder is ItemFileViewHolder) {
+        }
+        else if (holder is ItemFileViewHolder) {
             val item = msgList!![position]
             if (item.cMsg == null) {
                 return
@@ -412,17 +413,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             }
             if (!item.isLeft) {
                 holder.tvRightMsg.tag = position
+                holder.llReplyRight.tag = position
                 holder.tvRightTime.text = localTime
                 holder.tvRightTime.visibility = View.VISIBLE
                 holder.tvLeftTime.visibility = View.GONE
-
-//                holder.tvRightMsg.visibility = View.VISIBLE
-//                holder.ivRightImage.visibility = View.VISIBLE
-//                holder.ivRightChatarrow.visibility = View.VISIBLE
-
-//                holder.tvLeftMsg.visibility = View.GONE
-//                holder.ivArrow.visibility = View.GONE
-//                holder.ivKefuImage.visibility = View.GONE
 
                 holder.lyLeftContent.visibility = View.GONE
                 holder.lyRightContent.visibility = View.VISIBLE
@@ -435,71 +429,77 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val text = item.cMsg!!.content.data
                 //holder.llLeftReply.visibility = View.GONE
                 //holder.llRightReply.visibility = View.GONE
+                holder.tvRightMsg.text = text
                 if (item.cMsg!!.replyMsgId > 0){
 
-                    holder.llRightReply.visibility = View.VISIBLE
-                    //holder.tvRightReply.tag = item.cMsg?.replyMsgId?: 0
-                    holder.tvRightMsg.visibility = View.GONE
+                    holder.llReplyRight.visibility = View.VISIBLE
+                    holder.tvRightSize.visibility = View.GONE
+                    if ((item.replyItem?.fileName?:"").isNotEmpty()){
+                        val ext = item.replyItem?.fileName?.split(".")?.last()
+                        if (ext != null && Constants.fileTypes.contains(ext)){
+                            holder.tvRightSize.text = ((item.replyItem?.size?:0)  * 0.001).toString() + "K"
+                            holder.tvRightSize.visibility = View.VISIBLE
+                        }
+                        holder.ivRightReplyImage.visibility = View.VISIBLE
+                    }else{
+                        holder.ivRightReplyImage.visibility = View.GONE
+                        holder.tvRightReplyOrigin.text = item.replyItem?.content?: ""
+                    }
 
-                    //val reply = text.substring(text.indexOf("回复：")+3)
-                    //val reply = text
-                    holder.tvRightReply.text = text
-                    holder.tvRightReply.tag = position
+                    val fileName = item.replyItem?.fileName?:""
+                    if (fileName.isNotEmpty()){
+                        holder.tvRightReplyOrigin.text = fileName
+                        holder.ivRightReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
+                    }
 
-                    holder.tvRightReply.setOnClickListener(object : View.OnClickListener {
+                    holder.llReplyRight.setOnClickListener(object : View.OnClickListener {
                         override fun onClick(v: View?) {
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
                     //holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
                 }else{
-                    holder.tvRightMsg.text = text
-                    holder.tvRightMsg.visibility = View.VISIBLE
+                    holder.llReplyRight.visibility = View.GONE
                 }
             } else {
+                holder.llReplyRight.tag = position
                 holder.tvLeftMsg.tag = position
                 holder.tvLeftTime.text = localTime
                 holder.tvRightTime.visibility = View.GONE
                 holder.tvLeftTime.visibility = View.VISIBLE
-
-
                 holder.lyLeftContent.visibility = View.VISIBLE
                 holder.lyRightContent.visibility = View.GONE
 
-//                holder.tvLeftMsg.visibility = View.VISIBLE
-//                holder.ivArrow.visibility = View.VISIBLE
-//                holder.ivKefuImage.visibility = View.VISIBLE
-
-//                holder.tvRightTime.visibility = View.GONE
-//                holder.tvRightMsg.visibility = View.GONE
-//                holder.tvRightMsg.visibility = View.GONE
-
-
-//                holder.ivRightImage.visibility = View.GONE
-//                holder.ivRightChatarrow.visibility = View.GONE
-//
-//                holder.tvLeftMsg.visibility = View.VISIBLE
-//
-//                holder.llRightReply.visibility = View.GONE
-
                 val text = item.cMsg!!.content.data
+                holder.tvLeftMsg.text = text
                 if (item.cMsg!!.replyMsgId > 0){
-                    holder.tvLeftMsg.visibility = View.GONE
-                    holder.llLeftReply.visibility = View.VISIBLE
-                    holder.tvLeftMsg.visibility = View.GONE
+                    holder.llReplyRight.visibility = View.VISIBLE
+                    holder.tvLeftSize.visibility = View.GONE
+                    if ((item.replyItem?.fileName?:"").isNotEmpty()){
+                        val ext = item.replyItem?.fileName?.split(".")?.last()
+                        if (ext != null && Constants.fileTypes.contains(ext)){
+                            holder.tvLeftSize.text = ((item.replyItem?.size?:0)  * 0.001).toString() + "K"
+                            holder.tvLeftSize.visibility = View.VISIBLE
+                        }
+                        holder.ivLeftReplyImage.visibility = View.VISIBLE
+                    }else{
+                        holder.ivLeftReplyImage.visibility = View.GONE
+                        holder.tvLeftReplyOrigin.text = item.replyItem?.content?: ""
+                    }
 
-//                    val reply = text.substring(text.indexOf("回复：")+3)
-//                    holder.tvLeftReply.text = reply
-//                    holder.tvLeftReplyOrigin.text = text.substring(0,text.indexOf("回复："))
-                    holder.tvLeftReply.tag = position
-                    holder.tvLeftReply.setOnClickListener(object : View.OnClickListener {
+                    val fileName = item.replyItem?.fileName?:""
+                    if (fileName.isNotEmpty()){
+                        holder.tvLeftReplyOrigin.text = fileName
+                        holder.ivLeftReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
+                    }
+
+                    holder.llReplyRight.setOnClickListener(object : View.OnClickListener {
                         override fun onClick(v: View?) {
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
                 }else{
-                    holder.tvLeftMsg.text = text
-                    holder.llLeftReply.visibility = View.GONE
+                    holder.llReplyRight.visibility = View.GONE
                 }
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
@@ -646,15 +646,23 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var ivKefuImage =  binding.civKefuImage
         var ivRightImage =  binding.civRightImage
 
-        var llLeftReply = binding.llLeftReply
-        var tvLeftReply = binding.tvLeftReply
+        var llReplyLeft = binding.llLeftReply
         var tvLeftReplyOrigin = binding.tvLeftReplyOrigin
 
-        var tvRightReply = binding.tvRightReply
-        var llRightReply = binding.llRightReply
+        var llReplyRight = binding.llReplyRight
         var tvRightReplyOrigin = binding.tvRightReplyOrigin
+
+        //var tvLeftSize = binding.
         var lyLeftContent = binding.lyLeftContent
         var lyRightContent = binding.lyRightContent
+
+        var tvLeftSize = binding.tvLeftReplySize
+        var tvRightSize = binding.tvRightReplySize
+
+        var ivLeftReplyImage = binding.ivLeftReplyImage
+        var ivRightReplyImage = binding.ivRightReplyImage
+
+        //iv_left_reply_image
 
         init {
             // 必须在事件发生前，调用这个方法来监视View的触摸
@@ -818,13 +826,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var tvRightTime =  binding.tvRightTime
         var ivRightImg =  binding.ivRightFile
 
-        var ivArrow =  binding.ivArrow
-        var ivRightChatarrow =  binding.ivRightChatarrow
-
-        var ivKefuImage =  binding.civKefuImage
-        var civKefuRightImage =  binding.civKefuRightImage
-
-
         var ivSendStatus =  binding.ivSendStatus
 
         var llLeftContent =  binding.llLeftContent
@@ -901,6 +902,10 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             return R.drawable.ppt_default
         }else if (ext == "mp3" || ext == "m4a"){
             return R.drawable.audio_default
+        }else if (Constants.imageTypes.contains(ext)){
+            return R.drawable.image_default
+        }else if (Constants.videoTypes.contains(ext)){
+            return R.drawable.video_default
         }else{
             return R.drawable.unknown_default
         }

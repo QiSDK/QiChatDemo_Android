@@ -256,7 +256,7 @@ class KeFuViewModel() : BaseViewModel() {
 
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageContent.newBuilder()
-
+        cMContent.data = history.content?.data;
         cMsg.msgTime = Utils().getNowTimeStamp()
 
         //回复消息

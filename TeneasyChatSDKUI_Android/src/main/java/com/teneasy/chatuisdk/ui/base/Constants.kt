@@ -114,5 +114,6 @@ class Constants {
 
         val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
         val fileTypes = arrayOf("docx","doc","pdf", "xls", "xlsx", "csv")
+        val videoTypes = arrayOf("mp4", "avi", "mkv", "mov", "wmv", "flv", "webm")
     }
 }
