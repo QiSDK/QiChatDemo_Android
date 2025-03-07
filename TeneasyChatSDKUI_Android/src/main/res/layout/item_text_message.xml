@@ -50,7 +50,7 @@
         </ImageView>
 
     <LinearLayout
-        android:id="@+id/ll_left_reply"
+        android:id="@+id/ll_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="fill_horizontal"
@@ -69,7 +69,7 @@
             android:gravity="start"
             android:padding="10dp"
             android:textColor="@color/ps_color_4e4d4e"
-            android:text="这是回复内容"
+            android:text="这是怎么一回事"
             android:textSize="14sp"
             android:layout_marginBottom="5dp"
             android:visibility="visible" />
@@ -77,10 +77,12 @@
         <LinearLayout
             android:background="@drawable/rounded_corner"
             android:elevation="2dp"
+            android:id="@+id/ll_reply_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="200dp"
             android:padding="5dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal">
             <TextView
                 android:layout_width="wrap_content"
@@ -169,7 +171,7 @@
                 android:textColor="@color/white"
                 android:padding="10dp"
                 android:layout_marginStart="@dimen/dp_10"
-                android:text="这是回复内容"
+                android:text="这是右边的消息"
                 android:textSize="14sp"
                 android:layout_marginBottom="5dp"
                 android:visibility="visible" />

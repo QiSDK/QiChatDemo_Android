@@ -462,7 +462,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.llReplyRight.visibility = View.GONE
                 }
             } else {
-                holder.llReplyRight.tag = position
+                holder.llReplyLeft.tag = position
                 holder.tvLeftMsg.tag = position
                 holder.tvLeftTime.text = localTime
                 holder.tvRightTime.visibility = View.GONE
@@ -493,13 +493,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                         holder.ivLeftReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                     }
 
-                    holder.llReplyRight.setOnClickListener(object : View.OnClickListener {
+                    holder.llReplyLeft.setOnClickListener(object : View.OnClickListener {
                         override fun onClick(v: View?) {
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
                 }else{
-                    holder.llReplyRight.visibility = View.GONE
+                    holder.llReplyLeft.visibility = View.GONE
                 }
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
@@ -646,7 +646,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var ivKefuImage =  binding.civKefuImage
         var ivRightImage =  binding.civRightImage
 
-        var llReplyLeft = binding.llLeftReply
+        var llReplyLeft = binding.llReplyLeft
         var tvLeftReplyOrigin = binding.tvLeftReplyOrigin
 
         var llReplyRight = binding.llReplyRight
