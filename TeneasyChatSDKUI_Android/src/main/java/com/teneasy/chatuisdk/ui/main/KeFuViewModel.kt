@@ -191,6 +191,8 @@ class KeFuViewModel() : BaseViewModel() {
         }else {
             cMContent.uri = history?.file?.uri
         }
+        cMContent.fileName = history?.file?.fileName
+        cMContent.size = (history?.file?.size?:0).toInt()
         cMsg.setFile(cMContent)
 
         cMsg.msgFmt = CMessage.MessageFormat.MSG_FILE

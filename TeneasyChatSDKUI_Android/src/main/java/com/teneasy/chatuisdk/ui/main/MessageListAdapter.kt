@@ -174,6 +174,9 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val ext = item.cMsg?.file?.uri?.split(".")?.last()
                 holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
                 holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
+                holder.tvRightFileSize.text = ((item.cMsg!!.file.size?:0) * 0.001).toString() + "K"
+                holder.tvRightFileName.text = item.cMsg!!.file.fileName
+
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
                 holder.llRightContent.tag = position
                 holder.llRightContent.setOnClickListener {
@@ -190,6 +193,11 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val ext = item.cMsg?.file?.uri?.split(".")?.last()
                 holder.ivLeftImg.setImageResource(getFileThumbnail(ext?:"#"))
                 holder.ivLeftImg.scaleType = ImageView.ScaleType.CENTER_CROP
+
+                //((item.replyItem?.size?:0)  * 0.001).toString() + "K"
+                holder.tvLeftFileSize.text = ((item.cMsg!!.file.size?:0) * 0.001).toString() + "K"
+                holder.tvLeftFileName.text = item.cMsg!!.file.fileName
+
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
                 holder.llLeftContent.tag = position
                 holder.llLeftContent.setOnClickListener {
@@ -825,6 +833,14 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
         var tvRightTime =  binding.tvRightTime
         var ivRightImg =  binding.ivRightFile
+
+        var tvRightFileName =  binding.tvRightFileName
+        var tvRightFileSize =  binding.tvRightFileSize
+
+        var tvLeftFileName =  binding.tvLeftFileName
+        var tvLeftFileSize =  binding.tvLeftFileSize
+
+        //var tvSize = binding.tv
 
         var ivSendStatus =  binding.ivSendStatus
 

@@ -923,7 +923,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     /**
      * 根据传递的图片地址，发送图片消息。该方法会发送socket消息
      */
-    fun sendImgMsg(url: String) {
+    fun sendImgMsg(url: Urls) {
         if(chatLib == null){
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
@@ -934,11 +934,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             withAutoReplyU = null
         }
 
-        val ext = url.split(".").last()
+        val ext = url.uri.split(".").last()
         if (imageTypes.contains(ext.lowercase())){
-            chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID, 0, withAutoReplyU)
+            chatLib?.sendMessage(url.uri, CMessage.MessageFormat.MSG_IMG, Constants.CONSULT_ID, 0, withAutoReplyU)
         }else if (fileTypes.contains(ext.lowercase())){
-            chatLib?.sendMessage(url, CMessage.MessageFormat.MSG_FILE, Constants.CONSULT_ID, 0, withAutoReplyU)
+            chatLib?.sendMessage(url.uri, CMessage.MessageFormat.MSG_FILE, Constants.CONSULT_ID, 0, withAutoReplyU, url.fileSize, url.fileName)
         }else{
             Toast.makeText(requireContext(), "不支持的文件类型", Toast.LENGTH_SHORT).show()
             return
@@ -1237,7 +1237,7 @@ code: 1002 无效的Token
             sendVideoMsg(urls)//Constants.baseUrlImage +
         } else {
             // 发送图片或文件
-            sendImgMsg(urls.uri)
+            sendImgMsg(urls)
         }
         runOnUiThread {
             mIProgressLoader?.updateMessage("")

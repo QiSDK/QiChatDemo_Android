@@ -65,7 +65,7 @@
                 ></ImageView>
 
             <TextView
-                android:id="@+id/tv_fileName"
+                android:id="@+id/tv_left_fileName"
                 android:layout_width="wrap_content"
                 android:text="你好_dde ddd _dee.jpg"
                 android:layout_marginTop="5dp"
@@ -79,6 +79,7 @@
                 android:layout_height="wrap_content"></TextView>
 
             <TextView
+                android:id="@+id/tv_left_fileSize"
                 android:layout_width="wrap_content"
                 android:text="300K"
                 android:textColor="@color/ps_color_grey_3e"
@@ -170,6 +171,7 @@
         android:layout_height="wrap_content"></TextView>
 
     <TextView
+        android:id="@+id/tv_right_fileSize"
         android:layout_width="wrap_content"
         android:text="300K"
         android:textColor="@color/white"

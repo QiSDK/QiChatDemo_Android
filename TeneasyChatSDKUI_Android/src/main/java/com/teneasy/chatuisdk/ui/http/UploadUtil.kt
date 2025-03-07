@@ -105,6 +105,8 @@ class UploadUtil(lis: UploadListener) {
                                     return;
                                 }else {
                                     val urls = Urls()
+                                    urls.fileName = file.name
+                                    urls.fileSize = file.length().toInt()
                                     urls.uri = b.data?.filepath?: ""
                                     listener?.uploadSuccess(
                                         urls,
@@ -226,6 +228,8 @@ class Urls {
     var uri: String = ""
     var hlsUri: String = ""
     var thumbnailUri = ""
+    var fileName: String = ""
+    var fileSize: Int = 0
 }
 
 /*
