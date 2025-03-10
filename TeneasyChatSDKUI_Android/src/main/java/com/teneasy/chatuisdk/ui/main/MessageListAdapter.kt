@@ -242,12 +242,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
 
-
-
-                if (item.cMsg!!.video.uri.isNotEmpty()){
-                    meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.uri
-                }
-
                 holder.ivRightImg.setOnClickListener {
                     listener?.onPlayVideo(meidaUrl)
                     print(meidaUrl)
@@ -912,7 +906,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             return R.drawable.word_default
         }else if(ext == "pdf"){
             return R.drawable.pdf_default
-        }else if(ext == "xls" || ext == "xlsx"){
+        }else if(ext == "xls" || ext == "xlsx" || ext == "csv"){
             return R.drawable.excel_default
         }else if (ext == "ppt" || ext == "pptx"){
             return R.drawable.ppt_default

@@ -36,9 +36,12 @@ class WebViewActivity : AppCompatActivity() {
         // Set a WebChromeClient to handle JavaScript alerts, etc.
         binding.myWebView.webChromeClient = WebChromeClient()
 
+        var ext = imageUrl?.split(".")?.last()?: ""
+        print(imageUrl)
+
         //val googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
         var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=$imageUrl"
-        if (imageUrl?.split(".")?.last() == "pdf") {
+        if (ext.lowercase() == "pdf") {
             googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
         }
         // Load a URL
