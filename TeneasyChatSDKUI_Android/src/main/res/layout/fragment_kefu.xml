@@ -119,8 +119,8 @@
                 app:layout_constraintLeft_toRightOf="@id/tv_QuotedMsg"
                 app:layout_constraintTop_toTopOf="@id/tv_QuotedMsg"
                 android:layout_marginStart="-10dp"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:src="@drawable/close" />
 
         <com.android.common.view.chat.emoji.EmoticonEditText

@@ -339,50 +339,49 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
                 }
                 var thumb = meidaUrl
+                Glide.with(act)
+                    .load(thumb)
+                    .apply(
+                        RequestOptions()
+                            .placeholder(R.drawable.loading_animation)
+                            .dontAnimate().skipMemoryCache(true)
+                    )
+                    .listener(object : RequestListener<Drawable?> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable?>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            return false
+                        }
 
-                    Glide.with(act)
-                        .load(thumb)
-                        .apply(
-                            RequestOptions()
-                                .placeholder(R.drawable.loading_animation)
-                                .dontAnimate().skipMemoryCache(true)
-                        )
-                        .listener(object : RequestListener<Drawable?> {
-                            override fun onLoadFailed(
-                                e: GlideException?,
-                                model: Any?,
-                                target: Target<Drawable?>,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                return false
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable?>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            val bitmap = Utils().drawableToBitmap(resource);
+                            print(bitmap.width)
+                            if (bitmap.height > bitmap.width) {
+                                Utils().updateLayoutParams(
+                                    holder.rlLeftImagecontainer,
+                                    Utils().dp2px(106.0f),
+                                    Utils().dp2px(176.0f)
+                                )
+                            } else {
+                                Utils().updateLayoutParams(
+                                    holder.rlLeftImagecontainer,
+                                    Utils().dp2px(176.0f),
+                                    Utils().dp2px(106.0f)
+                                )
                             }
-
-                            override fun onResourceReady(
-                                resource: Drawable,
-                                model: Any,
-                                target: Target<Drawable?>?,
-                                dataSource: DataSource,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                val bitmap = Utils().drawableToBitmap(resource);
-                                print(bitmap.width)
-                                if (bitmap.height > bitmap.width) {
-                                    Utils().updateLayoutParams(
-                                        holder.rlLeftImagecontainer,
-                                        Utils().dp2px(106.0f),
-                                        Utils().dp2px(176.0f)
-                                    )
-                                } else {
-                                    Utils().updateLayoutParams(
-                                        holder.rlLeftImagecontainer,
-                                        Utils().dp2px(176.0f),
-                                        Utils().dp2px(106.0f)
-                                    )
-                                }
-                                return false
-                            }
-                        })
-                        .into(holder.ivLeftImg)
+                            return false
+                        }
+                    })
+                    .into(holder.ivLeftImg)
 
                 //客服头像
                 val url = Constants.baseUrlImage + Constants.workerAvatar
@@ -433,8 +432,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 //holder.llRightReply.visibility = View.GONE
                 holder.tvRightMsg.text = text
                 if (item.cMsg!!.replyMsgId > 0){
-
-                    holder.llReplyRight.visibility = View.VISIBLE
                     holder.tvRightSize.visibility = View.GONE
                     if ((item.replyItem?.fileName?:"").isNotEmpty()){
                         val ext = item.replyItem?.fileName?.split(".")?.last()
@@ -459,6 +456,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
+                    holder.llReplyRight.visibility = View.VISIBLE
                     //holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
                 }else{
                     holder.llReplyRight.visibility = View.GONE
@@ -469,30 +467,27 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.tvLeftTime.text = localTime
                 holder.tvRightTime.visibility = View.GONE
                 holder.tvLeftTime.visibility = View.VISIBLE
+
                 holder.lyLeftContent.visibility = View.VISIBLE
                 holder.lyRightContent.visibility = View.GONE
 
                 val text = item.cMsg!!.content.data
                 holder.tvLeftMsg.text = text
                 if (item.cMsg!!.replyMsgId > 0){
-                    holder.llReplyRight.visibility = View.VISIBLE
                     holder.tvLeftSize.visibility = View.GONE
-                    if ((item.replyItem?.fileName?:"").isNotEmpty()){
+                    val fileName = item.replyItem?.fileName?:""
+                    if (fileName.isNotEmpty()){
                         val ext = item.replyItem?.fileName?.split(".")?.last()
                         if (ext != null && Constants.fileTypes.contains(ext)){
                             holder.tvLeftSize.text = ((item.replyItem?.size?:0)  * 0.001).toString() + "K"
                             holder.tvLeftSize.visibility = View.VISIBLE
                         }
+                        holder.tvLeftReplyOrigin.text = fileName
+                        holder.ivLeftReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                         holder.ivLeftReplyImage.visibility = View.VISIBLE
                     }else{
                         holder.ivLeftReplyImage.visibility = View.GONE
                         holder.tvLeftReplyOrigin.text = item.replyItem?.content?: ""
-                    }
-
-                    val fileName = item.replyItem?.fileName?:""
-                    if (fileName.isNotEmpty()){
-                        holder.tvLeftReplyOrigin.text = fileName
-                        holder.ivLeftReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                     }
 
                     holder.llReplyLeft.setOnClickListener(object : View.OnClickListener {
@@ -500,6 +495,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                             listener?.onShowOriginal(v?.tag as Int)
                         }
                     })
+                    holder.llReplyLeft.visibility = View.VISIBLE
                 }else{
                     holder.llReplyLeft.visibility = View.GONE
                 }

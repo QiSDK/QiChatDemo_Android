@@ -155,7 +155,7 @@ class KeFuViewModel() : BaseViewModel() {
             cMContent.uri = history?.image?.uri ?: ""
         }
         cMsg.setImage(cMContent)
-
+        cMsg.msgFmt = CMessage.MessageFormat.MSG_IMG
         cMsg.msgId = (history?.msgId?: "0").toLong()
         cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
 
@@ -231,6 +231,7 @@ class KeFuViewModel() : BaseViewModel() {
         cMsg.msgTime = d.build()
         cMsg.replyMsgId = (history?.replyMsgId?: "0").toLong()
         cMsg.msgId = (history?.msgId?: "0").toLong()
+        cMsg.msgFmt = CMessage.MessageFormat.MSG_VIDEO
 
         if (!videoPath.isEmpty()){
             cMContent.uri = videoPath
@@ -260,6 +261,7 @@ class KeFuViewModel() : BaseViewModel() {
         var cMContent = CMessage.MessageContent.newBuilder()
         cMContent.data = history.content?.data?: ""
         cMsg.msgTime = Utils().getNowTimeStamp()
+        cMsg.msgFmt = CMessage.MessageFormat.MSG_TEXT
 
         //回复消息
         val replyMsgId = (history.replyMsgId?: "0").toLong()
