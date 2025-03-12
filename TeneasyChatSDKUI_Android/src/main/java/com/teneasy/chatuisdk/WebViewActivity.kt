@@ -39,11 +39,11 @@ class WebViewActivity : AppCompatActivity() {
         var ext = imageUrl?.split(".")?.last()?: ""
         print(imageUrl)
 
-        //val googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
-        var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=$imageUrl"
-        if (ext.lowercase() == "pdf") {
-            googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
-        }
+        val googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
+        //var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=$imageUrl"
+        //if (ext.lowercase() == "pdf" || ext.lowercase() == "csv") {
+        //    googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
+        //}
         // Load a URL
         binding.myWebView.loadUrl(googleDocsUrl) // Replace with your URL
         binding?.tvTitle?.text = kefuName
