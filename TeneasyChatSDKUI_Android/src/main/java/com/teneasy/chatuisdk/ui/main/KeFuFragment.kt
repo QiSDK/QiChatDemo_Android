@@ -2,32 +2,24 @@ package com.teneasy.chatuisdk.ui.main;
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
-import android.content.ContentResolver
-import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.util.Size
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.gson.Gson
 import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
@@ -42,7 +34,6 @@ import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.FullImageActivity
 import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
-import com.teneasy.chatuisdk.UploadResult
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
@@ -58,12 +49,9 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
-import com.teneasy.chatuisdk.ui.http.UploadImage
 import com.teneasy.chatuisdk.ui.http.UploadListener
 import com.teneasy.chatuisdk.ui.http.UploadUtil
-import com.teneasy.chatuisdk.ui.http.UploadUtilWithProgress
 import com.teneasy.chatuisdk.ui.http.Urls
-import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -72,7 +60,6 @@ import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasy.sdk.ui.ReplyMessageItem
-import com.teneasyChat.api.common.CEntrance
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
@@ -82,18 +69,10 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.*
-import okhttp3.MediaType.Companion.get
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.net.URLEncoder
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
@@ -326,10 +305,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                         url = Constants.baseUrlImage + msg?.video?.uri ?: ""
                     }else if ((msg?.file?.uri ?: "").isNotEmpty()) {
                         url = Constants.baseUrlImage + msg?.file?.uri ?: ""
+                        Utils().openFileInBrower(requireContext(), url)
+                        return
                     }
                     this@KeFuFragment.mIProgressLoader?.updateMessage("请稍等...")
                     this@KeFuFragment.mIProgressLoader?.showLoading()
-                    Utils().downloadVideo(url, object :
+                    Utils().downloadFile(url, object :
                             (Int) -> Unit {
                         override fun invoke(progress: Int) {
                             Log.d(TAG, "下载进度：$progress")
@@ -537,6 +518,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         }
     }
 
+    //"text/csv", "application/csv", "text/comma-separated-values"
     fun openFilePicker() {
         val ALLOWED_MIME_TYPES = arrayOf(
             "application/msword", // .doc
@@ -544,7 +526,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             "application/pdf", // .pdf
             "application/vnd.ms-excel", // .xls
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
-            "text/csv" // .csv
+            "application/csv",
+            "text/csv", "application/csv", "text/comma-separated-values",
         )
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)

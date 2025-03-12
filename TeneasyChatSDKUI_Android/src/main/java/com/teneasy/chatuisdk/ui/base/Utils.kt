@@ -1,6 +1,5 @@
 package com.teneasy.chatuisdk.ui.base
 
-import android.app.Application
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -45,9 +44,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -392,7 +389,7 @@ class Utils {
         return null
     }
 
-    fun downloadVideo(url: String, onProgress: (progress: Int) -> Unit) {
+    fun downloadFile(url: String, onProgress: (progress: Int) -> Unit) {
         val client = OkHttpClient()
 
         val request = Request.Builder()
@@ -479,52 +476,25 @@ class Utils {
         }
     }
 
-    /**
-     * Opens a PDF file from a given URI in an external browser.
-     *
-     * @param context The context to use for launching the intent.
-     * @param pdfUri The URI of the PDF file to open.
-     */
-    fun openPdfInBrowser(context: Context, pdfUri: Uri) {
+    fun openFileInBrower(myContext: Context, url: String) {
+        var context = myContext
+        val intent = Intent(Intent.ACTION_VIEW)
         try {
-            // Create an intent to view the PDF file.
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = pdfUri
-                //setDataAndType(pdfUri, getMimeType(pdfUri.path?.split(".")?.lastOrNull() ?: "*/*"))
-                //setDataAndType(pdfUri, getMimeType(pdfUri.path?.split(".")?.lastOrNull() ?: ""))
-                //flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
-                flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-
-            // Check if there's an app that can handle the intent.
-            if (intent.resolveActivity(context.packageManager) != null) {
-                // Start the activity.
-                ContextCompat.startActivity(context, intent, null)
-            } else {
-                // No app found to handle the intent.
-                Log.e(TAG, "No PDF viewer app found.")
-                Toast.makeText(context, "No viewer app found.", Toast.LENGTH_SHORT).show()
-                // Optionally, you can show a message to the user here.
-            }
-        } catch (e: ActivityNotFoundException) {
-            Log.e(TAG, "No PDF viewer app found.", e)
-            Toast.makeText(context, "No viewer app found.", Toast.LENGTH_SHORT).show()
-            // Optionally, you can show a message to the user here.
+            intent.data = Uri.parse(url)
+            context.startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Error opening PDF in browser.", e)
-            // Optionally, you can show a message to the user here.
+
         }
     }
 
-    private fun getMimeType2(ext: String): String {
-        return "application/octet-stream";
-//        return when (ext.lowercase()) {
-//            "pdf" -> "application/pdf"
-//            "doc", "docx" -> "application/msword"
-//            "xls", "xlsx" -> "application/vnd.ms-excel"
-//            "ppt", "pptx" -> "application/vnd.ms-powerpoint"
-//            else -> "application/octet-stream" // Default MIME type
-//        }
+    fun formatSize(bytes: Int): String {
+        val kb = bytes.toDouble() / 1024.0
+
+        return when {
+            kb > 1024 -> String.format("%.2fM", kb / 1024.0)
+            kb < 1 -> String.format("%.2fKB", kb)
+            else -> String.format("%.0fKB", kb)
+        }
     }
 
     private fun getMimeType(ext: String): String {

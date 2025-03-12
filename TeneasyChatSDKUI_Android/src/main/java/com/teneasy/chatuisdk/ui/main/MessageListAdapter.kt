@@ -174,7 +174,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val ext = item.cMsg?.file?.uri?.split(".")?.last()
                 holder.ivRightImg.setImageResource(getFileThumbnail(ext?:"#"))
                 holder.ivRightImg.scaleType = ImageView.ScaleType.CENTER_CROP
-                holder.tvRightFileSize.text = ((item.cMsg!!.file.size?:0) * 0.001).toString() + "K"
+                holder.tvRightFileSize.text = Utils().formatSize(item.cMsg?.file?.size?: 0)
                 holder.tvRightFileName.text = item.cMsg!!.file.fileName
 
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
@@ -195,7 +195,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivLeftImg.scaleType = ImageView.ScaleType.CENTER_CROP
 
                 //((item.replyItem?.size?:0)  * 0.001).toString() + "K"
-                holder.tvLeftFileSize.text = ((item.cMsg!!.file.size?:0) * 0.001).toString() + "K"
+                holder.tvLeftFileSize.text = Utils().formatSize(item.cMsg?.file?.size?: 0)
                 holder.tvLeftFileName.text = item.cMsg!!.file.fileName
 
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
@@ -203,6 +203,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.llLeftContent.setOnClickListener {
                     listener?.onOpenFile(meidaUrl)
                 }
+                //客服头像
+                val url = Constants.baseUrlImage + Constants.workerAvatar
+                print("avatar:$url")
+                Glide.with(act).load(url).dontAnimate()
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .into(holder.civKefuImage)
             }
         }
        else if (holder is ItemVideoViewHolder) {
@@ -820,6 +827,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
     inner class ItemFileViewHolder(binding: ItemFileMessageBinding) : RecyclerView.ViewHolder(binding.root) {
         val tvLeftTime = binding.tvLeftTime
         var ivLeftImg =  binding.ivFile
+
+        var civKefuImage = binding.civKefuImage
 
         var tvRightTime =  binding.tvRightTime
         var ivRightImg =  binding.ivRightFile
