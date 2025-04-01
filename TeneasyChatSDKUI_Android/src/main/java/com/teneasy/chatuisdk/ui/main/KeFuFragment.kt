@@ -1029,7 +1029,7 @@ code: 1002 无效的Token
                 val referMsg =
                     viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg?.replyMsgId }
                 if (referMsg != null) {
-                    handleReply(referMsg.cMsg!!, item, msgId)
+                    getReply(referMsg.cMsg!!, item, msgId)
                 }
             } else {
                 item.cMsg = msg
@@ -1076,7 +1076,7 @@ code: 1002 无效的Token
             if (msg.replyMsgId > 0) {
                 val referMsg = viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg.replyMsgId }
                 if (referMsg != null) {
-                    handleReply(referMsg.cMsg!!, messageItem, msg.msgId)
+                    getReply(referMsg.cMsg!!, messageItem, msg.msgId)
                 }
             }
 
@@ -1181,7 +1181,7 @@ code: 1002 无效的Token
         binding?.tvQuotedMsg?.text = txt
     }
 
-    fun handleReply(oriMsg: CMessage.Message, model: MessageItem, newMsgId: Long){
+    fun getReply(oriMsg: CMessage.Message, model: MessageItem, newMsgId: Long){
         var replyItem = ReplyMessageItem()
         if (oriMsg != null){
             if (oriMsg.msgFmt.toString() == "MSG_TEXT"){
