@@ -1,15 +1,17 @@
 package com.teneasy.chatuisdk.ui.main
 
 import android.util.Log
+import androidx.fragment.app.add
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.google.protobuf.Timestamp
 import com.teneasy.chatuisdk.BaseViewModel
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.chatId
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.MainApi
@@ -18,10 +20,10 @@ import com.teneasy.chatuisdk.ui.http.bean.AssignWorker
 import com.teneasy.chatuisdk.ui.http.bean.AutoReply
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory
-import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.list
+import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.hMessage
+import com.teneasy.chatuisdk.ui.http.bean.ReplyList
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
-import com.teneasy.sdk.TimeUtil
 import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
@@ -33,7 +35,7 @@ import com.xuexiang.xhttp2.exception.ApiException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.filterList
+import org.json.JSONObject
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
@@ -57,9 +59,10 @@ class KeFuViewModel() : BaseViewModel() {
     val mlAutoReplyItem = MutableLiveData<AutoReplyItem?>()
     val mlAssignWorker = MutableLiveData<AssignWorker>()
     val mlMsgMap = MutableLiveData<HashMap<Long, MessageItem>?>()
-    val mHistoryList = MutableLiveData<List<list>?>()
+    val mHistoryHMessage = MutableLiveData<List<hMessage>?>()
+    var mReplyHMessage = ArrayList<hMessage>()
 
-    var mReplyList = ArrayList<list>()
+    val mHmessage = MutableLiveData<hMessage>()
     val TAG = "ChatLibViewModel"
     val mlNewWorkAssigned = MutableLiveData<Boolean>()
 
@@ -132,7 +135,7 @@ class KeFuViewModel() : BaseViewModel() {
     * @param isLeft
     */
     //撰写一条图片信息
-    fun composeImgMsg(history: list?, isLeft: Boolean, imgPath: String = "") : MessageItem{
+    fun composeImgMsg(history: hMessage?, isLeft: Boolean, imgPath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         //cMsg.consultId = history?.consultID ?: Constants.CONSULT_ID
         var cMContent = CMessage.MessageImage.newBuilder()
@@ -169,7 +172,7 @@ class KeFuViewModel() : BaseViewModel() {
         return chatModel
     }
 
-    fun composeFileMsg(history: list?, isLeft: Boolean, filePath: String = "") : MessageItem{
+    fun composeFileMsg(history: hMessage?, isLeft: Boolean, filePath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         //cMsg.consultId = history?.consultID ?: Constants.CONSULT_ID
         var cMContent = CMessage.MessageFile.newBuilder()
@@ -214,7 +217,7 @@ class KeFuViewModel() : BaseViewModel() {
      * @param isLeft
      */
     //撰写一条图片信息
-    fun composeVideoMsg(history: list?, isLeft: Boolean, videoPath: String = "") : MessageItem{
+    fun composeVideoMsg(history: hMessage?, isLeft: Boolean, videoPath: String = "") : MessageItem{
         var cMsg = CMessage.Message.newBuilder()
         var cMContent = CMessage.MessageVideo.newBuilder()
 
@@ -254,7 +257,7 @@ class KeFuViewModel() : BaseViewModel() {
         return chatModel
     }
 
-    fun composeTextMsg(history: list,  isLeft: Boolean) : MessageItem{
+    fun composeTextMsg(history: hMessage, isLeft: Boolean) : MessageItem{
         var chatModel = MessageItem()
 
         var cMsg = CMessage.Message.newBuilder()
@@ -266,21 +269,11 @@ class KeFuViewModel() : BaseViewModel() {
         //回复消息
         val replyMsgId = (history.replyMsgId?: "0").toLong()
         if (replyMsgId > 0){
-            val oriMsg =  mReplyList.firstOrNull { it.msgId == replyMsgId.toString() }
-            var replyItem = ReplyMessageItem()
-            if (oriMsg != null){
-                if (oriMsg.msgFmt == "MSG_TEXT"){
-                    replyItem.content = oriMsg.content?.data?:""
-                }else if (oriMsg.msgFmt == "MSG_IMG"){
-                    replyItem.fileName = oriMsg.image?.uri?:""
-                }else if (oriMsg.msgFmt == "MSG_VIDEO"){
-                    replyItem.fileName = oriMsg.video?.uri?:""
-                }else if (oriMsg.msgFmt == "MSG_FILE"){
-                    replyItem.size = oriMsg?.file?.size?: 0
-                    replyItem.fileName = oriMsg?.file?.fileName?:""
-                }
+            val oriMsg =  mReplyHMessage.firstOrNull { it.msgId == replyMsgId.toString() }
+
+            oriMsg?.apply {
+                chatModel.replyItem = getReplyItem(this)
             }
-            chatModel.replyItem = replyItem
         }
         else if (history.workerChanged != null){
             cMContent.data = history.workerChanged.greeting
@@ -469,13 +462,11 @@ class KeFuViewModel() : BaseViewModel() {
             object : ProgressLoadingCallBack<ReturnData<ChatHistory>>(null) {
                 override fun onSuccess(res: ReturnData<ChatHistory>) {
                     res.data?.list?.let {
-                        mHistoryList.postValue(it)
+                        mHistoryHMessage.postValue(it)
                     }
-
                     res.data?.replyList?.let {
-                        mReplyList = it as ArrayList<list>
+                        mReplyHMessage = it as ArrayList<hMessage>
                     }
-
                     if (res.code != 0) {
                         val resp = Gson().toJson(res)
                         logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
@@ -485,6 +476,51 @@ class KeFuViewModel() : BaseViewModel() {
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     println(e)
+                    logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", requestUrl )
+                }
+            }
+        )
+    }
+
+    fun queryMessage(msgId: String, callback: (hMessage?) -> Unit) {
+        //var param = Request(0, "0", 0, true, 0, consultId, 0)
+//        val param = JsonObject()
+//        param.addProperty("chatId", 0)
+//        param.addProperty("msgIds", arrayListOf(msgId).toString())
+
+        val jsonString = """
+{
+    "chatId": "${chatId}",
+    "msgIds": ["${msgId}"]
+}"""
+
+        //val param = JsonObject(jsonString)
+        val jsonElement = JsonParser.parseString(jsonString)
+        val param = jsonElement.asJsonObject
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
+
+        val requestUrl = Constants.baseUrlApi() + "/" + "v1/api/message/reply-message/sync"
+        request.call(request.create(MainApi.IMainTask::class.java)
+            .queryMessage(param),
+            object : ProgressLoadingCallBack<ReturnData<ReplyList>>(null) {
+                override fun onSuccess(res: ReturnData<ReplyList>) {
+                    res.data?.replyList?.let {
+                        //mHmessage.postValue(it.get(0))
+                        callback(it.get(0))
+                    }
+                    if (res.code != 0) {
+                        val resp = Gson().toJson(res)
+                        logError(res.code, "", "x-token " + Constants.xToken, resp, requestUrl)
+                        callback(null)
+                    }
+                }
+
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    println(e)
+                    callback(null)
                     logError(e?.code?:500, "", "x-token " + Constants.xToken, e?.message?: "", requestUrl )
                 }
             }
@@ -509,8 +545,6 @@ class KeFuViewModel() : BaseViewModel() {
             }
             unSentMessage[CONSULT_ID] = java.util.ArrayList()
         }
-
-
         return true
     }
 
@@ -523,6 +557,23 @@ class KeFuViewModel() : BaseViewModel() {
 
         unSentMessage[CONSULT_ID] = filteredList as ArrayList<MessageItem>
         Log.i(TAG, "getUnSendMsg: " + filteredList.size)
+    }
+
+    fun getReplyItem(oriMsg: hMessage) : ReplyMessageItem{
+        var replyItem = ReplyMessageItem()
+        if (oriMsg != null){
+            if (oriMsg.msgFmt == "MSG_TEXT"){
+                replyItem.content = oriMsg.content?.data?:""
+            }else if (oriMsg.msgFmt == "MSG_IMG"){
+                replyItem.fileName = oriMsg.image?.uri?:""
+            }else if (oriMsg.msgFmt == "MSG_VIDEO"){
+                replyItem.fileName = oriMsg.video?.uri?:""
+            }else if (oriMsg.msgFmt == "MSG_FILE"){
+                replyItem.size = oriMsg?.file?.size?: 0
+                replyItem.fileName = oriMsg?.file?.fileName?:""
+            }
+        }
+        return replyItem
     }
 
 }

@@ -590,9 +590,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             }
         }
 
-        viewModel.mHistoryList.observe(viewLifecycleOwner){
+        viewModel.mHistoryHMessage.observe(viewLifecycleOwner){
            it?.run {
                //BuildHistory
+               Constants.chatId = this[0].chatId
                var historyList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
@@ -1072,18 +1073,25 @@ code: 1002 无效的Token
             //把收到的消息插入到列表
             val messageItem = MessageItem()
             messageItem.cMsg = msg
-
+            //切记，在这也付值msgId，便于从列表里面找记录
+            messageItem.msgId = msg.msgId
+            messageItem.isLeft = true
             if (msg.replyMsgId > 0) {
                 val referMsg = viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg.replyMsgId }
                 if (referMsg != null) {
                     getReply(referMsg.cMsg!!, messageItem, msg.msgId)
+                    viewModel.addMsgItem(messageItem, 0)
+                }else{
+                    viewModel.queryMessage(msg.replyMsgId.toString(), callback = {
+                        it?.let {
+                            messageItem.replyItem = viewModel.getReplyItem(it)
+                            viewModel.addMsgItem(messageItem, 0)
+                        }
+                    })
                 }
+            }else{
+                viewModel.addMsgItem(messageItem, 0)
             }
-
-            //切记，在这也付值msgId，便于从列表里面找记录
-            messageItem.msgId = msg.msgId
-            messageItem.isLeft = true
-            viewModel.addMsgItem(messageItem, 0)
         }
     }
 

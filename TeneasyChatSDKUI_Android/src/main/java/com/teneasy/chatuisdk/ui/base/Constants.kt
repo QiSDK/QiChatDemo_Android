@@ -82,6 +82,7 @@ var cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQc
         var CONSULT_ID: Long = 0
         //val wss_token = "wss_token"
         var workerAvatar = ""
+        var chatId = "0";
 
         //var autoPlay = CMessage.MessageAutoReply.newBuilder()
 

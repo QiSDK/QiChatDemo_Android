@@ -4,14 +4,14 @@ import com.teneasy.chatuisdk.ui.http.Urls
 
 data class ChatHistory (
   val request: Request,
-  val list: List<list>,
-  val replyList: List<list>,
+  val list: List<hMessage>,
+  val replyList: List<hMessage>,
   val lastMsgID: String,
 
   val nick: String
 )
 
-data class list (
+data class hMessage (
   val chatId: String,
 
   val msgId: String,
