@@ -570,7 +570,8 @@ class KeFuViewModel() : BaseViewModel() {
                 replyItem.fileName = oriMsg.video?.uri?:""
             }else if (oriMsg.msgFmt == "MSG_FILE"){
                 replyItem.size = oriMsg?.file?.size?: 0
-                replyItem.fileName = oriMsg?.file?.fileName?:""
+                //replyItem.fileName = oriMsg?.file?.fileName?:""
+                replyItem.fileName = oriMsg?.file?.uri?:""
             }
         }
         return replyItem

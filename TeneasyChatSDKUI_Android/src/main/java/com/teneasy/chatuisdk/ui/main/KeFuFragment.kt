@@ -42,6 +42,7 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.imageTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.uploadProgress
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.videoTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.GlideEngine
@@ -333,19 +334,36 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     });
                 }
 
+//                override fun onShowOriginal(position: Int) {
+//                    val curMsg = viewModel.mlMsgList.value?.get(position)
+//                    val oriMsg =
+//                        viewModel.mlMsgList.value?.firstOrNull { it.msgId == curMsg?.cMsg?.replyMsgId }
+//                    if (oriMsg != null) {
+//                        if ((oriMsg?.cMsg?.image?.uri ?: "").isNotEmpty()) {
+//                            onPlayImage(Constants.baseUrlImage + (oriMsg?.cMsg?.image?.uri ?: ""))
+//                        }
+//                        if ((oriMsg?.cMsg?.video?.uri ?: "").isNotEmpty()) {
+//                            onPlayVideo(Constants.baseUrlImage + (oriMsg?.cMsg?.video?.uri ?: ""))
+//                        }
+//                        if ((oriMsg?.cMsg?.file?.uri ?: "").isNotEmpty()) {
+//                            onOpenFile(Constants.baseUrlImage + (oriMsg?.cMsg?.file?.uri ?: ""))
+//                        }
+//                    }
+//                }
+
                 override fun onShowOriginal(position: Int) {
                     val curMsg = viewModel.mlMsgList.value?.get(position)
-                    val oriMsg =
-                        viewModel.mlMsgList.value?.firstOrNull { it.msgId == curMsg?.cMsg?.replyMsgId }
-                    if (oriMsg != null) {
-                        if ((oriMsg?.cMsg?.image?.uri ?: "").isNotEmpty()) {
-                            onPlayImage(Constants.baseUrlImage + (oriMsg?.cMsg?.image?.uri ?: ""))
+                    curMsg?.let {
+                        var ext = it.replyItem?.fileName?.split(".")?.last()?: "#"
+                        var fileName = it.replyItem?.fileName?: "#"
+                        if (imageTypes.contains(ext)) {
+                            onPlayImage(Constants.baseUrlImage + fileName)
                         }
-                        if ((oriMsg?.cMsg?.video?.uri ?: "").isNotEmpty()) {
-                            onPlayVideo(Constants.baseUrlImage + (oriMsg?.cMsg?.video?.uri ?: ""))
+                        else if (videoTypes.contains(ext)) {
+                            onPlayVideo(Constants.baseUrlImage + fileName)
                         }
-                        if ((oriMsg?.cMsg?.file?.uri ?: "").isNotEmpty()) {
-                            onOpenFile(Constants.baseUrlImage + (oriMsg?.cMsg?.file?.uri ?: ""))
+                        else {
+                            onOpenFile(Constants.baseUrlImage + fileName)
                         }
                     }
                 }
@@ -1201,7 +1219,7 @@ code: 1002 无效的Token
                 replyItem.fileName = oriMsg.video?.uri?:""
             }else if (oriMsg.msgFmt.toString() == "MSG_FILE"){
                 replyItem.size = (oriMsg?.file?.size?: 0).toLong()
-                replyItem.fileName = oriMsg?.file?.fileName?:""
+                replyItem.fileName = oriMsg?.file?.uri?:""
             }
         }
         model.replyItem = replyItem
