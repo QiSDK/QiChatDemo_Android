@@ -47,15 +47,16 @@ class Constants {
         var userId = 666688//1125324
         var baseUrlImage = "https://imagesacc.hfxg.xyz" //用于拼接图片地址
 
-//        var lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xyz"
-//        var cert = "COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg"
+        //lucky test, 对应：2025_1	test000000
+        var cert = "CMUCEAUYASCUAyjs8YWbyTI.xnc1L2bV5n21oQ2RNN8ojJD4IS-hTvXo2cgvFka4SLjsQ6rdhFFyfWKnNX3iU2VYtZtGn2-BfpI5J_xuYiy8CA"
 //        var merchantId = 225
 //        var userId = 777772
 //        var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
 
+
         /*雷哥的测试环境*/
 //var lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xyz"
-var cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQcLftyD2KBMIdYetjTYQEyQwWLy7Lfkm8cs3aogaThAw"
+//var cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQcLftyD2KBMIdYetjTYQEyQwWLy7Lfkm8cs3aogaThAw"
 //var merchantId = 232
 //var userId = 364310
 //                var baseUrlImage = "https://sssacc.wwc09.com" //用于拼接图片地址
