@@ -39,9 +39,8 @@ class Constants {
 
         // 基础配置属性
         var lines = "https://csapi.hfxg.xyz,https://xxxapi.qixin14.xyz"  // 服务器线路地址
-        var cert =
-            "CMUCEAUYASCUAyjs8YWbyTI.xnc1L2bV5n21oQ2RNN8ojJD4IS-hTvXo2cgvFka4SLjsQ6rdhFFyfWKnNX3iU2VYtZtGn2-BfpI5J_xuYiy8CA"  // 认证证书
-
+        //var cert = "CMUCEAUYASCUAyjs8YWbyTI.xnc1L2bV5n21oQ2RNN8ojJD4IS-hTvXo2cgvFka4SLjsQ6rdhFFyfWKnNX3iU2VYtZtGn2-BfpI5J_xuYiy8CA"  // 认证证书
+        var cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQcLftyD2KBMIdYetjTYQEyQwWLy7Lfkm8cs3aogaThAw"
         //var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
         var merchantId = 230  // 商户ID
         var userId = 666688   // 用户ID

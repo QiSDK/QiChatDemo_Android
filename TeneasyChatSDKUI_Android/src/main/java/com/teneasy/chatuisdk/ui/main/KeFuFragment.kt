@@ -178,13 +178,27 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
     //初始化聊天SDK
     private fun initChatSDK(baseUrl: String){
-        val wssUrl = "wss://" + baseUrl + "/v1/gateway/h5?"
-        Log.i(TAG, "x-token:" + Constants.xToken + "\n" + Date())
+        val wssUrl = "wss://$baseUrl/v1/gateway/h5?"
+        Log.i(TAG, "x-token: ${Constants.xToken}, time: ${Date()}")
 
-        chatLib = ChatLib(Constants.cert , Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc",  0L, getCustomParam(), Constants.maxSessionMins)
-        chatLib?.listener = this
-        Log.i(TAG, "开始初始化SDK")
-        chatLib?.makeConnect()
+        try {
+            chatLib = ChatLib(
+                Constants.cert,
+                Constants.xToken,
+                wssUrl,
+                Constants.userId,
+                "9zgd9YUc",
+                0L,
+                getCustomParam(),
+                Constants.maxSessionMins
+            )
+            chatLib?.listener = this
+            Log.i(TAG, "开始初始化SDK")
+            chatLib?.makeConnect()
+        } catch (e: Exception) {
+            Log.e(TAG, "初始化SDK失败: ${e.message}")
+            showTip("初始化SDK失败，请稍后重试")
+        }
     }
 
     /* 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
@@ -668,74 +682,68 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     }
 
     //刷新列表，确保每次有新消息都刷新并滚动到底部
-    private fun refreshList(){
+    private fun refreshList() {
+        if (!isAdded) return // 防止Fragment已分离导致的崩溃
+
         runOnUiThread {
-            msgAdapter.notifyDataSetChanged()
-            binding?.let {
-                //it.rcvMsg.scrollToBottomWithMargin(100)
-                it.rcvMsg.scrollToPosition(msgAdapter.itemCount - 1)
-                Log.i(TAG, "刷新列表，滚动到底部")
+            try {
+                msgAdapter.notifyDataSetChanged()
+                binding?.rcvMsg?.post {
+                    binding?.rcvMsg?.scrollToPosition(msgAdapter.itemCount - 1)
+                    Log.i(TAG, "刷新列表，滚动到底部")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "刷新列表失败: ${e.message}")
             }
         }
     }
 
     //开一个定时器每隔几秒检查连接状态
     private fun startTimer() {
-        //当页面在后台很多个小时之后, reConnectTimer期待为无效，如果仍然不为null，就需要判断并强制为null以边重新初始化
-//        if (reConnectTimer != null && lastTimestamp != null){
-//            val curTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
-//            Log.d(TAG, "时间间隔：${(curTimestamp.seconds - lastTimestamp?.seconds!!)}")
-//            if (((curTimestamp.seconds - lastTimestamp?.seconds!! ) ?: 0) > 10){
-//                lastTimestamp = null
-//                reConnectTimer = null
-//                Log.d(TAG, "reConnectTimer 已经无效")
-//            }
-//        }
-
-        //当页面在后台很多个小时之后, reConnectTimer期待为无效，如果仍然不为null，就需要判断并强制为null以边重新初始化
-//        Log.d(TAG, "时间间隔：${(Utils().differenceInMinutes(lastActiveDateTime, Date()))}")
-//        if (Utils().differenceInMinutes(lastActiveDateTime, Date()) > 60 * 4){
-//            reConnectTimer = null
-//        }
-
         Log.i(TAG, "检查连接状态:${isConnected}")
         if(isConnected) {
             Log.i(TAG, "startTimer return")
             showTip("状态：已连接")
-           return
+            return
         }
+
         if (isFirstLoad) {
             showTip("初始化SDK")
         }
 
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
-        if(reConnectTimer == null) {
-            reConnectTimer?.cancel()
-            reConnectTimer?.purge()
-            reConnectTimer = Timer()
-            reConnectTimer?.schedule(object : TimerTask() {
-                override fun run() {
-                    if (chatLib == null) {
+
+        // 确保在创建新Timer前清理旧Timer
+        closeTimer()
+
+        reConnectTimer = Timer()
+        reConnectTimer?.schedule(object : TimerTask() {
+            override fun run() {
+                when {
+                    chatLib == null -> {
                         Log.d(TAG, "SDK重新初始化...")
                         showTip("初始化SDK...")
                         initChatSDK(Constants.domain)
-                    } else if (!isConnected){
-                        //showTip("SDK连接中...")
+                    }
+                    !isConnected -> {
                         Log.d(TAG, "SDK连接中")
                         chatLib?.makeConnect()
                     }
-                    lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
-
-                    //上传视频的时候，在这里更新上传进度，对接开发人员可以有自己的办法，和聊天sdk无关。
-                    if (uploadProgress > 0 && (uploadProgress < 67 || uploadProgress >= 70) && uploadProgress < 96){
-                        uploadProgress += 3
-                        uploadProgress(uploadProgress)
-                    }
                 }
-            }, 6000, 3000) //这里必须Delay 3s及以上，给初始化SDK足够的时间
-        } else{
-                showTip("请稍等...")
-        }
+
+                lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
+
+                // 更新上传进度
+                updateUploadProgressIfNeeded()
+            }
+
+            private fun updateUploadProgressIfNeeded() {
+                if (uploadProgress in 1..95 && (uploadProgress < 67 || uploadProgress >= 70)) {
+                    uploadProgress += 3
+                    uploadProgress(uploadProgress)
+                }
+            }
+        }, 6000, 3000) // 这里必须Delay 3s及以上，给初始化SDK足够的时间
     }
 
     // 关闭连接状态定时器
@@ -755,78 +763,105 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         return mIProgressLoader
     }
 
-    fun beforeUpload(filePath: String){
-        println("开始上传。。。")
-        mIProgressLoader?.updateMessage("正在上传。。。")
+    fun beforeUpload(filePath: String) {
+        Log.i(TAG, "开始上传文件: $filePath")
+        mIProgressLoader?.updateMessage("正在上传...")
         mIProgressLoader?.showLoading()
         uploadProgress = 0
 
-        //val filePath = Utils().encodeFilePath(mediaPath)
-        var file = File(filePath)
+        val file = File(filePath)
 
-        if (!file.exists()){
+        if (!file.exists()) {
             ToastUtils.showToast(requireContext(), "文件不存在")
             mIProgressLoader?.dismissLoading()
             return
         }
-        val ext = file.absoluteFile.extension
 
-        if (imageTypes.contains(ext.lowercase())){
-            if (file.length() >= 2000 * 10 * 1000){
-                ToastUtils.showToast(requireContext(), "图片限制20M")
-                mIProgressLoader?.dismissLoading()
-                return
-            }
-            //uploadFile(file)
-            //UploadImage(this).uploadFile(file)
-            uploadProgress = 1
-            UploadUtil(this@KeFuFragment).uploadFile(file)
-        }else{
-            val newFilePath = file.absolutePath.replace("." + ext,"").replace(".","") + Date().time + "." + ext
-            val newFile = File(newFilePath)
-            uploadProgress = 1
-            //如果小于30M就不压缩
-            if (file.length() <= 3000 * 10 * 1000){
-                UploadUtil(this@KeFuFragment).uploadFile(file)
-            }else {
-                //mIProgressLoader?.updateMessage("开始压缩。。。")
-                CoroutineScope(Dispatchers.Main).launch {
-                    val resultCode =
-                        Utils().compressVideo(file.absolutePath.toString(), newFilePath)
+        val ext = file.absoluteFile.extension.lowercase()
 
-                    withContext(Dispatchers.Main) {
-                        if (resultCode == 0) {
-                            Log.i(TAG, "原始文件大小:" + file.length())
-                            Log.i(TAG, "Video compression succeeded")
-                            // If you need to update the UI, do it here
-                            if (newFile.length() >= 30000 * 10 * 1000) {
+        when {
+            // 处理图片文件
+            imageTypes.contains(ext) -> handleImageUpload(file)
+
+            // 处理其他文件（视频等）
+            else -> handleVideoOrFileUpload(file, ext)
+        }
+    }
+
+    private fun handleImageUpload(file: File) {
+        val maxImageSize = 20 * 1024 * 1024 // 20MB
+
+        if (file.length() >= maxImageSize) {
+            ToastUtils.showToast(requireContext(), "图片限制20M")
+            mIProgressLoader?.dismissLoading()
+            return
+        }
+
+        uploadProgress = 1
+        UploadUtil(this).uploadFile(file)
+    }
+
+    private fun handleVideoOrFileUpload(file: File, ext: String) {
+        val maxFileSize = 300 * 1024 * 1024 // 300MB
+        val compressionThreshold = 30 * 1024 * 1024 // 30MB
+
+        uploadProgress = 1
+
+        // 如果小于30M就不压缩
+        if (file.length() <= compressionThreshold) {
+            UploadUtil(this).uploadFile(file)
+            return
+        }
+
+        // 需要压缩的文件
+        val newFilePath = "${file.absolutePath.replace("." + ext,"").replace(".","")}${Date().time}.$ext"
+        val newFile = File(newFilePath)
+
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val resultCode = Utils().compressVideo(file.absolutePath, newFilePath)
+
+                withContext(Dispatchers.Main) {
+                    when {
+                        // 压缩成功
+                        resultCode == 0 -> {
+                            Log.i(TAG, "压缩成功: 原始大小:${file.length()}, 压缩后:${newFile.length()}")
+
+                            if (newFile.length() >= maxFileSize) {
                                 ToastUtils.showToast(requireContext(), "视频/文件限制300M")
                                 mIProgressLoader?.dismissLoading()
                                 return@withContext
                             }
 
-                            if (newFile.length() > 0) {
-                                file = newFile
-                            }
-                            mIProgressLoader?.updateMessage("开始上传。。。")
+                            val fileToUpload = if (newFile.length() > 0) newFile else file
+                            mIProgressLoader?.updateMessage("开始上传...")
                             uploadProgress = 70
+                            UploadUtil(this@KeFuFragment).uploadFile(fileToUpload)
+                            Log.i(TAG, "上传文件大小: ${fileToUpload.length()}")
+                        }
+
+                        // 压缩失败但文件大小可接受
+                        file.length() < maxFileSize -> {
+                            Log.i(TAG, "压缩失败，使用原文件上传: ${file.length()}")
                             UploadUtil(this@KeFuFragment).uploadFile(file)
-                            //uploadFile(file)
-                            Log.i(TAG, "上传文件大小:" + file.length())
-                        } else {
-                            Log.i(TAG, "Video compression failed with return code $resultCode")
-                            //Config.printLastCommandOutput(Log.INFO)
-                            if (file.length() >= 30000 * 10 * 1000) {
-                                ToastUtils.showToast(requireContext(), "视频/文件限制300M")
-                                mIProgressLoader?.dismissLoading()
-                                return@withContext
-                            }
-                            Log.i(TAG, "上传文件大小:" + file.length())
-                            UploadUtil(this@KeFuFragment).uploadFile(file)
-                            //uploadFile(file)
+                        }
+
+                        // 压缩失败且文件过大
+                        else -> {
+                            ToastUtils.showToast(requireContext(), "视频/文件限制300M")
+                            mIProgressLoader?.dismissLoading()
                         }
                     }
-
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "压缩文件异常: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    if (file.length() < maxFileSize) {
+                        UploadUtil(this@KeFuFragment).uploadFile(file)
+                    } else {
+                        ToastUtils.showToast(requireContext(), "处理文件失败")
+                        mIProgressLoader?.dismissLoading()
+                    }
                 }
             }
         }
@@ -846,17 +881,28 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
         exitChat()
+        mIProgressLoader = null
     }
 
     //释放聊天相关库和变量
-    fun exitChat(){
-        closeTimer()
-        Constants.workerId = 0
-        isConnected = false
-        chatLib?.disConnect()
-        chatLib = null
-        isFirstLoad = true
-        Log.i(TAG, "销毁聊天")
+    fun exitChat() {
+        try {
+            // 关闭定时器
+            closeTimer()
+
+            // 重置状态
+            Constants.workerId = 0
+            isConnected = false
+
+            // 断开连接并释放资源
+            chatLib?.disConnect()
+            chatLib = null
+            isFirstLoad = true
+
+            Log.i(TAG, "聊天资源已释放")
+        } catch (e: Exception) {
+            Log.e(TAG, "释放聊天资源时发生错误: ${e.message}")
+        }
     }
 
     //==========图片选择===========//
@@ -885,39 +931,42 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
      */
     fun sendMsg(txt: String, force: Boolean = false, replyMsgId: Long = 0) {
         if(chatLib == null){
-            // Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             showTip("SDK还未初始化")
             return
         }
 
-        if (txt.isEmpty()){
+        val trimmedText = txt.trim()
+        if (trimmedText.isEmpty()){
             Toast.makeText(requireContext(), "请输入内容", Toast.LENGTH_SHORT).show()
             return
         }
-         /*
-            用户发送消息，要先比对上一条时间 ，超过配置的时间就分配新客服
-         */
-        if(!force && lastMsg != null) {
-            //tempContent = txt
-            val lastMsgTime = Date(lastMsg?.msgTime?.seconds?: 0L)
-            val sendingMsgTime = Date(Date().time)
 
-            val diffTime = Utils().sessionTimeout(lastMsgTime, sendingMsgTime, chatExpireTime)
-            if (diffTime) {
+        // 检查会话是否超时，需要分配新客服
+        if(!force && lastMsg != null) {
+            val lastMsgTime = Date(lastMsg?.msgTime?.seconds?: 0L)
+            val sendingMsgTime = Date()
+
+            if (Utils().sessionTimeout(lastMsgTime, sendingMsgTime, chatExpireTime)) {
                 Log.i(TAG, "超过配置的时间，调用分流接口")
+                tempContent = trimmedText // 保存消息内容，等待分配新客服后发送
                 viewModel.assignNewWorker(Constants.CONSULT_ID)
                 return
             }
-
         }
-        //说明至少已经发送成功1条消息，无需再附带自动回复消息
+
+        // 如果已经发送过消息，不再附带自动回复
         if (lastMsg != null){
             withAutoReplyU = null
         }
-        chatLib?.sendMessage(txt, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId, withAutoReplyU)
-        val messageItem = MessageItem()
-        messageItem.cMsg = chatLib?.sendingMessage
-        messageItem.isLeft = false
+
+        // 发送消息
+        chatLib?.sendMessage(trimmedText, CMessage.MessageFormat.MSG_TEXT, Constants.CONSULT_ID, replyMsgId, withAutoReplyU)
+
+        // 添加到消息列表
+        val messageItem = MessageItem().apply {
+            cMsg = chatLib?.sendingMessage
+            isLeft = false
+        }
         viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
     }
@@ -1073,42 +1122,63 @@ code: 1002 无效的Token
 
     //收到对方消息
     override fun receivedMsg(msg: CMessage.Message) {
-        //当用户端在当前会话，但是其他咨询类型客服发来了消息，给予提醒。
-        if (msg.consultId != Constants.CONSULT_ID){
-            showTip("其他客服有新消息！")
-            val tMsg = binding?.tvTips?.text
-            if (tMsg != null && tMsg.isNotEmpty()){
-               // return
-                Handler(Looper.getMainLooper()).postDelayed(
-                    {
-                      showTip(tMsg.toString())
-                    },
-                    3000 // value in milliseconds
-                )
-            }
-        }else {
+        if (!isAdded) return // 防止Fragment已分离导致的崩溃
 
-            //把收到的消息插入到列表
-            val messageItem = MessageItem()
-            messageItem.cMsg = msg
-            //切记，在这也付值msgId，便于从列表里面找记录
-            messageItem.msgId = msg.msgId
-            messageItem.isLeft = true
-            if (msg.replyMsgId > 0) {
-                val referMsg = viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg.replyMsgId }
-                if (referMsg != null) {
-                    getReply(referMsg.cMsg!!, messageItem, msg.msgId)
+        // 当用户端在当前会话，但是其他咨询类型客服发来了消息，给予提醒
+        if (msg.consultId != Constants.CONSULT_ID) {
+            handleOtherConsultMessage()
+            return
+        }
+
+        // 处理当前会话的消息
+        processReceivedMessage(msg)
+    }
+
+    /**
+     * 处理其他咨询类型的消息提醒
+     */
+    private fun handleOtherConsultMessage() {
+        showTip("其他客服有新消息！", 3000)
+    }
+
+    /**
+     * 处理接收到的消息
+     */
+    private fun processReceivedMessage(msg: CMessage.Message) {
+        // 创建消息项
+        val messageItem = MessageItem().apply {
+            cMsg = msg
+            msgId = msg.msgId
+            isLeft = true
+        }
+
+        // 处理回复消息
+        if (msg.replyMsgId > 0) {
+            processReplyMessage(messageItem, msg)
+        } else {
+            // 普通消息直接添加
+            viewModel.addMsgItem(messageItem, 0)
+        }
+    }
+
+    /**
+     * 处理回复类型的消息
+     */
+    private fun processReplyMessage(messageItem: MessageItem, msg: CMessage.Message) {
+        // 先查找本地消息列表中是否有被回复的消息
+        val referMsg = viewModel.mlMsgList.value?.firstOrNull { it.msgId == msg.replyMsgId }
+
+        if (referMsg != null) {
+            // 本地有被回复的消息
+            getReply(referMsg.cMsg!!, messageItem, msg.msgId)
+            viewModel.addMsgItem(messageItem, 0)
+        } else {
+            // 本地没有被回复的消息，需要从服务器查询
+            viewModel.queryMessage(msg.replyMsgId.toString()) { replyMsg ->
+                replyMsg?.let {
+                    messageItem.replyItem = viewModel.getReplyItem(it)
                     viewModel.addMsgItem(messageItem, 0)
-                }else{
-                    viewModel.queryMessage(msg.replyMsgId.toString(), callback = {
-                        it?.let {
-                            messageItem.replyItem = viewModel.getReplyItem(it)
-                            viewModel.addMsgItem(messageItem, 0)
-                        }
-                    })
                 }
-            }else{
-                viewModel.addMsgItem(messageItem, 0)
             }
         }
     }
@@ -1132,17 +1202,42 @@ code: 1002 无效的Token
         }
     }
 
-    private fun showTip(msg: String){
+    /**
+     * 显示提示信息
+     * @param msg 提示内容
+     * @param duration 显示时长(毫秒)，0表示一直显示
+     */
+    private fun showTip(msg: String, duration: Long = 0) {
+        if (!isAdded) return // 防止Fragment已分离导致的崩溃
+
         runOnUiThread {
-            binding?.tvTips?.visibility = View.VISIBLE
-            binding?.tvTips?.text = msg
+            binding?.tvTips?.apply {
+                text = msg
+                visibility = if (msg.isNotEmpty()) View.VISIBLE else View.GONE
+
+                // 如果设置了显示时长，则自动隐藏
+                if (duration > 0 && msg.isNotEmpty()) {
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (isAdded) {
+                            binding?.tvTips?.visibility = View.GONE
+                        }
+                    }, duration)
+                }
+            }
         }
     }
 
-    private fun hideTip(){
+    /**
+     * 隐藏提示信息
+     */
+    private fun hideTip() {
+        if (!isAdded) return
+
         runOnUiThread {
-            binding?.tvTips?.visibility = View.GONE
-            binding?.tvTips?.text = ""
+            binding?.tvTips?.apply {
+                visibility = View.GONE
+                text = ""
+            }
         }
     }
 

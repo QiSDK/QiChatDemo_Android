@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.dash.manifest.BaseUrl
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -246,25 +247,30 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     holder.ivSendStatus.visibility = View.GONE
 
                 holder.ivRightImg.visibility = View.VISIBLE
-
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
-
-                holder.ivRightImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl)
-                    print(meidaUrl)
-                }
-
-                if (item.cMsg!!.image.uri.isNotEmpty()) {
-                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
-                    holder.ivRightImg.setOnClickListener {
-                        listener?.onPlayImage(meidaUrl)
-                    }
-                    holder.ivRightPlay.visibility = View.GONE
-                }
 
                 if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                } else if (item.cMsg!!.image.uri.isNotEmpty()) {
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
+                    holder.ivRightPlay.visibility = View.GONE
                 }
+
+                holder.ivRightImg.setOnClickListener {
+                    var tag = holder.ivRightImg.tag as Int
+                    val myItem = msgList!![tag]
+
+                    if ((myItem.cMsg?.video?.uri?:"").isNotEmpty()) {
+                        var videoUrl = item.cMsg?.video!!.uri
+                        if (item.cMsg?.video!!.hlsUri.isNotEmpty()){
+                            videoUrl = item.cMsg?.video!!.hlsUri
+                        }
+                        listener?.onPlayVideo(Constants.baseUrlImage + videoUrl)
+                    }else {
+                        listener?.onPlayImage(meidaUrl)
+                    }
+                }
+
                 var thumb = meidaUrl
                 Glide.with(act)
                     .load(thumb)
@@ -326,22 +332,29 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 holder.ivLeftImg.visibility = View.VISIBLE
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
-                if (item.cMsg!!.video.hlsUri.isNotEmpty()){
-                    meidaUrl =  Constants.baseUrlImage + item.cMsg!!.video.hlsUri
-                }
-                holder.ivLeftImg.setOnClickListener {
-                    listener?.onPlayVideo(meidaUrl);
-                    print(meidaUrl)
+
+                if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                } else if (item.cMsg!!.image.uri.isNotEmpty()) {
+                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
+                    holder.ivRightPlay.visibility = View.GONE
                 }
 
-                Log.d("AdapterNChatLib", "meidaUrl:" + meidaUrl)
-                if (item.cMsg!!.image.uri.isNotEmpty()) {
-                    meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
-                    holder.ivLeftImg.setOnClickListener {
+                holder.ivLeftImg.setOnClickListener {
+                    var tag = holder.ivLeftImg.tag as Int
+                    val myItem = msgList!![tag]
+
+                    if ((myItem.cMsg?.video?.uri?:"").isNotEmpty()) {
+                        var videoUrl = item.cMsg?.video!!.uri
+                        if (item.cMsg?.video!!.hlsUri.isNotEmpty()){
+                            videoUrl = item.cMsg?.video!!.hlsUri
+                        }
+                        listener?.onPlayVideo(Constants.baseUrlImage + videoUrl)
+                    }else {
                         listener?.onPlayImage(meidaUrl)
                     }
-                    holder.ivPlay.visibility = View.GONE
                 }
+
                 if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
                 }
