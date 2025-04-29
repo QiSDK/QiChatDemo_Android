@@ -81,60 +81,64 @@ import kotlin.collections.ArrayList
  * 客服主界面fragment
  */
 class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
+    companion object {
+        private const val PICK_FILE_REQUEST_CODE = 1001
+    }
 
-    //消息列表的Adapter
+    // UI组件
     private lateinit var msgAdapter: MessageListAdapter
-    //聊天页面的ViewModel
     private lateinit var viewModel: KeFuViewModel
-    //加载进度框
+    private lateinit var dialogBottomMenu: DialogBottomMenu
+    private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
+    
+    // 状态变量
     private var mIProgressLoader: IProgressLoader? = null
-    //设置一个timer, 每隔几秒检查连接状态
-    private var reConnectTimer: Timer? = null
-    //聊天SDK库
     private var chatLib: ChatLib? = null
-    //联结状态标志
     private var isConnected = false
-    //自定义日志Tag
-     override var TAG = "KefuNchatlib"
-    //是否第一次加载页面的标志，历史记录和打招呼只需要页面第一次加载的时候显示
     private var isFirstLoad = true
-
     private var tempContent = ""
-    private var chatExpireTime = 0 //in seconds, chatExpireTime
-
+    private var chatExpireTime = 0 // 会话过期时间（秒）
+    
+    // 聊天相关数据
     private var lastMsg: CMessage.Message? = null
     private var workInfo = WorkerInfo()
-    private var lastTimestamp: Timestamp? = null
-    private val PICK_FILE_REQUEST_CODE = 1001
-
-    private var isFirstSend = true
-    //val imageTypes = arrayOf("tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg")
-
     private var lastActiveDateTime = Date()
-    private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
+    private var reConnectTimer: Timer? = null
 
-    private lateinit var dialogBottomMenu: DialogBottomMenu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initializeComponents()
+        setupBackPressHandler()
+    }
+
+    /**
+     * 初始化组件
+     */
+    private fun initializeComponents() {
         viewModel = KeFuViewModel()
-        //检查内存变量的域名还存在不
-        if (Constants.domain.isEmpty()){
-            Utils().readConfig()
-        }
-        //初始化SDK
+        ensureDomainExists()
         initChatSDK(Constants.domain)
-
-        //硬返回按钮点点击之后
-       requireActivity().onBackPressedDispatcher.addCallback(this) {
-           //断开聊天，停止定时器等
-            exitChat()
-           //返回到上个页面
-            findNavController().popBackStack()
-        }
-
-        //初始化进度条
         mIProgressLoader = getProgressLoader()
         initializePickFileLauncher()
+    }
+
+    /**
+     * 确保域名存在
+     */
+    private fun ensureDomainExists() {
+        if (Constants.domain.isEmpty()) {
+            Utils().readConfig()
+        }
+    }
+
+    /**
+     * 设置返回键处理
+     */
+    private fun setupBackPressHandler() {
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            exitChat()
+            findNavController().popBackStack()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -211,19 +215,25 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
     override fun onResume() {
         super.onResume()
-
-        if (workInfo.workerName != null){
-            binding?.tvTitle?.text = workInfo.workerName
-        }
-
-        //定时检测链接状态
+        updateWorkerNameIfAvailable()
         startTimer()
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.getUnSendMsg()
-        viewModel.reportError()
+        viewModel.apply {
+            getUnSendMsg()
+            reportError()
+        }
+    }
+
+    /**
+     * 更新客服名称（如果可用）
+     */
+    private fun updateWorkerNameIfAvailable() {
+        if (workInfo.workerName != null) {
+            binding?.tvTitle?.text = workInfo.workerName
+        }
     }
 
     // UI初始化
@@ -715,7 +725,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
         // 确保在创建新Timer前清理旧Timer
         closeTimer()
-
         reConnectTimer = Timer()
         reConnectTimer?.schedule(object : TimerTask() {
             override fun run() {
@@ -730,9 +739,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                         chatLib?.makeConnect()
                     }
                 }
-
-                lastTimestamp = Timestamp.newBuilder().setSeconds(Date().time / 1000).build()
-
                 // 更新上传进度
                 updateUploadProgressIfNeeded()
             }
@@ -816,7 +822,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         // 需要压缩的文件
         val newFilePath = "${file.absolutePath.replace("." + ext,"").replace(".","")}${Date().time}.$ext"
         val newFile = File(newFilePath)
-
+        //mIProgressLoader?.updateMessage("正在压缩视频...")
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 val resultCode = Utils().compressVideo(file.absolutePath, newFilePath)
