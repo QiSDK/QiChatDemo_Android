@@ -282,19 +282,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
                     intent.setClass(requireContext(), WebViewActivity::class.java)
                     requireActivity().startActivity(intent)
-                    //WebViewActivity
                 }
 
                 override fun onPlayImage(url: String) {
-//                    XPopup.Builder(requireContext())
-//
-//                        .asCustom(BigImageView(requireContext(), url))
-//                        .show()
-//                    val bundle = Bundle()
-//                    bundle.putString(ARG_IMAGEURL, url)
-//                    bundle.putString(ARG_KEFUNAME, workInfo.workerName)
-//                    findNavController().navigate(R.id.frg_image_full, bundle)
-
                     val intent = Intent(requireContext(), FullImageActivity::class.java)
                     intent.putExtra(ARG_IMAGEURL, url)
                     intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
@@ -353,27 +343,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                                 );
                                 return
                             }
-                            //this@KeFuFragment.mIProgressLoader?.updateMessage("下载进度：$progress");
                         }
                     });
                 }
-
-//                override fun onShowOriginal(position: Int) {
-//                    val curMsg = viewModel.mlMsgList.value?.get(position)
-//                    val oriMsg =
-//                        viewModel.mlMsgList.value?.firstOrNull { it.msgId == curMsg?.cMsg?.replyMsgId }
-//                    if (oriMsg != null) {
-//                        if ((oriMsg?.cMsg?.image?.uri ?: "").isNotEmpty()) {
-//                            onPlayImage(Constants.baseUrlImage + (oriMsg?.cMsg?.image?.uri ?: ""))
-//                        }
-//                        if ((oriMsg?.cMsg?.video?.uri ?: "").isNotEmpty()) {
-//                            onPlayVideo(Constants.baseUrlImage + (oriMsg?.cMsg?.video?.uri ?: ""))
-//                        }
-//                        if ((oriMsg?.cMsg?.file?.uri ?: "").isNotEmpty()) {
-//                            onOpenFile(Constants.baseUrlImage + (oriMsg?.cMsg?.file?.uri ?: ""))
-//                        }
-//                    }
-//                }
 
                 override fun onShowOriginal(position: Int) {
                     val curMsg = viewModel.mlMsgList.value?.get(position)
@@ -394,13 +366,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
                 //这里实现自动回复的功能，属于本地消息
                 override fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String) {
-
                     if (msgType == "MSG_TEXT") {
                         this@KeFuFragment.sendLocalMsg(msg, isLeft)
                     } else if (msgType == "MSG_IMG") {
                         this@KeFuFragment.sendLocalImgMsg(msg, isLeft)
                     }
-
                 }
             })
 
@@ -460,13 +430,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                             }
                         }
                         sendMsg(txt.trim(), false, replayMsgId)
-
                         hidetvQuotedMsg()
-
                         binding?.etMsg?.text?.clear()
                     }
                 }
-
             }
             this.etMsg.isFocusable = true
             this.etMsg.isFocusableInTouchMode = true;
@@ -474,11 +441,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             this.ivPhoto.setOnClickListener { v: View ->
                 selectImageOrVideo(0)
             }
-
             this.ivVideo.setOnClickListener { v: View ->
                 selectImageOrVideo(1)
             }
-
             // 底部菜单初始化
             dialogBottomMenu = DialogBottomMenu(context)
                 .setItems(resources.getStringArray(R.array.bottom_menu))
@@ -486,8 +451,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                    selectImageOrVideo(i)
                 })
                 .build()
-
-
             this.tvTips.visibility = View.GONE
             initObserver()
 
@@ -498,7 +461,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun selectImageOrVideo(i: Int){
         when (i) {
             0 -> {
@@ -508,11 +470,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                         if(result != null && result.size > 0) {
                             val item = result[0]
                             dialogBottomMenu.dismiss()
-                            // 上传图片之前，首先在聊天框添加一个图片消息，更新聊天界面
-                            //val id = viewModel.composeAChatmodelImg(item.path, false)
-
-                                beforeUpload(item.realPath)
-
+                            beforeUpload(item.realPath)
                         }
                     }
                     override fun onCancel() {}
@@ -525,13 +483,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                         if(result != null && result.size > 0) {
                             val item = result[0]
                             dialogBottomMenu.dismiss()
-                            //val id = viewModel.composeAChatmodelImg(item.path, false)
-
                             beforeUpload(item.realPath)
-
                         }
                     }
-
                     override fun onCancel() {}
                 })
             }
@@ -560,7 +514,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         }
     }
 
-    //"text/csv", "application/csv", "text/comma-separated-values"
     fun openFilePicker() {
         val ALLOWED_MIME_TYPES = arrayOf(
             "application/msword", // .doc
@@ -578,7 +531,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         }
         pickFileLauncher.launch(intent)
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -622,8 +574,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 Constants.workerId = workInfo.id
                 updateWorkInf(workInfo)
             }
-
-            //}
         }
 
         viewModel.mlNewWorkAssigned.observe(viewLifecycleOwner){
@@ -1343,6 +1293,7 @@ code: 1002 无效的Token
     }
 
     override fun uploadSuccess(urls: Urls, isVideo: Boolean) {
+        uploadProgress = 0
         if (isVideo) {
             sendVideoMsg(urls)//Constants.baseUrlImage +
         } else {
