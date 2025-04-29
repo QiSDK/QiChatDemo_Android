@@ -60,21 +60,29 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
 /**
- * 客服主界面fragment
+ * 客服主界面基础Fragment
+ * 处理表情面板、输入框、键盘等交互功能
  */
 open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
+    // 底部菜单对话框
     private lateinit var dialogBottomMenu: DialogBottomMenu
+    // 表情导航列表
     private val mExpressionNavigation = mutableListOf<ChatExpressionNavigation>()
+    // 表情面板相关View
     private var mPanelNavigationRcv: RecyclerView? = null
     private var mPanelExpressionVP: ViewPager2? = null
+    
+    // 输入限制相关
     private var mLimitInput: String = ""
+    private var mMaxLength = 800
+
+    // 面板切换帮助类
     var mHelper: PanelSwitchHelper? = null
     open var TAG: String = "KeFuBaseFragment"
-    //0=文字输入模式 1=语音输入模式 2==禁言模式
+    
+    // 输入模式: 0=文字输入模式 1=语音输入模式 2=禁言模式
     private var mInputType: Int = 0
     private var unfilledHeight = 0
-    //    private var mRealLength = 0
-    private var mMaxLength = 800
 
     override fun onCreateViewBinding(
         inflater: LayoutInflater,
@@ -246,101 +254,88 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
 
     /**
      * 初始化面板切换帮助器
+     * 处理键盘、表情面板等切换逻辑
      */
     private fun initHelper() {
-        if (mHelper == null) {
-            mHelper = PanelSwitchHelper.Builder(this) //可选
-                .addKeyboardStateListener(object : OnKeyboardStateListener {
-                    override fun onKeyboardChange(visible: Boolean, height: Int) {
-                       
-                    }
-                }) //可选
-                .addEditTextFocusChangeListener(object : OnEditFocusChangeListener {
-                    override fun onFocusChange(view: View?, hasFocus: Boolean) {
-                        CfLog.d(
-                            TAG, "输入框是否获得焦点 : $hasFocus"
-                        )
-                        if (hasFocus) {
-                          //  scrollToBottom()
-                        }
-                    }
-                }) //可选
-//                .addViewClickListener(object : OnViewClickListener {
-//                    override fun onClickBefore(view: View?) {
-//                        when (view?.id) {
-//                             R.id.ivEmoj -> {
-//                                clearData(requireContext())
-//                                if (view.id == R.id.ivEmoj) {
-//                                    if (mInputType == 1) {
-//                                        showEmotionPanel()
-//                                    }
-//                                }
-////                                if (view.id == R.id.btn_more) {
-////                                    showTextModeNoKeyBoard()
-////                                }
-//
-//                            }
-//
-//                        }
-//                        CfLog.d(TAG, "点击了View : $view")
-//                    }
-//                }) //可选
-                .addPanelChangeListener(object : OnPanelChangeListener {
-                    override fun onKeyboard() {
-                        CfLog.d(TAG, "唤起系统输入法")
-                        //scrollToBottom()
-                        binding?.ivEmoj?.isSelected = false
-                        binding?.ivEmoj?.setImageResource(R.drawable.emoj)
-                    }
+        if (mHelper != null) return
 
-                    override fun onNone() {
-                        CfLog.d(TAG, "隐藏所有面板")
-                        binding?.ivEmoj?.isSelected = false
-                        binding?.ivEmoj?.setImageResource(R.drawable.emoj)
-                    }
+        mHelper = PanelSwitchHelper.Builder(this)
+            .addKeyboardStateListener(createKeyboardStateListener())
+            .addEditTextFocusChangeListener(createFocusChangeListener())
+            .addPanelChangeListener(createPanelChangeListener())
+            .addContentScrollMeasurer { 
+                getScrollDistance { defaultDistance -> defaultDistance - unfilledHeight }
+                getScrollViewId { R.id.rcv_msg }
+            }
+            .addPanelHeightMeasurer {
+                getTargetPanelDefaultHeight { Utils().dp2px(250f) }
+                getPanelTriggerId { R.id.ivEmoj }
+            }
+            .logTrack(false)
+            .build()
+    }
 
-                    override fun onPanel(panel: IPanelView?) {
-                        CfLog.d(TAG, "唤起面板 : $panel")
-                        if (panel is PanelView) {
-                            //scrollToBottom()
-                            if (panel.id == R.id.panel_emotion) {
-                                //表情
-                                binding?.ivEmoj?.isSelected = true
-                                binding?.ivEmoj?.setImageResource(R.drawable.ht_shuru)
+    /**
+     * 创建键盘状态监听器
+     */
+    private fun createKeyboardStateListener() = object : OnKeyboardStateListener {
+        override fun onKeyboardChange(visible: Boolean, height: Int) {
+            // 键盘显示/隐藏时的处理
+        }
+    }
 
-                            }
+    /**
+     * 创建输入框焦点变化监听器
+     */
+    private fun createFocusChangeListener() = object : OnEditFocusChangeListener {
+        override fun onFocusChange(view: View?, hasFocus: Boolean) {
+            CfLog.d(TAG, "输入框是否获得焦点 : $hasFocus")
+        }
+    }
 
-                            /*else if (panel.id == R.id.panel_more) {
-                                //更多
-
-                            }*/
-
-                        }
-                    }
-
-                    override fun onPanelSizeChange(
-                        panelView: IPanelView?,
-                        portrait: Boolean,
-                        oldWidth: Int,
-                        oldHeight: Int,
-                        width: Int,
-                        height: Int
-                    ) {
-
-                    }
-                })
-                .addContentScrollMeasurer { //可选，滑动模式下，可以针对内容面板内的view，定制滑动距离，默认滑动距离为 defaultDistance
-                    getScrollDistance { defaultDistance ->
-                        defaultDistance - unfilledHeight
-                    }
-                    getScrollViewId { R.id.rcv_msg }
-                }.addPanelHeightMeasurer {
-                    getTargetPanelDefaultHeight { Utils().dp2px(250f) }
-                    getPanelTriggerId { R.id.ivEmoj }
-                }.logTrack(false).build()
+    /**
+     * 创建面板变化监听器
+     * 处理键盘和表情面板的切换
+     */
+    private fun createPanelChangeListener() = object : OnPanelChangeListener {
+        override fun onKeyboard() {
+            CfLog.d(TAG, "唤起系统输入法")
+            updateEmojiButtonState(false)
         }
 
-        //binding?.rcvMsg?.setPanelSwitchHelper(mHelper)
+        override fun onNone() {
+            CfLog.d(TAG, "隐藏所有面板")
+            updateEmojiButtonState(false)
+        }
+
+        override fun onPanel(panel: IPanelView?) {
+            CfLog.d(TAG, "唤起面板 : $panel")
+            if (panel is PanelView && panel.id == R.id.panel_emotion) {
+                updateEmojiButtonState(true)
+            }
+        }
+
+        override fun onPanelSizeChange(
+            panelView: IPanelView?,
+            portrait: Boolean,
+            oldWidth: Int,
+            oldHeight: Int,
+            width: Int,
+            height: Int
+        ) {
+            // 面板大小变化时的处理
+        }
+    }
+
+    /**
+     * 更新表情按钮状态
+     * @param isSelected 是否选中
+     */
+    private fun updateEmojiButtonState(isSelected: Boolean) {
+        binding?.ivEmoj?.apply {
+            this.isSelected = isSelected
+            setImageResource(if (isSelected) R.drawable.ht_shuru else R.drawable.emoj)
+        }
     }
     /**
      * 表情输入模式
