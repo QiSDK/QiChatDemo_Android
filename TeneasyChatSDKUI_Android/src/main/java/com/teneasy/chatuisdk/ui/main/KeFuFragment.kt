@@ -840,25 +840,37 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         mIProgressLoader = null
     }
 
-    //释放聊天相关库和变量
+    /**
+     * 释放聊天相关资源
+     */
     fun exitChat() {
         try {
-            // 关闭定时器
-            closeTimer()
-
-            // 重置状态
-            Constants.workerId = 0
-            isConnected = false
-
-            // 断开连接并释放资源
-            chatLib?.disConnect()
-            chatLib = null
-            isFirstLoad = true
-
+            releaseResources()
+            resetState()
             Log.i(TAG, "聊天资源已释放")
         } catch (e: Exception) {
             Log.e(TAG, "释放聊天资源时发生错误: ${e.message}")
         }
+    }
+
+    /**
+     * 释放资源
+     */
+    private fun releaseResources() {
+        closeTimer()
+        chatLib?.apply {
+            disConnect()
+            chatLib = null
+        }
+    }
+
+    /**
+     * 重置状态
+     */
+    private fun resetState() {
+        Constants.workerId = 0
+        isConnected = false
+        isFirstLoad = true
     }
 
     //==========图片选择===========//
@@ -1201,13 +1213,6 @@ code: 1002 无效的Token
     private fun updateWorkInf(workerInfo: WorkerInfo){
             binding?.let {
                 it.tvTitle.text = "${workerInfo.workerName}"
-                //showTip("您好，${workerInfo.workerName}为您服务！")
-                /*if (isFirstLoad){
-                    viewModel.composeLocalMsg("您好，${workerInfo.workerName}为您服务！", true, false)
-                }else{
-                    viewModel.composeLocalMsg("您好，${workerInfo.workerName}为您服务！", false, true)
-                }*/
-
                 if (!isFirstLoad){
                     showTip("您好，${workerInfo.workerName}为您服务！")
                 }
