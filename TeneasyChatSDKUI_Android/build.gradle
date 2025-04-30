@@ -70,7 +70,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.emoji2:emoji2-bundled:1.4.0'
     implementation 'androidx.emoji2:emoji2-views:1.4.0'
-    implementation libs.prdownloader
+    //implementation libs.prdownloader
     implementation libs.androidx.media3.exoplayer.hls
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
@@ -83,7 +83,7 @@ dependencies {
 
     implementation "io.github.cymchad:BaseRecyclerViewAdapterHelper:3.0.4"
     implementation 'com.github.sunhapper.SpEditTool:SpEditText:1.0.4'
-    implementation 'com.github.tbruyelle:rxpermissions:0.12'
+    implementation 'com.github.tbruyelle:RxPermissions:v0.12'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
 
@@ -123,8 +123,7 @@ dependencies {
 
     // image compress library (Not necessary)
     implementation 'io.github.lucksiege:compress:v3.11.2'
-    implementation 'com.arthenica:ffmpeg-kit-full-gpl:4.5.1-1'
-    //implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
+    implementation 'com.github.arthenica:ffmpeg-kit:v5.1'
 }
 
 afterEvaluate {
