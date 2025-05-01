@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.emoji2.bundled.BundledEmojiCompatConfig
 import androidx.emoji2.text.EmojiCompat
-import com.downloader.PRDownloader
 import com.xuexiang.xhttp2.XHttpSDK
 
 class ApplicationExt: Application(){
