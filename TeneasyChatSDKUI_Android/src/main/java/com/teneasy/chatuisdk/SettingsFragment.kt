@@ -24,14 +24,22 @@ import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.base.toIntOrZero
 
+/**
+ * 设置页面Fragment
+ * 用于配置聊天SDK的各项参数
+ */
 class SettingsFragment : Fragment() {
-var binding: FragmentSettingsBinding? = null
+    // 视图绑定对象
+    var binding: FragmentSettingsBinding? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 设置返回键处理
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             findNavController().popBackStack()
         }
+        // 读取已保存的配置
         Utils().readConfig()
     }
 
@@ -39,37 +47,43 @@ var binding: FragmentSettingsBinding? = null
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // 初始化视图绑定
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
         binding?.apply {
-            this.etLine?.setText(Constants.lines)
-            this.etWssCert?.setText(Constants.cert)
+            // 将已保存的配置填充到输入框中
+            this.etLine?.setText(Constants.lines)           // 服务器线路
+            this.etWssCert?.setText(Constants.cert)        // 访问证书
 
+            // 商户ID（如果大于0才显示）
             if (Constants.merchantId > 0) {
                 this.etMerchanId?.setText(Constants.merchantId.toString())
             }
 
+            // 用户ID（如果大于0才显示）
             if (Constants.userId > 0) {
                 this.etUserId?.setText(Constants.userId.toString())
             }
 
-            this.etUserName?.setText(Constants.userName)
+            this.etUserName?.setText(Constants.userName)           // 用户名
+            this.etBaseImgUrl?.setText(Constants.baseUrlImage)    // 图片服务器地址
+            this.etMaxSessionMins?.setText(Constants.maxSessionMins.toString())  // 最大会话时长
+            this.etUserLevel?.setText(Constants.userLevel.toString())           // 用户等级
 
-            this.etBaseImgUrl?.setText(Constants.baseUrlImage)
-            this.etMaxSessionMins?.setText(Constants.maxSessionMins.toString())
-            this.etUserLevel?.setText(Constants.userLevel.toString())
-
+            // 保存按钮点击事件
             this.btnSave.setOnClickListener {
+                // 保存各项配置到Constants
                 Constants.lines = this.etLine.text.toString().trim()
-                //配置更改后，要清除Token
+                // 配置更改后，清除Token
                 Constants.xToken = ""
                 Constants.cert = this.etWssCert.text.toString().trim()
-                Constants.merchantId =  this.etMerchanId.text.toString().trim().toIntOrZero()
-                Constants.userId =  this.etUserId.text.toString().trim().toIntOrZero()
+                Constants.merchantId = this.etMerchanId.text.toString().trim().toIntOrZero()
+                Constants.userId = this.etUserId.text.toString().trim().toIntOrZero()
                 Constants.baseUrlImage = this.etBaseImgUrl.text.toString().trim()
                 Constants.userName = this.etUserName.text.toString().trim()
                 Constants.maxSessionMins = this.etMaxSessionMins.text.toString().trim().toIntOrZero()
                 Constants.userLevel = this.etUserLevel.text.toString().trim().toIntOrZero()
 
+                // 将配置保存到SharedPreferences
                 UserPreferences().putString(PARAM_CERT, Constants.cert)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
@@ -80,14 +94,16 @@ var binding: FragmentSettingsBinding? = null
                 UserPreferences().putInt(PARAM_MAXSESSIONMINS, Constants.maxSessionMins)
                 UserPreferences().putInt(PARAM_USER_LEVEL, Constants.userLevel)
 
+                // 显示保存成功提示
                 ToastUtils.showToast(requireContext(), "保存成功")
             }
 
+            // 设置根视图的触摸事件，用于关闭软键盘
             this.root.setOnTouchListener { v, event ->
-                    if (event.action == MotionEvent.ACTION_DOWN) {
-                       Utils().closeSoftKeyboard(v)
-                    }
-                    true
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    Utils().closeSoftKeyboard(v)
+                }
+                true
             }
         }
 

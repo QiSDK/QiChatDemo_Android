@@ -323,6 +323,20 @@ class Utils {
         return d.build()
     }
 
+    fun strintToTimeStamp(msgTime: String?): Timestamp{
+        var d = Timestamp.newBuilder()
+        val cal = Calendar.getInstance()
+        if (msgTime != null) {
+            cal.time = Utils().convertStrToDate(msgTime)
+        }else{
+            cal.time = Date()
+        }
+        val millis = cal.timeInMillis
+        d.seconds = (millis * 0.001).toLong()
+        d.nanos = System.nanoTime().toInt();
+        return d.build()
+    }
+
     suspend fun compressVideo(inputFilePath: String, outputFilePath: String): Int {
         println("FFmpeg 开始压缩")
         return withContext(Dispatchers.IO) {
