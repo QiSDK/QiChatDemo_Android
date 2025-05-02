@@ -41,7 +41,15 @@ import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
 import java.util.*
-
+import com.teneasy.chatuisdk.ui.utils.LinkUtils
+import android.text.method.LinkMovementMethod
+import android.content.Intent
+import android.net.Uri
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ClickableSpan
+import android.text.util.Linkify
+import java.util.regex.Pattern
 
 interface MessageItemOperateListener {
     fun onDelete(position: Int)
@@ -450,7 +458,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val text = item.cMsg!!.content.data
                 //holder.llLeftReply.visibility = View.GONE
                 //holder.llRightReply.visibility = View.GONE
-                holder.tvRightMsg.text = text
+                processTextWithLinks(holder.tvRightMsg, text)
                 if (item.cMsg!!.replyMsgId > 0){
                     holder.tvRightSize.visibility = View.GONE
                     if ((item.replyItem?.fileName?:"").isNotEmpty()){
@@ -492,7 +500,7 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.lyRightContent.visibility = View.GONE
 
                 val text = item.cMsg!!.content.data
-                holder.tvLeftMsg.text = text
+                processTextWithLinks(holder.tvLeftMsg, text)
                 if (item.cMsg!!.replyMsgId > 0){
                     holder.tvLeftSize.visibility = View.GONE
                     val fileName = item.replyItem?.fileName?:""
@@ -670,44 +678,36 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var llReplyRight = binding.llReplyRight
         var tvRightReplyOrigin = binding.tvRightReplyOrigin
 
-        //var tvLeftSize = binding.
-        var lyLeftContent = binding.lyLeftContent
-        var lyRightContent = binding.lyRightContent
-
         var tvLeftSize = binding.tvLeftReplySize
         var tvRightSize = binding.tvRightReplySize
 
         var ivLeftReplyImage = binding.ivLeftReplyImage
         var ivRightReplyImage = binding.ivRightReplyImage
 
-        //iv_left_reply_image
+        var lyLeftContent = binding.lyLeftContent
+        var lyRightContent = binding.lyRightContent
 
         init {
+            // 设置文本可点击
+            tvLeftMsg.movementMethod = LinkMovementMethod.getInstance()
+            tvRightMsg.movementMethod = LinkMovementMethod.getInstance()
+            
             // 必须在事件发生前，调用这个方法来监视View的触摸
             val builder: XPopup.Builder = XPopup.Builder(act)
                 .watchView(tvLeftMsg)
             tvLeftMsg.setOnLongClickListener(OnLongClickListener {
                 builder.asAttachList(
-                    //"删除"前端App不需要
                     arrayOf<String>("复制","回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
                                 0 -> {
-                                    //置顶
                                     println("复制")
                                     listener?.onCopy(it.tag as Int)
                                 }
-
                                 1 -> {
-                                    //复制
                                     println("回复")
                                     listener?.onQuote(it.tag as Int)
-                                }
-                                2 -> {
-                                    //删除
-                                    println("删除")
-                                    listener?.onDelete(it.tag as Int)
                                 }
                             }
                         }
@@ -721,26 +721,17 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 .watchView(tvRightMsg)
             tvRightMsg.setOnLongClickListener(OnLongClickListener {
                 builder3.asAttachList(
-                    //"删除"前端App不需要
                     arrayOf<String>("复制","回复"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
                                 0 -> {
-                                    //置顶
                                     println("复制")
                                     listener?.onCopy(it.tag as Int)
                                 }
-
                                 1 -> {
-                                    //复制
                                     println("回复")
                                     listener?.onQuote(it.tag as Int)
-                                }
-                                2 -> {
-                                    //删除
-                                    println("删除")
-                                    listener?.onDelete(it.tag as Int)
                                 }
                             }
                         }
@@ -852,8 +843,6 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var tvLeftFileName =  binding.tvLeftFileName
         var tvLeftFileSize =  binding.tvLeftFileSize
 
-        //var tvSize = binding.tv
-
         var ivSendStatus =  binding.ivSendStatus
 
         var llLeftContent =  binding.llLeftContent
@@ -939,4 +928,14 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         }
     }
 
+    private fun processTextWithLinks(textView: com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView, text: String) {
+        // 设置原始文本
+        textView.text = text
+        
+        // 使用Linkify自动识别链接
+        Linkify.addLinks(textView, Linkify.WEB_URLS)
+        
+        // 设置链接颜色
+        textView.setLinkTextColor(act.resources.getColor(android.R.color.holo_blue_light))
+    }
 }
