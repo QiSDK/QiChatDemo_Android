@@ -337,6 +337,30 @@ class Utils {
         return d.build()
     }
 
+    fun hexToColor(hex: String): Int {
+        // Remove the '#' if it exists
+        val cleanHex = if (hex.startsWith("#")) hex.substring(1) else hex
+
+        // Check for valid length (6 or 8 characters)
+        if (cleanHex.length != 6 && cleanHex.length != 8) {
+            throw IllegalArgumentException("Invalid hex color string: $hex. It must be 6 or 8 characters long (excluding #).")
+        }
+
+        // Parse the hex string to an integer
+        return try {
+            val colorInt = cleanHex.toLong(16).toInt()
+
+            // If it's 6 characters, assume full opacity (alpha = FF)
+            if (cleanHex.length == 6) {
+                colorInt or -0x1000000 // Add alpha FF (0xFF000000)
+            } else {
+                colorInt
+            }
+        } catch (e: NumberFormatException) {
+            throw IllegalArgumentException("Invalid hex color string: $hex. It must contain only hexadecimal characters.", e)
+        }
+    }
+
     suspend fun compressVideo(inputFilePath: String, outputFilePath: String): Int {
         println("FFmpeg 开始压缩")
         return withContext(Dispatchers.IO) {

@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.http.bean.ChatHistory
 
 import com.teneasy.chatuisdk.ui.http.Urls
+import com.teneasyChat.api.common.CMessage
 
 data class ChatHistory (
   val request: Request,
@@ -38,7 +39,8 @@ data class hMessage (
   val blacklistApply: Blacklist,
   val blacklistConfirm: Blacklist,
   val autoReply: AutoReply,
-  val workerChanged: WorkerChanged?
+  val workerChanged: WorkerChanged?,
+  val msgSourceType: CMessage.MsgSourceType
 )
 
 data class Audio (

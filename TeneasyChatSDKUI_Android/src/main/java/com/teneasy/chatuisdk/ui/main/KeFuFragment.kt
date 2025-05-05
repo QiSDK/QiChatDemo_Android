@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.gson.Gson
 import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
@@ -53,6 +54,7 @@ import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.UploadListener
 import com.teneasy.chatuisdk.ui.http.UploadUtil
 import com.teneasy.chatuisdk.ui.http.Urls
+import com.teneasy.chatuisdk.ui.http.bean.TextBody
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -256,7 +258,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 //长按消息，复制文本内容
                 override fun onCopy(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)
-                    val text = messageItem?.cMsg?.content?.data ?: ""
+                    var text = messageItem?.cMsg?.content?.data ?: ""
+                    if (text.contains("\"color\"")) {
+                        val gson = Gson()
+                        try {
+                            val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
+                            text = textBody.content ?: ""
+                        } catch (e: Exception) {
+
+                        }
+                    }
                     Utils().copyText(text, requireContext())
                 }
 
@@ -590,8 +601,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
                    var isLeft = true
-                   if (item.sender == item.chatId){
+                   if (item.sender == item.chatId || item.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER){
                        isLeft = false
+                   }
+                   if (item.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER){
+                       isLeft = true
                    }
 
                    if (item.msgOp == "MSG_OP_DELETE"){
@@ -1113,11 +1127,16 @@ code: 1002 无效的Token
      * 处理接收到的消息
      */
     private fun processReceivedMessage(msg: CMessage.Message) {
+        var left = true;
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER){
+            left = false;
+        }
+
         // 创建消息项
         val messageItem = MessageItem().apply {
             cMsg = msg
             msgId = msg.msgId
-            isLeft = true
+            isLeft = left
         }
 
         // 处理回复消息

@@ -41,7 +41,6 @@ import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
 import java.util.*
-import com.teneasy.chatuisdk.ui.utils.LinkUtils
 import android.text.method.LinkMovementMethod
 import android.content.Intent
 import android.net.Uri
@@ -49,6 +48,10 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ClickableSpan
 import android.text.util.Linkify
+import androidx.compose.ui.graphics.Color
+import androidx.core.text.color
+import com.google.gson.Gson
+import com.teneasy.chatuisdk.ui.http.bean.TextBody
 import java.util.regex.Pattern
 
 interface MessageItemOperateListener {
@@ -449,15 +452,150 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 holder.lyLeftContent.visibility = View.GONE
                 holder.lyRightContent.visibility = View.VISIBLE
+                holder.rlImagecontainer.visibility = View.GONE
 
                 if (item.sendStatus != MessageSendState.发送成功) {
                     holder.ivSendStatus.visibility = View.VISIBLE
                 } else
                     holder.ivSendStatus.visibility = View.GONE
 
-                val text = item.cMsg!!.content.data
-                //holder.llLeftReply.visibility = View.GONE
-                //holder.llRightReply.visibility = View.GONE
+                var text = item.cMsg!!.content.data
+                //val dd = "{\"content\":\"文本\",\"image\":\"图片链接\",\"video\":\"视频链接\",\"color\":\"文本颜色\"}";
+
+                if (text.contains("\"color\"")){
+                    val gson = Gson()
+                    try {
+                        val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
+                        text = textBody.content
+                        println("Content: ${textBody.content}")
+                        println("Image: ${textBody.image}")
+                        println("Video: ${textBody.video}")
+                        println("Color: ${textBody.color}")
+
+                        //holder.tvRightMsg.setTextColor(Color.parseColor(textBody.color))
+                        holder.ivRightImg.visibility = View.VISIBLE
+                        holder.ivRightPlay.visibility = View.GONE
+                        holder.ivSendStatus.visibility = View.GONE
+                        holder.tvRightMsg.setTextColor(Utils().hexToColor(textBody.color?:"#ffffff"))
+
+                        var meidaUrl = textBody.image
+
+                        if ((textBody.video?:"").length > 0) {
+                            meidaUrl = textBody.video
+                            holder.ivRightPlay.visibility = View.VISIBLE
+                        }
+
+                        if ((meidaUrl?:"").isNotEmpty()) {
+                            holder.rlImagecontainer.visibility = View.VISIBLE
+                        }else{
+                            return
+                        }
+
+                        holder.ivRightImg.setOnClickListener {
+                            var tag = holder.tvRightMsg.tag as Int
+                            val myItem = msgList!![tag]
+
+                            if ((textBody.video?:"").isNotEmpty()) {
+                                listener?.onPlayVideo(textBody.video?:"")
+                            }else {
+                                listener?.onPlayImage(textBody.image?:"")
+                            }
+                        }
+
+                        var thumb = meidaUrl
+                        Glide.with(act)
+                            .load(thumb)
+                            .apply(
+                                RequestOptions()
+                                    .placeholder(R.drawable.loading_animation)
+                                    .dontAnimate().skipMemoryCache(true)
+                            )
+                            .listener(object : RequestListener<Drawable?> {
+                                override fun onLoadFailed(
+                                    e: GlideException?,
+                                    model: Any?,
+                                    target: Target<Drawable?>,
+                                    isFirstResource: Boolean
+                                ): Boolean {
+                                    return false
+                                }
+
+                                override fun onResourceReady(
+                                    resource: Drawable,
+                                    model: Any,
+                                    target: Target<Drawable?>?,
+                                    dataSource: DataSource,
+                                    isFirstResource: Boolean
+                                ): Boolean {
+                                    val bitmap = Utils().drawableToBitmap(resource);
+                                    print(bitmap.width)
+                                    if (bitmap.height > bitmap.width) {
+                                        Utils().updateLayoutParams(
+                                            holder.rlImagecontainer,
+                                            Utils().dp2px(106.0f),
+                                            Utils().dp2px(176.0f)
+                                        )
+                                    } else {
+                                        Utils().updateLayoutParams(
+                                            holder.rlImagecontainer,
+                                            Utils().dp2px(176.0f),
+                                            Utils().dp2px(106.0f)
+                                        )
+                                    }
+                                    return false
+                                }
+                            })
+                            .into(holder.ivRightImg)
+
+                        // 必须在事件发生前，调用这个方法来监视View的触摸
+//                        val builder: XPopup.Builder = XPopup.Builder(act)
+//                            .watchView(holder.tvLeftMsg)
+                        holder.tvRightMsg.setOnLongClickListener(OnLongClickListener {
+                            holder.builder3.asAttachList(
+                                arrayOf<String>("复制"), null,
+                                object : OnSelectListener {
+                                    override fun onSelect(position: Int, text: String) {
+                                        when (position) {
+                                            0 -> {
+                                                println("复制")
+                                                listener?.onCopy(it.tag as Int)
+                                            }
+                                        }
+                                    }
+                                })
+                                .show()
+                            false
+                        })
+                    } catch (e: Exception) {
+                        println("Error parsing JSON: ${e.message}")
+                        e.printStackTrace()
+                    }
+                }else{
+                    // 必须在事件发生前，调用这个方法来监视View的触摸
+//                    val builder: XPopup.Builder = XPopup.Builder(act)
+//                        .watchView(holder.tvLeftMsg)
+                    holder.tvRightMsg.setOnLongClickListener(OnLongClickListener {
+                        holder.builder3.asAttachList(
+                            arrayOf<String>("复制","回复"), null,
+                            object : OnSelectListener {
+                                override fun onSelect(position: Int, text: String) {
+                                    when (position) {
+                                        0 -> {
+                                            println("复制")
+                                            listener?.onCopy(it.tag as Int)
+                                        }
+                                        1 -> {
+                                            println("回复")
+                                            listener?.onQuote(it.tag as Int)
+                                        }
+                                    }
+                                }
+                            })
+                            .show()
+                        false
+                    })
+                }
+
                 processTextWithLinks(holder.tvRightMsg, text)
                 if (item.cMsg!!.replyMsgId > 0){
                     holder.tvRightSize.visibility = View.GONE
@@ -498,8 +636,133 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
 
                 holder.lyLeftContent.visibility = View.VISIBLE
                 holder.lyRightContent.visibility = View.GONE
+                holder.rlLeftImagecontainer.visibility = View.GONE
+                var text = item.cMsg!!.content.data
 
-                val text = item.cMsg!!.content.data
+                if (text.contains("\"color\"")){
+                    val gson = Gson()
+                    try {
+                        val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
+                        text = textBody.content
+                        holder.ivLeftImage.visibility = View.VISIBLE
+                        holder.ivLeftPlay.visibility = View.GONE
+                        holder.ivSendStatus.visibility = View.GONE
+                        holder.tvLeftMsg.setTextColor(Utils().hexToColor(textBody.color?:"#ffffff"))
+                        var meidaUrl = textBody.image
+
+                        if ((textBody.video?:"").length > 0) {
+                            meidaUrl = textBody.video
+                            holder.ivLeftPlay.visibility = View.VISIBLE
+                        }
+
+                        if ((meidaUrl?:"").isNotEmpty()) {
+                            holder.rlLeftImagecontainer.visibility = View.VISIBLE
+                            holder.ivLeftImage.setOnClickListener {
+                                var tag = holder.tvLeftMsg.tag as Int
+                                val myItem = msgList!![tag]
+
+                                if ((textBody.video ?: "").isNotEmpty()) {
+                                    listener?.onPlayVideo(textBody.video ?: "")
+                                } else {
+                                    listener?.onPlayImage(textBody.image ?: "")
+                                }
+                            }
+
+                            var thumb = meidaUrl
+                            Glide.with(act)
+                                .load(thumb)
+                                .apply(
+                                    RequestOptions()
+                                        .placeholder(R.drawable.loading_animation)
+                                        .dontAnimate().skipMemoryCache(true)
+                                )
+                                .listener(object : RequestListener<Drawable?> {
+                                    override fun onLoadFailed(
+                                        e: GlideException?,
+                                        model: Any?,
+                                        target: Target<Drawable?>,
+                                        isFirstResource: Boolean
+                                    ): Boolean {
+                                        return false
+                                    }
+
+                                    override fun onResourceReady(
+                                        resource: Drawable,
+                                        model: Any,
+                                        target: Target<Drawable?>?,
+                                        dataSource: DataSource,
+                                        isFirstResource: Boolean
+                                    ): Boolean {
+                                        val bitmap = Utils().drawableToBitmap(resource);
+                                        print(bitmap.width)
+                                        if (bitmap.height > bitmap.width) {
+                                            Utils().updateLayoutParams(
+                                                holder.rlLeftImagecontainer,
+                                                Utils().dp2px(106.0f),
+                                                Utils().dp2px(176.0f)
+                                            )
+                                        } else {
+                                            Utils().updateLayoutParams(
+                                                holder.rlLeftImagecontainer,
+                                                Utils().dp2px(176.0f),
+                                                Utils().dp2px(106.0f)
+                                            )
+                                        }
+                                        return false
+                                    }
+                                })
+                                .into(holder.ivLeftImage)
+                        }
+
+                        // 必须在事件发生前，调用这个方法来监视View的触摸
+//                        val builder: XPopup.Builder = XPopup.Builder(act)
+//                            .watchView(holder.tvLeftMsg)
+                        holder.tvLeftMsg.setOnLongClickListener(OnLongClickListener {
+                            holder.builder.asAttachList(
+                                arrayOf<String>("复制"), null,
+                                object : OnSelectListener {
+                                    override fun onSelect(position: Int, text: String) {
+                                        when (position) {
+                                            0 -> {
+                                                println("复制")
+                                                listener?.onCopy(it.tag as Int)
+                                            }
+                                        }
+                                    }
+                                })
+                                .show()
+                            false
+                        })
+
+                    } catch (e: Exception) {
+                        println("Error parsing JSON: ${e.message}")
+                        e.printStackTrace()
+                    }
+                }else{
+                    // 必须在事件发生前，调用这个方法来监视View的触摸
+//                    val builder: XPopup.Builder = XPopup.Builder(act)
+//                        .watchView(holder.tvLeftMsg)
+                    holder.tvLeftMsg.setOnLongClickListener(OnLongClickListener {
+                        holder.builder.asAttachList(
+                            arrayOf<String>("复制","回复"), null,
+                            object : OnSelectListener {
+                                override fun onSelect(position: Int, text: String) {
+                                    when (position) {
+                                        0 -> {
+                                            println("复制")
+                                            listener?.onCopy(it.tag as Int)
+                                        }
+                                        1 -> {
+                                            println("回复")
+                                            listener?.onQuote(it.tag as Int)
+                                        }
+                                    }
+                                }
+                            })
+                            .show()
+                        false
+                    })
+                }
                 processTextWithLinks(holder.tvLeftMsg, text)
                 if (item.cMsg!!.replyMsgId > 0){
                     holder.tvLeftSize.visibility = View.GONE
@@ -687,58 +950,67 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         var lyLeftContent = binding.lyLeftContent
         var lyRightContent = binding.lyRightContent
 
+        var ivRightImg =  binding.ivRightImage
+        var ivRightPlay = binding.ivRightPlay
+        var rlImagecontainer = binding.rlImagecontainer
+
+        var ivLeftImage =  binding.ivLeftImage
+        var ivLeftPlay = binding.ivPlay
+        var rlLeftImagecontainer = binding.rlLeftImagecontainer
+        val builder: XPopup.Builder = XPopup.Builder(act).watchView(tvLeftMsg)
+        val builder3: XPopup.Builder = XPopup.Builder(act).watchView(tvRightMsg)
         init {
             // 设置文本可点击
             tvLeftMsg.movementMethod = LinkMovementMethod.getInstance()
             tvRightMsg.movementMethod = LinkMovementMethod.getInstance()
             
-            // 必须在事件发生前，调用这个方法来监视View的触摸
-            val builder: XPopup.Builder = XPopup.Builder(act)
-                .watchView(tvLeftMsg)
-            tvLeftMsg.setOnLongClickListener(OnLongClickListener {
-                builder.asAttachList(
-                    arrayOf<String>("复制","回复"), null,
-                    object : OnSelectListener {
-                        override fun onSelect(position: Int, text: String) {
-                            when (position) {
-                                0 -> {
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
-                                }
-                                1 -> {
-                                    println("回复")
-                                    listener?.onQuote(it.tag as Int)
-                                }
-                            }
-                        }
-                    })
-                    .show()
-                false
-            })
+//            // 必须在事件发生前，调用这个方法来监视View的触摸
+//            val builder: XPopup.Builder = XPopup.Builder(act)
+//                .watchView(tvLeftMsg)
+//            tvLeftMsg.setOnLongClickListener(OnLongClickListener {
+//                builder.asAttachList(
+//                    arrayOf<String>("复制","回复"), null,
+//                    object : OnSelectListener {
+//                        override fun onSelect(position: Int, text: String) {
+//                            when (position) {
+//                                0 -> {
+//                                    println("复制")
+//                                    listener?.onCopy(it.tag as Int)
+//                                }
+//                                1 -> {
+//                                    println("回复")
+//                                    listener?.onQuote(it.tag as Int)
+//                                }
+//                            }
+//                        }
+//                    })
+//                    .show()
+//                false
+//            })
 
             // 必须在事件发生前，调用这个方法来监视View的触摸
-            val builder3: XPopup.Builder = XPopup.Builder(act)
-                .watchView(tvRightMsg)
-            tvRightMsg.setOnLongClickListener(OnLongClickListener {
-                builder3.asAttachList(
-                    arrayOf<String>("复制","回复"), null,
-                    object : OnSelectListener {
-                        override fun onSelect(position: Int, text: String) {
-                            when (position) {
-                                0 -> {
-                                    println("复制")
-                                    listener?.onCopy(it.tag as Int)
-                                }
-                                1 -> {
-                                    println("回复")
-                                    listener?.onQuote(it.tag as Int)
-                                }
-                            }
-                        }
-                    })
-                    .show()
-                false
-            })
+//            val builder3: XPopup.Builder = XPopup.Builder(act)
+//                .watchView(tvRightMsg)
+//            tvRightMsg.setOnLongClickListener(OnLongClickListener {
+//                builder3.asAttachList(
+//                    arrayOf<String>("复制","回复"), null,
+//                    object : OnSelectListener {
+//                        override fun onSelect(position: Int, text: String) {
+//                            when (position) {
+//                                0 -> {
+//                                    println("复制")
+//                                    listener?.onCopy(it.tag as Int)
+//                                }
+//                                1 -> {
+//                                    println("回复")
+//                                    listener?.onQuote(it.tag as Int)
+//                                }
+//                            }
+//                        }
+//                    })
+//                    .show()
+//                false
+//            })
         }
     }
 
