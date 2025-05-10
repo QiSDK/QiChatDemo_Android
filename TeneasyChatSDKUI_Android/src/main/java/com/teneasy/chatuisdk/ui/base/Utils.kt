@@ -48,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.beyka.tiffbitmapfactory.TiffBitmapFactory
 import java.io.InputStream
 import java.net.NetworkInterface
 
@@ -541,6 +542,75 @@ class Utils {
             "doc", "docx" -> "application/msword"
             "xls", "xlsx" -> "application/vnd.ms-excel"
             else -> "*/*"
+        }
+    }
+
+    /**
+     * Converts a TIFF image file to a PNG image file.
+     *
+     * @param tiffFilePath Path to the input TIFF file.
+     * @param pngFilePath Path to save the output PNG file.
+     * @return True if conversion was successful, false otherwise.
+     */
+    fun convertTiffToPng(tiffFile: File, pngFilePath: String): Boolean {
+
+        try {
+            // Use TiffBitmapFactory to decode the TIFF file
+            val options = TiffBitmapFactory.Options()
+            options.inJustDecodeBounds =
+                false // Set to true to get dimensions only, false to load bitmap
+            // You can add other options here if needed, e.g., options.inSampleSize
+
+            val bitmap = TiffBitmapFactory.decodeFile(tiffFile, options)
+
+            if (bitmap == null) {
+                println("Error: Failed to decode TIFF file at ${tiffFile.absolutePath} using TiffBitmapFactory")
+                return false
+            }
+
+            val pngFile = File(pngFilePath)
+            val outputStream = FileOutputStream(pngFile)
+            val success = bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+
+            // It's good practice to recycle the bitmap when you're done with it
+            bitmap.recycle()
+
+            if (!success) {
+                println("Error: Failed to compress bitmap to PNG for $pngFilePath")
+                if (pngFile.exists()) {
+                    pngFile.delete()
+                }
+            } else {
+                println("Successfully converted $tiffFile.absolutePath to $pngFilePath")
+            }
+            return success
+        } catch (e: IOException) {
+            println("IOException during TIFF to PNG conversion: ${e.message}")
+            e.printStackTrace()
+            val pngFile = File(pngFilePath)
+            if (pngFile.exists()) {
+                pngFile.delete()
+            }
+            return false
+        } catch (e: UnsatisfiedLinkError) {
+            // This error can occur if the native libraries for TiffBitmapFactory are not loaded correctly.
+            println("UnsatisfiedLinkError: Could not load native TIFF library. Ensure AndroidTiffBitmapFactory is correctly integrated. ${e.message}")
+            e.printStackTrace()
+            val pngFile = File(pngFilePath)
+            if (pngFile.exists()) {
+                pngFile.delete()
+            }
+            return false
+        } catch (e: Exception) {
+            println("Exception during TIFF to PNG conversion: ${e.message}")
+            e.printStackTrace()
+            val pngFile = File(pngFilePath)
+            if (pngFile.exists()) {
+                pngFile.delete()
+            }
+            return false
         }
     }
 }

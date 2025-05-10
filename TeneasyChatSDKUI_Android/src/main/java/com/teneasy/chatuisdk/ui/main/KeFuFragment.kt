@@ -760,15 +760,28 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
     private fun handleImageUpload(file: File) {
         val maxImageSize = 20 * 1024 * 1024 // 20MB
-
         if (file.length() >= maxImageSize) {
             ToastUtils.showToast(requireContext(), "图片限制20M")
             mIProgressLoader?.dismissLoading()
             return
         }
 
-        uploadProgress = 1
-        UploadUtil(this).uploadFile(file)
+        if (file.extension == "tiff"){
+            var tiff = file.absolutePath
+            var png = tiff.replace(".tiff", ".png")
+            var s = Utils().convertTiffToPng(file, png)
+            if (s){
+               val file = File(png)
+                uploadProgress = 1
+                UploadUtil(this).uploadFile(file)
+            }else{
+                ToastUtils.showToast(requireContext(), "处理文件失败")
+                mIProgressLoader?.dismissLoading()
+            }
+        }else{
+            uploadProgress = 1
+            UploadUtil(this).uploadFile(file)
+        }
     }
 
     private fun handleVideoOrFileUpload(file: File, ext: String) {
@@ -900,11 +913,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     // 选择图片
     private fun showSelectPic(resultCallbackListener: OnResultCallbackListener<LocalMedia>) {
         PictureSelector.create(KeFuFragment@this)
-            .openGallery(SelectMimeType.TYPE_ALL)
+            .openGallery(SelectMimeType.ofImage())
             .setImageEngine(GlideEngine.createGlideEngine())
             .setMaxSelectNum(1)
             .isGif(true)
-
             .isDisplayCamera(false)
             .forResult(resultCallbackListener)
     }

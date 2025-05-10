@@ -28,6 +28,7 @@ class Constants {
             "bmp",
             "jpg",
             "jpeg",
+            "jfif",
             "png",
             "gif",
             "webp",

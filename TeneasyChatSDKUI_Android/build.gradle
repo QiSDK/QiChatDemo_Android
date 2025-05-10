@@ -124,6 +124,9 @@ dependencies {
     // image compress library (Not necessary)
     implementation 'io.github.lucksiege:compress:v3.11.2'
     implementation 'com.github.arthenica:ffmpeg-kit:v5.1'
+
+    // ... other dependencies ...
+    implementation 'io.github.beyka:Android-TiffBitmapFactory:0.9.9.1'
 }
 
 afterEvaluate {
