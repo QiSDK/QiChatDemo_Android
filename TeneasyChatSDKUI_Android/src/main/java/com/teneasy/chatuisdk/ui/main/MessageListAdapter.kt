@@ -339,16 +339,16 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 holder.ivRightImg.visibility = View.GONE
                 holder.lySend.visibility = View.GONE
                 holder.civKefuRightImage.visibility = View.GONE
-                holder.ivRightPlay.visibility = View.GONE
+                holder.ivPlay.visibility = View.GONE
 
                 holder.ivLeftImg.visibility = View.VISIBLE
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.uri
 
                 if (item.cMsg!!.video.thumbnailUri.isNotEmpty()) {
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.video.thumbnailUri
+                    holder.ivPlay.visibility = View.VISIBLE
                 } else if (item.cMsg!!.image.uri.isNotEmpty()) {
                     meidaUrl = Constants.baseUrlImage + item.cMsg!!.image.uri
-                    holder.ivRightPlay.visibility = View.GONE
                 }
 
                 holder.ivLeftImg.setOnClickListener {
