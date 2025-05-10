@@ -31,6 +31,7 @@ class Constants {
             "png",
             "gif",
             "webp",
+            "heic",
             "ico",
             "svg"
         )  // 支持的图片格式

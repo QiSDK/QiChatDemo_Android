@@ -903,6 +903,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             .openGallery(SelectMimeType.TYPE_ALL)
             .setImageEngine(GlideEngine.createGlideEngine())
             .setMaxSelectNum(1)
+            .isGif(true)
+
             .isDisplayCamera(false)
             .forResult(resultCallbackListener)
     }
@@ -973,7 +975,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         }else if (fileTypes.contains(ext.lowercase())){
             chatLib?.sendMessage(url.uri, CMessage.MessageFormat.MSG_FILE, Constants.CONSULT_ID, 0, withAutoReplyU, url.fileSize, url.fileName)
         }else{
-            Toast.makeText(requireContext(), "不支持的文件类型", Toast.LENGTH_SHORT).show()
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, "不支持的文件类型", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 

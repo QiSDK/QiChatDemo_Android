@@ -1,11 +1,15 @@
 package com.teneasy.chatuisdk.ui.http
 
 import android.util.Log
+import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teneasy.chatuisdk.FilePath
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.imageTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.uploadProgress
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.videoTypes
 import com.teneasy.chatuisdk.ui.base.Utils
 import okhttp3.Call
 import okhttp3.Callback
@@ -63,6 +67,11 @@ class UploadUtil(lis: UploadListener) {
     fun uploadFile(file: File) {
         val calendar = Calendar.getInstance()
         var mSec = calendar.timeInMillis.toString()
+
+        if (!fileTypes.contains(file.extension) && !imageTypes.contains(file.extension) && !videoTypes.contains(file.extension)){
+            listener?.uploadFailed("不支持的文件类型");
+            return
+        }
 
         listener?.uploadProgress(uploadProgress)
 
