@@ -1,6 +1,8 @@
 package com.teneasy.qldemo
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -40,9 +42,25 @@ class MainFragment : Fragment(){
             this.ivSettings.setOnClickListener {
                 findNavController().navigate(R.id.frg_settings)
             }
+
+            // Set the version name
+            this.tvVersionNumber.text = "Version: ${getAppVersion(requireContext()).first}"
         }
 
         return binding?.root
+    }
+
+    fun getAppVersion(context: Context): Pair<String, Int> {
+        try {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            val versionName = packageInfo.versionName
+            val versionCode = packageInfo.versionCode
+            return Pair(versionName, versionCode)
+        } catch (e: PackageManager.NameNotFoundException) {
+            // Handle the case where the package name is not found (should not happen in a running app)
+            e.printStackTrace()
+            return Pair("Unknown", -1) // Or throw an exception, depending on your needs
+        }
     }
 }
 

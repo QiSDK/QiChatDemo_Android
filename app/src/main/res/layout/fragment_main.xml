@@ -21,6 +21,15 @@
             android:text="联系客服"
             android:layout_marginBottom="200dp" />
 
+        <TextView
+            android:id="@+id/tv_version_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Version: 1.0.0"
+            app:layout_constraintTop_toBottomOf="@id/btn_send"
+            app:layout_constraintStart_toStartOf="@id/btn_send"
+            app:layout_constraintEnd_toEndOf="@id/btn_send"
+            android:layout_marginTop="8dp" />
 
         <ImageView
             android:id="@+id/iv_settings"
