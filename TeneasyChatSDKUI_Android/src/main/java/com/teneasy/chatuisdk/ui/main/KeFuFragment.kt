@@ -768,12 +768,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
         if (file.extension == "tiff"){
             var tiff = file.absolutePath
-            var png = tiff.replace(".tiff", ".png")
-            var s = Utils().convertTiffToPng(file, png)
+            // Create the temporary PNG in the app's cache directory
+            val cacheDir = requireContext().cacheDir
+            val pngCacheFile = File(cacheDir, "${file.nameWithoutExtension}.png")
+            var s = Utils().convertTiffToPng(file, pngCacheFile.absolutePath) // Pass cache path
             if (s){
-               val file = File(png)
+               //val fileToUpload = pngCacheFile // Use the file from the cache for upload
                 uploadProgress = 1
-                UploadUtil(this).uploadFile(file)
+                UploadUtil(this).uploadFile(pngCacheFile)
             }else{
                 ToastUtils.showToast(requireContext(), "处理文件失败")
                 mIProgressLoader?.dismissLoading()
@@ -913,7 +915,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     // 选择图片
     private fun showSelectPic(resultCallbackListener: OnResultCallbackListener<LocalMedia>) {
         PictureSelector.create(KeFuFragment@this)
-            .openGallery(SelectMimeType.ofImage())
+            .openGallery(SelectMimeType.TYPE_ALL)
             .setImageEngine(GlideEngine.createGlideEngine())
             .setMaxSelectNum(1)
             .isGif(true)

@@ -562,7 +562,6 @@ class Utils {
             // You can add other options here if needed, e.g., options.inSampleSize
 
             val bitmap = TiffBitmapFactory.decodeFile(tiffFile, options)
-
             if (bitmap == null) {
                 println("Error: Failed to decode TIFF file at ${tiffFile.absolutePath} using TiffBitmapFactory")
                 return false
