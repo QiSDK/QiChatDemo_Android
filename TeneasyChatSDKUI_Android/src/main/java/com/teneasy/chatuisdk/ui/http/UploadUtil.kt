@@ -72,7 +72,7 @@ class UploadUtil(lis: UploadListener) {
             listener?.uploadFailed("不支持的文件类型");
             return
         }
-
+        uploadProgress = 1
         listener?.uploadProgress(uploadProgress)
 
         Thread(Runnable {

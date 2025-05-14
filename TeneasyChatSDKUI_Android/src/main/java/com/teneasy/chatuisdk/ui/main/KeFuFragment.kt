@@ -515,7 +515,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
                     mIProgressLoader?.updateMessage("正在上传。。。")
                     mIProgressLoader?.showLoading()
-                    uploadProgress = 1
+                    //uploadProgress = 1
 
                     UploadUtil(this).uploadFile(myFile)
                 }
@@ -774,14 +774,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             var s = Utils().convertTiffToPng(file, pngCacheFile.absolutePath) // Pass cache path
             if (s){
                //val fileToUpload = pngCacheFile // Use the file from the cache for upload
-                uploadProgress = 1
+                //uploadProgress = 1
                 UploadUtil(this).uploadFile(pngCacheFile)
             }else{
                 ToastUtils.showToast(requireContext(), "处理文件失败")
                 mIProgressLoader?.dismissLoading()
             }
         }else{
-            uploadProgress = 1
+            //uploadProgress = 1
             UploadUtil(this).uploadFile(file)
         }
     }
@@ -790,7 +790,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         val maxFileSize = 300 * 1024 * 1024 // 300MB
         val compressionThreshold = 30 * 1024 * 1024 // 30MB
 
-        uploadProgress = 1
+        //uploadProgress = 1
 
         //var special = arrayOf("avi","mkv")
         // 如果小于30M就不压缩
