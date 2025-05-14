@@ -3,6 +3,8 @@ package com.teneasy.chatuisdk.ui.base
 import com.google.gson.Gson
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
+import com.teneasy.sdk.UploadListener
+import com.teneasy.sdk.UploadUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
 import java.net.URLEncoder
@@ -21,7 +23,6 @@ const val PARAM_USER_LEVEL = "USER_LEVEL"     // 用户等级
 
 class Constants {
     companion object {
-        // 文件类型集合
         val imageTypes = arrayOf(
             "tif",
             "tiff",
@@ -62,7 +63,7 @@ class Constants {
         var chatId = "0"  // 聊天ID
         var withAutoReplyU: CMessage.WithAutoReply? = null  // 自动回复配置
         var errorReport = ErrorReport(arrayListOf())  // 错误报告
-        var uploadProgress = 0  // 上传进度
+        var uploadProgress = UploadUtil.uploadProgress  // 上传进度
 
         // 消息存储
         var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存

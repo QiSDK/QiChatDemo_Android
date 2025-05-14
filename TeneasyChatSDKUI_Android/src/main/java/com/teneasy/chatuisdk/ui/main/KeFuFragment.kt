@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.gson.Gson
-import com.google.protobuf.Timestamp
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
@@ -38,6 +37,8 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.baseUrlApi
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.domain
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.imageTypes
@@ -46,6 +47,7 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.uploadProgress
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.videoTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
@@ -68,7 +70,6 @@ import com.teneasyChat.gateway.GGateway
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -82,7 +83,8 @@ import kotlin.collections.ArrayList
 /**
  * 客服主界面fragment
  */
-class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
+class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
+    com.teneasy.sdk.UploadListener {
     companion object {
         private const val PICK_FILE_REQUEST_CODE = 1001
     }
@@ -516,8 +518,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                     mIProgressLoader?.updateMessage("正在上传。。。")
                     mIProgressLoader?.showLoading()
                     //uploadProgress = 1
-
-                    UploadUtil(this).uploadFile(myFile)
+                    com.teneasy.sdk.UploadUtil(this@KeFuFragment, baseUrlApi(), xToken).uploadFile(myFile)
+                    //UploadUtil(this).uploadFile(myFile)
                 }
             } else {
                 Log.w(TAG, "File selection cancelled or failed.")
@@ -549,7 +551,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             data?.data?.let { fileUri ->
                 val fileName = Utils().getFileNameFromUri(requireContext().contentResolver, fileUri)
                 var myFile = Utils().uriToFile(requireContext(), fileUri, fileName)
-                UploadUtil(this).uploadFile(myFile)
+                //UploadUtil(this).uploadFile(myFile)
             }
         }
     }
@@ -708,9 +710,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             }
 
             private fun updateUploadProgressIfNeeded() {
-                if (uploadProgress in 1..95 && (uploadProgress < 67 || uploadProgress >= 70)) {
-                    uploadProgress += 3
-                    uploadProgress(uploadProgress)
+                if (com.teneasy.sdk.UploadUtil.uploadProgress in 1..95 && (com.teneasy.sdk.UploadUtil.uploadProgress < 67 || com.teneasy.sdk.UploadUtil.uploadProgress >= 69)) {
+                    com.teneasy.sdk.UploadUtil.uploadProgress += 3
+                    uploadProgress(com.teneasy.sdk.UploadUtil.uploadProgress)
                 }
             }
         }, 6000, 3000) // 这里必须Delay 3s及以上，给初始化SDK足够的时间
@@ -775,14 +777,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
             if (s){
                //val fileToUpload = pngCacheFile // Use the file from the cache for upload
                 //uploadProgress = 1
-                UploadUtil(this).uploadFile(pngCacheFile)
+                //UploadUtil(this).uploadFile(pngCacheFile)
+                com.teneasy.sdk.UploadUtil(this, baseUrlApi(), xToken).uploadFile(pngCacheFile)
             }else{
                 ToastUtils.showToast(requireContext(), "处理文件失败")
                 mIProgressLoader?.dismissLoading()
             }
         }else{
             //uploadProgress = 1
-            UploadUtil(this).uploadFile(file)
+            //UploadUtil(this).uploadFile(file)
+            com.teneasy.sdk.UploadUtil(this, baseUrlApi(), xToken).uploadFile(file)
         }
     }
 
@@ -795,7 +799,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         //var special = arrayOf("avi","mkv")
         // 如果小于30M就不压缩
         if (file.length() <= compressionThreshold) {
-            UploadUtil(this).uploadFile(file)
+            //UploadUtil(this).uploadFile(file)
+            com.teneasy.sdk.UploadUtil(this@KeFuFragment, baseUrlApi(), xToken).uploadFile(file)
             return
         }
 
@@ -821,15 +826,17 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
                             val fileToUpload = if (newFile.length() > 0) newFile else file
                             mIProgressLoader?.updateMessage("开始上传...")
-                            uploadProgress = 70
-                            UploadUtil(this@KeFuFragment).uploadFile(fileToUpload)
+                           com.teneasy.sdk.UploadUtil.uploadProgress = 65
+                            //UploadUtil(this@KeFuFragment).uploadFile(fileToUpload)
+                            com.teneasy.sdk.UploadUtil(this@KeFuFragment, baseUrlApi(), xToken).uploadFile(file)
                             Log.i(TAG, "上传文件大小: ${fileToUpload.length()}")
                         }
 
                         // 压缩失败但文件大小可接受
                         file.length() < maxFileSize -> {
                             Log.i(TAG, "压缩失败，使用原文件上传: ${file.length()}")
-                            UploadUtil(this@KeFuFragment).uploadFile(file)
+                            //UploadUtil(this@KeFuFragment).uploadFile(file)
+                            com.teneasy.sdk.UploadUtil(this@KeFuFragment, baseUrlApi(), xToken).uploadFile(file)
                         }
 
                         // 压缩失败且文件过大
@@ -843,7 +850,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
                 Log.e(TAG, "压缩文件异常: ${e.message}")
                 withContext(Dispatchers.Main) {
                     if (file.length() < maxFileSize) {
-                        UploadUtil(this@KeFuFragment).uploadFile(file)
+                        //UploadUtil(this@KeFuFragment).uploadFile(file)
+                        com.teneasy.sdk.UploadUtil(this@KeFuFragment, baseUrlApi(), xToken).uploadFile(file)
                     } else {
                         ToastUtils.showToast(requireContext(), "处理文件失败")
                         mIProgressLoader?.dismissLoading()
@@ -980,7 +988,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
     /**
      * 根据传递的图片地址，发送图片消息。该方法会发送socket消息
      */
-    fun sendImgMsg(url: Urls) {
+    fun sendImgMsg(url: com.teneasy.sdk.Urls) {
         if(chatLib == null){
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
@@ -1010,7 +1018,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
         lastActiveDateTime = Date()
     }
 
-    fun sendVideoMsg(urls: Urls) {
+    fun sendVideoMsg(urls: com.teneasy.sdk.Urls) {
         if(chatLib == null){
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
@@ -1342,8 +1350,29 @@ code: 1002 无效的Token
         return cMsg.build()
     }
 
-    override fun uploadSuccess(urls: Urls, isVideo: Boolean) {
-        uploadProgress = 0
+//    override fun uploadSuccess(urls: Urls, isVideo: Boolean) {
+//        uploadProgress = 0
+//        if (isVideo) {
+//            sendVideoMsg(urls)//Constants.baseUrlImage +
+//        } else {
+//            // 发送图片或文件
+//            sendImgMsg(urls)
+//        }
+//        runOnUiThread {
+//            mIProgressLoader?.updateMessage("")
+//            mIProgressLoader?.dismissLoading()
+//        }
+//    }
+
+    override fun uploadProgress(progress: Int) {
+        Log.i(TAG, "上传中 " + progress.toString() + "%")
+        runOnUiThread {
+         mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
+        }
+    }
+
+    override fun uploadSuccess(urls: com.teneasy.sdk.Urls, isVideo: Boolean) {
+        com.teneasy.sdk.UploadUtil.uploadProgress = 0
         if (isVideo) {
             sendVideoMsg(urls)//Constants.baseUrlImage +
         } else {
@@ -1353,13 +1382,6 @@ code: 1002 无效的Token
         runOnUiThread {
             mIProgressLoader?.updateMessage("")
             mIProgressLoader?.dismissLoading()
-        }
-    }
-
-    override fun uploadProgress(progress: Int) {
-        Log.i(TAG, "上传中 " + progress.toString() + "%")
-        runOnUiThread {
-         mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
         }
     }
 

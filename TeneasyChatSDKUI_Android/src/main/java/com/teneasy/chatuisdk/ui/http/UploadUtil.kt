@@ -35,35 +35,11 @@ interface UploadListener {
 
 class UploadUtil(lis: UploadListener) {
     private var listener: UploadListener? = null
-    /*
-   ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".jfif", ".heic": // 图片
-   ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm": // 视频
-   ".docx", ".doc", ".pdf", ".xls", ".xlsx", ".csv": // 文件
-   */
-
     private var TAG = "UploadUtil"
     init {
         listener = lis
     }
 
-    /**
-     * 上传图片。上传成功后，会直接调用socket进行消息发送。
-     *  @param filePath
-     *  // 文件类型类型 0 ～ 4
-     * enum AssetKind {
-     *   ASSET_KIND_NONE = 0;
-     *   // 商户公共文件
-     *   ASSET_KIND_PUBLIC = 1;
-     *   // 商户私有文件
-     *   ASSET_KIND_PRIVATE = 2;
-     *   // 头像
-     *   ASSET_KIND_AVATAR = 3;
-     *   // 会话私有文件
-     *   ASSET_KIND_SESSION = 4;
-     * }
-     */
-    //Date().time.toString() + "." + file.extension
-    //这个函数可以上传图片和视频
     fun uploadFile(file: File) {
         val calendar = Calendar.getInstance()
         var mSec = calendar.timeInMillis.toString()
