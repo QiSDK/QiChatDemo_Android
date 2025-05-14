@@ -792,6 +792,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
         uploadProgress = 1
 
+        //var special = arrayOf("avi","mkv")
         // 如果小于30M就不压缩
         if (file.length() <= compressionThreshold) {
             UploadUtil(this).uploadFile(file)
@@ -914,6 +915,13 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate, UploadListener {
 
     // 选择图片
     private fun showSelectPic(resultCallbackListener: OnResultCallbackListener<LocalMedia>) {
+
+        /*
+         .openGallery(PictureMimeType.ofVideo()) // or .ofAll() to support both images/videos
+    .setQueryMimeType(PictureMimeType.ofAll()) // optional: to allow multiple formats
+    .setCustomMimeType(new ArrayList<>(Arrays.asList("video/mp4", "video/webm"))) // add webm
+
+         */
         PictureSelector.create(KeFuFragment@this)
             .openGallery(SelectMimeType.TYPE_ALL)
             .setImageEngine(GlideEngine.createGlideEngine())

@@ -24,6 +24,8 @@ dependencyResolutionManagement {
 rootProject.name = "QiChatDemo"
 include ':app'
 include ':TeneasyChatSDKUI_Android'
+include ':ffmpeg-kit-android-lib'
+
 
 //includeBuild('../QiChatSDK_Android') {
 //    dependencySubstitution {
@@ -31,3 +33,4 @@ include ':TeneasyChatSDKUI_Android'
 //    }
 //}
 
+include ':ffmpeg-kit-android-lib'

@@ -72,6 +72,7 @@ dependencies {
     implementation 'androidx.emoji2:emoji2-views:1.4.0'
     //implementation libs.prdownloader
     implementation libs.androidx.media3.exoplayer.hls
+    implementation project(':ffmpeg-kit-android-lib')
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
@@ -123,7 +124,9 @@ dependencies {
 
     // image compress library (Not necessary)
     implementation 'io.github.lucksiege:compress:v3.11.2'
-    implementation 'com.github.arthenica:ffmpeg-kit:v5.1'
+    //implementation 'com.arthenica.ffmpegkit:ffmpeg-kit-https-gpl:v5.1' // Corrected group ID
+// https://mvnrepository.com/artifact/com.arthenica/ffmpeg-kit-full
+    //implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
 
     // ... other dependencies ...
     implementation 'io.github.beyka:Android-TiffBitmapFactory:0.9.9.1'
