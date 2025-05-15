@@ -53,9 +53,6 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
-import com.teneasy.chatuisdk.ui.http.UploadListener
-import com.teneasy.chatuisdk.ui.http.UploadUtil
-import com.teneasy.chatuisdk.ui.http.Urls
 import com.teneasy.chatuisdk.ui.http.bean.TextBody
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
