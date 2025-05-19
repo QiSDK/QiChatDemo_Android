@@ -8,3 +8,9 @@ class TextBody {
     @SerializedName("video"   ) var video   : String? = null
     @SerializedName("color"   ) var color   : String? = null
 }
+
+
+ class TextImages {
+    val message: String = ""
+    val imgs: List<String> = listOf()
+}

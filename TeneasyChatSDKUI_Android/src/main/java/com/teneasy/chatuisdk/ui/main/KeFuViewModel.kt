@@ -77,6 +77,8 @@ class KeFuViewModel : BaseViewModel() {
             newItem.cMsg?.video != null && newItem.cMsg!!.video.uri.isNotEmpty() -> CellType.TYPE_VIDEO
             newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty() -> CellType.TYPE_Image
             newItem.cMsg?.file != null && newItem.cMsg!!.file.uri.isNotEmpty() -> CellType.TYPE_File
+            //说明文本消息里面包含有图片的链接
+            newItem.cMsg?.content?.data != null && (newItem.cMsg?.content?.data ?:"").contains("/public/") -> CellType.TYPE_Text_Images
             else -> {
                 // 处理编辑消息的情况
                 if (newItem.cMsg?.msgOp == CMessage.MessageOperate.MSG_OP_EDIT) {
@@ -243,6 +245,9 @@ class KeFuViewModel : BaseViewModel() {
             } else if (history.workerChanged != null) {
                 contentBuilder.data = history.workerChanged.greeting
                 chatModel.cellType = CellType.TYPE_Tip
+            } else if ((history.content?.data ?:"").contains("/public/")) {
+                //说明文本消息里面包含有图片的链接
+                chatModel.cellType = CellType.TYPE_Text_Images
             } else {
                 contentBuilder.data = history.content?.data ?: "历史消息"
             }

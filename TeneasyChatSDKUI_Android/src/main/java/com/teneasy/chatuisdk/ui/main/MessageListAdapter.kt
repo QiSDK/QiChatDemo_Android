@@ -4,7 +4,8 @@ package com.teneasy.chatuisdk.ui.main;
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.util.Log
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -12,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.dash.manifest.BaseUrl
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -22,12 +23,14 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
+import com.google.gson.Gson
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.databinding.ItemFileMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemLastLineBinding
 import com.teneasy.chatuisdk.databinding.ItemQaListBinding
+import com.teneasy.chatuisdk.databinding.ItemTextImagesMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTextMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.databinding.ItemVideoImageMessageBinding
@@ -36,23 +39,13 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.QA
+import com.teneasy.chatuisdk.ui.http.bean.TextBody
+import com.teneasy.chatuisdk.ui.http.bean.TextImages
 import com.teneasy.sdk.ui.CellType
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasy.sdk.ui.MessageSendState
 import com.teneasyChat.api.common.CMessage
-import java.util.*
-import android.text.method.LinkMovementMethod
-import android.content.Intent
-import android.net.Uri
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ClickableSpan
-import android.text.util.Linkify
-import androidx.compose.ui.graphics.Color
-import androidx.core.text.color
-import com.google.gson.Gson
-import com.teneasy.chatuisdk.ui.http.bean.TextBody
-import java.util.regex.Pattern
+
 
 interface MessageItemOperateListener {
     fun onDelete(position: Int)
@@ -115,12 +108,18 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 parent,
                 false)
             return ItemLastLineViewHolder(binding)
-        }else  if (viewType == CellType.TYPE_File.value) {
+        }else if (viewType == CellType.TYPE_File.value) {
             val binding = ItemFileMessageBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false)
             return ItemFileViewHolder(binding)
+        }else if (viewType == CellType.TYPE_Text_Images.value) {
+            val binding = ItemTextImagesMessageBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false)
+            return TextImagesViewHolder(binding)
         }else {
 
             val binding = ItemTextMessageBinding.inflate(
@@ -422,6 +421,24 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .into(holder.ivKefuImage)
             }
+        }
+        else if (holder is TextImagesViewHolder) {
+            val item = msgList!![position]
+            var textImages = item.cMsg?.content?.data?: ""
+            textImages = "{\"message\":\"您要看什么图片，不会是瑟瑟的图吧！这我不会发给你的。\",\"imgs\":[\"/public/tenant_298/20250517/Images/9e3b8aa1-f612-4fb2-b6a4-66cf9e25341c/小鱼儿和花无缺.jpeg\",\"/public/tenant_298/20250517/Images/c4ceb97d-d0cd-4c6f-8ce4-a2c11c784e40/客服1.jpg\",\"/public/tenant_298/20250517/Images/615c605d-e9fd-49b3-9fd2-3d8f005dfd07/客服2.jpeg\",\"/public/tenant_298/20250517/Images/4597dfae-57c2-4289-a8da-d89dfa5dd7fe/客服3.jpeg\",\"/public/tenant_298/20250517/Images/098871a8-75f2-48af-a1e6-ea85cbcb720b/客服4.jpeg\",\"/public/tenant_298/20250517/Images/e5e6508b-f3d5-4b31-afc5-100505ab207e/客服5.jpeg\",\"/public/tenant_298/20250517/Images/452b2b36-ad7f-4ed6-99ce-b0ea052292d9/客服6.jpeg\",\"/public/tenant_298/20250517/Images/f47ca62d-1a6a-4cc4-8b30-33e6998b2731/老板1.png\",\"/public/tenant_298/20250517/Images/7ffc3d11-49d0-4ed6-ae12-239363f1d559/老板2.jpeg\"]}"
+            val gson = Gson()
+            try {
+                val textBody: TextImages = gson.fromJson(textImages, TextImages::class.java)
+                val adapter = ImageAdapter(textBody.imgs)
+                holder.rvList.adapter = adapter
+                val layoutManager = GridLayoutManager(act, 2)
+                holder.rvList.layoutManager = layoutManager
+                holder.tvMsg.text = textBody.message
+            }catch (ex:Exception){
+                print(ex)
+            }
+            val localTime = Utils().timestampToDate(System.currentTimeMillis() + 700)
+            holder.tvLeftTime.text = localTime
         }
         else if (holder is TipMsgViewHolder) {
             val item = msgList!![position]
@@ -960,57 +977,8 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         val builder: XPopup.Builder = XPopup.Builder(act).watchView(tvLeftMsg)
         val builder3: XPopup.Builder = XPopup.Builder(act).watchView(tvRightMsg)
         init {
-            // 设置文本可点击
             tvLeftMsg.movementMethod = LinkMovementMethod.getInstance()
             tvRightMsg.movementMethod = LinkMovementMethod.getInstance()
-            
-//            // 必须在事件发生前，调用这个方法来监视View的触摸
-//            val builder: XPopup.Builder = XPopup.Builder(act)
-//                .watchView(tvLeftMsg)
-//            tvLeftMsg.setOnLongClickListener(OnLongClickListener {
-//                builder.asAttachList(
-//                    arrayOf<String>("复制","回复"), null,
-//                    object : OnSelectListener {
-//                        override fun onSelect(position: Int, text: String) {
-//                            when (position) {
-//                                0 -> {
-//                                    println("复制")
-//                                    listener?.onCopy(it.tag as Int)
-//                                }
-//                                1 -> {
-//                                    println("回复")
-//                                    listener?.onQuote(it.tag as Int)
-//                                }
-//                            }
-//                        }
-//                    })
-//                    .show()
-//                false
-//            })
-
-            // 必须在事件发生前，调用这个方法来监视View的触摸
-//            val builder3: XPopup.Builder = XPopup.Builder(act)
-//                .watchView(tvRightMsg)
-//            tvRightMsg.setOnLongClickListener(OnLongClickListener {
-//                builder3.asAttachList(
-//                    arrayOf<String>("复制","回复"), null,
-//                    object : OnSelectListener {
-//                        override fun onSelect(position: Int, text: String) {
-//                            when (position) {
-//                                0 -> {
-//                                    println("复制")
-//                                    listener?.onCopy(it.tag as Int)
-//                                }
-//                                1 -> {
-//                                    println("回复")
-//                                    listener?.onQuote(it.tag as Int)
-//                                }
-//                            }
-//                        }
-//                    })
-//                    .show()
-//                false
-//            })
         }
     }
 
@@ -1174,6 +1142,47 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
             })
         }
     }
+
+    inner class TextImagesViewHolder(binding: ItemTextImagesMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvLeftTime = binding.tvLeftTime
+        var civKefuImage = binding.civKefuImage
+        var tvRightTime =  binding.tvRightTime
+        var civRightImage = binding.civRightImage
+
+        var tvMsg =  binding.tvMsg
+        var rvList = binding.rvList
+
+        var llTextImages = binding.llTextImages
+
+        init {
+
+            val builder2: XPopup.Builder = XPopup.Builder(act)
+                .watchView(llTextImages)
+            llTextImages.setOnLongClickListener(OnLongClickListener {
+                builder2.asAttachList(
+                    arrayOf<String>("回复", "下载"), null,
+                    object : OnSelectListener {
+                        override fun onSelect(position: Int, text: String) {
+                            when (position) {
+                                0 -> {
+                                    println("回复")
+                                    listener?.onQuote(it.tag as Int)
+                                }
+
+                                1 -> {
+                                    //删除
+                                    println("下载")
+                                    listener?.onDownload(it.tag as Int)
+                                }
+                            }
+                        }
+                    })
+                    .show()
+                false
+            })
+        }
+    }
+
 
 
     fun showBigImage(imageView: ImageView, url: String){
