@@ -23,7 +23,12 @@ class ImageAdapter(private val imageUrls: List<String>) :
         holder.bind(imageUrl)
     }
 
-    override fun getItemCount(): Int = imageUrls.size
+    //override fun getItemCount(): Int = imageUrls.size
+
+    override fun getItemCount(): Int{
+        return 9
+        //return imageUrls.size
+    }
 
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.iv_image)

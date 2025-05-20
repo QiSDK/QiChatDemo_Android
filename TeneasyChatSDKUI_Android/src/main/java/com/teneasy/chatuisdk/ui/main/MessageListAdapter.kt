@@ -24,6 +24,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.google.gson.Gson
+import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.R
@@ -432,9 +433,13 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
                 val adapter = ImageAdapter(textBody.imgs)
                 holder.rvList.adapter = adapter
                 val layoutManager = GridLayoutManager(act, 2)
+                layoutManager.orientation = LinearLayoutManager.HORIZONTAL
+                //val layoutManager = LinearLayoutManager(act)
                 holder.rvList.layoutManager = layoutManager
                 holder.tvMsg.text = textBody.message
+                //adapter.notifyDataSetChanged()
             }catch (ex:Exception){
+                ToastUtils.showToast(act, ex.message)
                 print(ex)
             }
             val localTime = Utils().timestampToDate(System.currentTimeMillis() + 700)

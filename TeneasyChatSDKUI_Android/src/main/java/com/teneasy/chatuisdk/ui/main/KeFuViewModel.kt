@@ -246,6 +246,7 @@ class KeFuViewModel : BaseViewModel() {
                 contentBuilder.data = history.workerChanged.greeting
                 chatModel.cellType = CellType.TYPE_Tip
             } else if ((history.content?.data ?:"").contains("/public/")) {
+                contentBuilder.data = history.content?.data ?: ""
                 //说明文本消息里面包含有图片的链接
                 chatModel.cellType = CellType.TYPE_Text_Images
             } else {
