@@ -206,14 +206,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         }
     }
 
-    /* 初始化sdk的时候，如果需要传更多参数，在参数的最后一个，可以使用自定义参数
-            var custom = Custom()
-        custom.username = "xiaoming"
-        val cust = Gson().toJson(custom)
-         val ENCODED_cust = URLEncoder.encode(cust, "utf-8")
-
-     */
-
     override fun onResume() {
         super.onResume()
         updateWorkerNameIfAvailable()
@@ -244,7 +236,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
             this.setVariable(BR.vm, viewModel)
 
             // 初始化聊天消息列表
-            msgAdapter = MessageListAdapter(requireContext(), object : MessageItemOperateListener {
+            msgAdapter = MessageListAdapter(requireActivity(), object : MessageItemOperateListener {
                 //长按消息，删除消息的功能，按实际需求，可能不需要
                 override fun onDelete(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)

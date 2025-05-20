@@ -2,6 +2,7 @@ package com.teneasy.chatuisdk.ui.main;
 
 //import com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
@@ -65,9 +66,9 @@ data class QADisplayedEvent(val tag: Int)
 /**
  * 聊天界面列表adapter
  */
-class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var msgList: ArrayList<MessageItem>? = null
-    val act: Context = myContext
+    val act: Activity = myContext
     private var listener: MessageItemOperateListener? = listener
     private var autoReplyItem: AutoReplyItem? = null
 //    fun getList(): ArrayList<MessageItem>? {
@@ -426,18 +427,22 @@ class MessageListAdapter (myContext: Context,  listener: MessageItemOperateListe
         else if (holder is TextImagesViewHolder) {
             val item = msgList!![position]
             var textImages = item.cMsg?.content?.data?: ""
-            textImages = "{\"message\":\"您要看什么图片，不会是瑟瑟的图吧！这我不会发给你的。\",\"imgs\":[\"/public/tenant_298/20250517/Images/9e3b8aa1-f612-4fb2-b6a4-66cf9e25341c/小鱼儿和花无缺.jpeg\",\"/public/tenant_298/20250517/Images/c4ceb97d-d0cd-4c6f-8ce4-a2c11c784e40/客服1.jpg\",\"/public/tenant_298/20250517/Images/615c605d-e9fd-49b3-9fd2-3d8f005dfd07/客服2.jpeg\",\"/public/tenant_298/20250517/Images/4597dfae-57c2-4289-a8da-d89dfa5dd7fe/客服3.jpeg\",\"/public/tenant_298/20250517/Images/098871a8-75f2-48af-a1e6-ea85cbcb720b/客服4.jpeg\",\"/public/tenant_298/20250517/Images/e5e6508b-f3d5-4b31-afc5-100505ab207e/客服5.jpeg\",\"/public/tenant_298/20250517/Images/452b2b36-ad7f-4ed6-99ce-b0ea052292d9/客服6.jpeg\",\"/public/tenant_298/20250517/Images/f47ca62d-1a6a-4cc4-8b30-33e6998b2731/老板1.png\",\"/public/tenant_298/20250517/Images/7ffc3d11-49d0-4ed6-ae12-239363f1d559/老板2.jpeg\"]}"
+            //textImages = "{\"message\":\"您要看什么图片，不会是瑟瑟的图吧！这我不会发给你的。\",\"imgs\":[\"/public/tenant_298/20250517/Images/9e3b8aa1-f612-4fb2-b6a4-66cf9e25341c/小鱼儿和花无缺.jpeg\",\"/public/tenant_298/20250517/Images/c4ceb97d-d0cd-4c6f-8ce4-a2c11c784e40/客服1.jpg\",\"/public/tenant_298/20250517/Images/615c605d-e9fd-49b3-9fd2-3d8f005dfd07/客服2.jpeg\",\"/public/tenant_298/20250517/Images/4597dfae-57c2-4289-a8da-d89dfa5dd7fe/客服3.jpeg\",\"/public/tenant_298/20250517/Images/098871a8-75f2-48af-a1e6-ea85cbcb720b/客服4.jpeg\",\"/public/tenant_298/20250517/Images/e5e6508b-f3d5-4b31-afc5-100505ab207e/客服5.jpeg\",\"/public/tenant_298/20250517/Images/452b2b36-ad7f-4ed6-99ce-b0ea052292d9/客服6.jpeg\",\"/public/tenant_298/20250517/Images/f47ca62d-1a6a-4cc4-8b30-33e6998b2731/老板1.png\",\"/public/tenant_298/20250517/Images/7ffc3d11-49d0-4ed6-ae12-239363f1d559/老板2.jpeg\"]}"
             val gson = Gson()
             try {
                 val textBody: TextImages = gson.fromJson(textImages, TextImages::class.java)
-                val adapter = ImageAdapter(textBody.imgs)
+                val adapter = ImageAdapter(textBody.imgs, act)
                 holder.rvList.adapter = adapter
                 val layoutManager = GridLayoutManager(act, 2)
                 layoutManager.orientation = LinearLayoutManager.HORIZONTAL
-                //val layoutManager = LinearLayoutManager(act)
                 holder.rvList.layoutManager = layoutManager
                 holder.tvMsg.text = textBody.message
-                //adapter.notifyDataSetChanged()
+                val url = Constants.baseUrlImage + Constants.workerAvatar
+                Glide.with(act).load(url).dontAnimate()
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .into(holder.civKefuImage)
+
             }catch (ex:Exception){
                 ToastUtils.showToast(act, ex.message)
                 print(ex)
