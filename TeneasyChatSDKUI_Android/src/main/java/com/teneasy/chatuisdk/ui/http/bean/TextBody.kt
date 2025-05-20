@@ -9,7 +9,6 @@ class TextBody {
     @SerializedName("color"   ) var color   : String? = null
 }
 
-
  class TextImages {
     val message: String = ""
     val imgs: List<String> = listOf()
