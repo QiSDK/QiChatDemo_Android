@@ -54,6 +54,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.TextBody
+import com.teneasy.chatuisdk.ui.http.bean.TextImages
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
@@ -258,6 +259,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                         } catch (e: Exception) {
 
                         }
+                    }else if (text.contains("\"imgs\"")) {
+                        val gson = Gson()
+                        try {
+                            val textBody: TextImages = gson.fromJson(text, TextImages::class.java)
+                            text = textBody.message
+                        } catch (e: Exception) {
+
+                        }
                     }
                     Utils().copyText(text, requireContext())
                 }
@@ -308,6 +317,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                     } else {
                         var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data ?: " "
                         txt = txt.split("回复：")[0]
+
+                        if (txt.contains("\"imgs\"")) {
+                            val gson = Gson()
+                            try {
+                                val textBody: TextImages = gson.fromJson(txt, TextImages::class.java)
+                                txt = textBody.message
+                            } catch (e: Exception) {
+
+                            }
+                        }
                         showQuotedMsg("回复：" + txt)
                     }
                 }
@@ -1309,7 +1328,17 @@ code: 1002 无效的Token
         var replyItem = ReplyMessageItem()
         if (oriMsg != null){
             if (oriMsg.msgFmt.toString() == "MSG_TEXT"){
-                replyItem.content = oriMsg.content?.data?:""
+                var text = oriMsg.content?.data?:""
+                if (text.contains("\"imgs\"")) {
+                    val gson = Gson()
+                    try {
+                        val textBody: TextImages = gson.fromJson(text, TextImages::class.java)
+                        text = textBody.message
+                    } catch (e: Exception) {
+
+                    }
+                }
+                replyItem.content = text
             }
             else if (oriMsg.msgFmt.toString() == "MSG_IMG"){
                 replyItem.fileName = oriMsg.image?.uri?:""

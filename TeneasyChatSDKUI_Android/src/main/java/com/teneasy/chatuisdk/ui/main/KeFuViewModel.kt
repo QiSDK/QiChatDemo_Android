@@ -21,6 +21,7 @@ import com.teneasy.chatuisdk.ui.http.bean.AutoReplyItem
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.hMessage
 import com.teneasy.chatuisdk.ui.http.bean.ReplyList
+import com.teneasy.chatuisdk.ui.http.bean.TextImages
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.ui.CellType
@@ -523,7 +524,17 @@ class KeFuViewModel : BaseViewModel() {
         var replyItem = ReplyMessageItem()
         if (oriMsg != null){
             if (oriMsg.msgFmt == "MSG_TEXT"){
-                replyItem.content = oriMsg.content?.data?:""
+                var text = oriMsg.content?.data?:""
+                if (text.contains("\"imgs\"")) {
+                    val gson = Gson()
+                    try {
+                        val textBody: TextImages = gson.fromJson(text, TextImages::class.java)
+                        text = textBody.message
+                    } catch (e: Exception) {
+
+                    }
+                }
+                replyItem.content = text
             }else if (oriMsg.msgFmt == "MSG_IMG"){
                 replyItem.fileName = oriMsg.image?.uri?:""
             }else if (oriMsg.msgFmt == "MSG_VIDEO"){

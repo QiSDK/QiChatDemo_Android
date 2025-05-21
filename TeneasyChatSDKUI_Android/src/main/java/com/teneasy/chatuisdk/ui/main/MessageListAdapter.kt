@@ -430,8 +430,14 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
             //textImages = "{\"message\":\"您要看什么图片，不会是瑟瑟的图吧！这我不会发给你的。\",\"imgs\":[\"/public/tenant_298/20250517/Images/9e3b8aa1-f612-4fb2-b6a4-66cf9e25341c/小鱼儿和花无缺.jpeg\",\"/public/tenant_298/20250517/Images/c4ceb97d-d0cd-4c6f-8ce4-a2c11c784e40/客服1.jpg\",\"/public/tenant_298/20250517/Images/615c605d-e9fd-49b3-9fd2-3d8f005dfd07/客服2.jpeg\",\"/public/tenant_298/20250517/Images/4597dfae-57c2-4289-a8da-d89dfa5dd7fe/客服3.jpeg\",\"/public/tenant_298/20250517/Images/098871a8-75f2-48af-a1e6-ea85cbcb720b/客服4.jpeg\",\"/public/tenant_298/20250517/Images/e5e6508b-f3d5-4b31-afc5-100505ab207e/客服5.jpeg\",\"/public/tenant_298/20250517/Images/452b2b36-ad7f-4ed6-99ce-b0ea052292d9/客服6.jpeg\",\"/public/tenant_298/20250517/Images/f47ca62d-1a6a-4cc4-8b30-33e6998b2731/老板1.png\",\"/public/tenant_298/20250517/Images/7ffc3d11-49d0-4ed6-ae12-239363f1d559/老板2.jpeg\"]}"
             val gson = Gson()
             try {
+                holder.llTextImages.tag = position
                 val textBody: TextImages = gson.fromJson(textImages, TextImages::class.java)
-                val adapter = ImageAdapter(textBody.imgs, act)
+                val adapter = ImageAdapter(textBody.imgs, act, object : ImageOnListener {
+                    override fun onQuote(position: Int) {
+                        var pos = holder.llTextImages.tag?:0
+                        listener?.onQuote(pos as Int)
+                    }
+                })
                 holder.rvList.adapter = adapter
                 val layoutManager = GridLayoutManager(act, 2)
                 layoutManager.orientation = LinearLayoutManager.HORIZONTAL
@@ -1170,20 +1176,17 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 .watchView(llTextImages)
             llTextImages.setOnLongClickListener(OnLongClickListener {
                 builder2.asAttachList(
-                    arrayOf<String>("回复", "下载"), null,
+                    arrayOf<String>("回复", "复制"), null,
                     object : OnSelectListener {
                         override fun onSelect(position: Int, text: String) {
                             when (position) {
                                 0 -> {
                                     println("回复")
                                     listener?.onQuote(it.tag as Int)
-                                }
-
-                                1 -> {
-                                    //删除
-                                    println("下载")
-                                    listener?.onDownload(it.tag as Int)
-                                }
+                                }  1 -> {
+                                println("复制")
+                                listener?.onCopy(it.tag as Int)
+                            }
                             }
                         }
                     })
