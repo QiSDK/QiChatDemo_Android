@@ -607,7 +607,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         viewModel.mHistoryHMessage.observe(viewLifecycleOwner){
            it?.run {
                //BuildHistory
-               Constants.chatId = this[0].chatId
+               if (!this.isEmpty()) {
+                   Constants.chatId = this[0].chatId
+               }
                var historyList = ArrayList<MessageItem>()
                for (item in this.reversed()) {
                    // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
