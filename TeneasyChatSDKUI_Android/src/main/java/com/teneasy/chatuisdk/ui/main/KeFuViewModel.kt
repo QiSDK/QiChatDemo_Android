@@ -246,7 +246,7 @@ class KeFuViewModel : BaseViewModel() {
             } else if (history.workerChanged != null) {
                 contentBuilder.data = history.workerChanged.greeting
                 chatModel.cellType = CellType.TYPE_Tip
-            } else if ((history.content?.data ?:"").contains("\"imgs\"")) {
+            } else if (history.msgSourceType == CMessage.MsgSourceType.MST_AI) {
                 contentBuilder.data = history.content?.data ?: ""
                 //说明文本消息里面包含有图片的链接
                 chatModel.cellType = CellType.TYPE_Text_Images
@@ -525,7 +525,7 @@ class KeFuViewModel : BaseViewModel() {
         if (oriMsg != null){
             if (oriMsg.msgFmt == "MSG_TEXT"){
                 var text = oriMsg.content?.data?:""
-                if (text.contains("\"imgs\"")) {
+                if (oriMsg.msgSourceType == CMessage.MsgSourceType.MST_AI) {
                     val gson = Gson()
                     try {
                         val textBody: TextImages = gson.fromJson(text, TextImages::class.java)

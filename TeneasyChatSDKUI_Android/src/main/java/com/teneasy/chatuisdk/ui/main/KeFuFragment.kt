@@ -251,6 +251,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                 override fun onCopy(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)
                     var text = messageItem?.cMsg?.content?.data ?: ""
+                    var srcType = messageItem?.cMsg?.msgSourceType ?: CMessage.MsgSourceType.MST_SYSTEM_WORKER
                     if (text.contains("\"color\"")) {
                         val gson = Gson()
                         try {
@@ -259,7 +260,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                         } catch (e: Exception) {
 
                         }
-                    }else if (text.contains("\"imgs\"")) {
+                    }else if (srcType == CMessage.MsgSourceType.MST_AI) {
                         val gson = Gson()
                         try {
                             val textBody: TextImages = gson.fromJson(text, TextImages::class.java)
@@ -308,6 +309,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                     binding?.tvQuotedMsg?.visibility = View.VISIBLE
                     binding?.tvQuotedMsg?.tag = position
                     val msg = msgAdapter.msgList?.get(position)?.cMsg
+                    val srcType = msg?.msgSourceType ?: CMessage.MsgSourceType.MST_SYSTEM_WORKER
                     if ((msg?.image?.uri ?: "").isNotEmpty()) {
                         showQuotedMsg("回复：图片")
                     } else if ((msg?.file?.uri ?: "").isNotEmpty()) {
@@ -317,8 +319,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                     } else {
                         var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data ?: " "
                         txt = txt.split("回复：")[0]
-
-                        if (txt.contains("\"imgs\"")) {
+                        if (srcType == CMessage.MsgSourceType.MST_AI) {
                             val gson = Gson()
                             try {
                                 val textBody: TextImages = gson.fromJson(txt, TextImages::class.java)
@@ -1329,7 +1330,7 @@ code: 1002 无效的Token
         if (oriMsg != null){
             if (oriMsg.msgFmt.toString() == "MSG_TEXT"){
                 var text = oriMsg.content?.data?:""
-                if (text.contains("\"imgs\"")) {
+                if (oriMsg.msgSourceType == CMessage.MsgSourceType.MST_AI) {
                     val gson = Gson()
                     try {
                         val textBody: TextImages = gson.fromJson(text, TextImages::class.java)
