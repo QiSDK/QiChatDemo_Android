@@ -260,7 +260,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                         } catch (e: Exception) {
 
                         }
-                    }else if (srcType == CMessage.MsgSourceType.MST_AI) {
+                    }else if (text.contains("\"imgs\"")) {
                         val gson = Gson()
                         try {
                             val textBody: TextImages = gson.fromJson(text, TextImages::class.java)
@@ -319,7 +319,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                     } else {
                         var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data ?: " "
                         txt = txt.split("回复：")[0]
-                        if (srcType == CMessage.MsgSourceType.MST_AI) {
+                        if (txt.contains("\"imgs\"")) {
                             val gson = Gson()
                             try {
                                 val textBody: TextImages = gson.fromJson(txt, TextImages::class.java)
@@ -1332,7 +1332,7 @@ code: 1002 无效的Token
         if (oriMsg != null){
             if (oriMsg.msgFmt.toString() == "MSG_TEXT"){
                 var text = oriMsg.content?.data?:""
-                if (oriMsg.msgSourceType == CMessage.MsgSourceType.MST_AI) {
+                if (text.contains("\"imgs\"")) {
                     val gson = Gson()
                     try {
                         val textBody: TextImages = gson.fromJson(text, TextImages::class.java)

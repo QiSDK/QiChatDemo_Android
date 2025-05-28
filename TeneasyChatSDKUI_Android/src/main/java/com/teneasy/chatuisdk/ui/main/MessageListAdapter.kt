@@ -225,7 +225,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                     .into(holder.civKefuImage)
             }
         }
-       else if (holder is ItemVideoViewHolder) {
+        else if (holder is ItemVideoViewHolder) {
             val item = msgList!![position]
             if (item.cMsg == null) {
                 return
@@ -632,29 +632,30 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 processTextWithLinks(holder.tvRightMsg, text)
                 if (item.cMsg!!.replyMsgId > 0){
                     holder.tvRightSize.visibility = View.GONE
-                    if ((item.replyItem?.fileName?:"").isNotEmpty()){
+                    val fileName = item.replyItem?.fileName?:""
+                    if (fileName.isNotEmpty()){
                         val ext = item.replyItem?.fileName?.split(".")?.last()
                         if (ext != null && Constants.fileTypes.contains(ext)){
                             holder.tvRightSize.text = ((item.replyItem?.size?:0)  * 0.001).toString() + "K"
                             holder.tvRightSize.visibility = View.VISIBLE
                         }
+                        holder.tvRightReplyOrigin.text = fileName
+                        holder.ivRightReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                         holder.ivRightReplyImage.visibility = View.VISIBLE
+
+                        holder.llReplyRight.setOnClickListener(object : View.OnClickListener {
+                            override fun onClick(v: View?) {
+                                listener?.onShowOriginal(v?.tag as Int)
+                            }
+                        })
+                        holder.tvRightReplyOrigin.setLines(1)
                     }else{
                         holder.ivRightReplyImage.visibility = View.GONE
                         holder.tvRightReplyOrigin.text = item.replyItem?.content?: ""
+                        holder.tvRightReplyOrigin.setLines(5)
                     }
 
-                    val fileName = item.replyItem?.fileName?:""
-                    if (fileName.isNotEmpty()){
-                        holder.tvRightReplyOrigin.text = fileName
-                        holder.ivRightReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
-                    }
 
-                    holder.llReplyRight.setOnClickListener(object : View.OnClickListener {
-                        override fun onClick(v: View?) {
-                            listener?.onShowOriginal(v?.tag as Int)
-                        }
-                    })
                     holder.llReplyRight.visibility = View.VISIBLE
                     //holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
                 }else{
@@ -809,16 +810,18 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         holder.tvLeftReplyOrigin.text = fileName
                         holder.ivLeftReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                         holder.ivLeftReplyImage.visibility = View.VISIBLE
-                    }else{
-                        holder.ivLeftReplyImage.visibility = View.GONE
-                        holder.tvLeftReplyOrigin.text = item.replyItem?.content?: ""
-                    }
 
-                    holder.llReplyLeft.setOnClickListener(object : View.OnClickListener {
-                        override fun onClick(v: View?) {
-                            listener?.onShowOriginal(v?.tag as Int)
-                        }
-                    })
+                        holder.llReplyLeft.setOnClickListener(object : View.OnClickListener {
+                            override fun onClick(v: View?) {
+                                listener?.onShowOriginal(v?.tag as Int)
+                            }
+                        })
+                        holder.tvRightReplyOrigin.setLines(1)
+                    }else {
+                        holder.ivLeftReplyImage.visibility = View.GONE
+                        holder.tvLeftReplyOrigin.text = item.replyItem?.content ?: ""
+                        holder.tvRightReplyOrigin.setLines(5)
+                    }
                     holder.llReplyLeft.visibility = View.VISIBLE
                 }else{
                     holder.llReplyLeft.visibility = View.GONE
