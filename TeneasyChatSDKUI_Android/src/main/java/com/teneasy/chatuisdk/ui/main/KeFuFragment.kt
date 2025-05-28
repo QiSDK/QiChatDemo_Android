@@ -1182,6 +1182,7 @@ code: 1002 无效的Token
             cMsg = msg
             msgId = msg.msgId
             isLeft = left
+            sendStatus = MessageSendState.发送成功
         }
 
         // 处理回复消息
