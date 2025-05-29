@@ -3,7 +3,6 @@ package com.teneasy.chatuisdk.ui.main;
 //import com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
 
 import android.app.Activity
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
@@ -493,19 +492,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                     holder.ivSendStatus.visibility = View.GONE
 
                 var text = item.cMsg!!.content.data
-                //val dd = "{\"content\":\"文本\",\"image\":\"图片链接\",\"video\":\"视频链接\",\"color\":\"文本颜色\"}";
 
                 if (text.contains("\"color\"")){
                     val gson = Gson()
                     try {
                         val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
                         text = textBody.content
-                        println("Content: ${textBody.content}")
-                        println("Image: ${textBody.image}")
-                        println("Video: ${textBody.video}")
-                        println("Color: ${textBody.color}")
 
-                        //holder.tvRightMsg.setTextColor(Color.parseColor(textBody.color))
                         holder.ivRightImg.visibility = View.VISIBLE
                         holder.ivRightPlay.visibility = View.GONE
                         holder.ivSendStatus.visibility = View.GONE
@@ -521,13 +514,10 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         if ((meidaUrl?:"").isNotEmpty()) {
                             holder.rlImagecontainer.visibility = View.VISIBLE
                         }else{
-                            return
+                            holder.rlImagecontainer.visibility = View.GONE
                         }
 
                         holder.ivRightImg.setOnClickListener {
-                            var tag = holder.tvRightMsg.tag as Int
-                            val myItem = msgList!![tag]
-
                             if ((textBody.video?:"").isNotEmpty()) {
                                 listener?.onPlayVideo(textBody.video?:"")
                             }else {
@@ -584,7 +574,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 //                        val builder: XPopup.Builder = XPopup.Builder(act)
 //                            .watchView(holder.tvLeftMsg)
                         holder.tvRightMsg.setOnLongClickListener(OnLongClickListener {
-                            holder.builder3.asAttachList(
+                            holder.rightPopBuild.asAttachList(
                                 arrayOf<String>("复制"), null,
                                 object : OnSelectListener {
                                     override fun onSelect(position: Int, text: String) {
@@ -604,11 +594,9 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         e.printStackTrace()
                     }
                 }else{
-                    // 必须在事件发生前，调用这个方法来监视View的触摸
-//                    val builder: XPopup.Builder = XPopup.Builder(act)
-//                        .watchView(holder.tvLeftMsg)
+                    holder.tvRightMsg.setTextColor(act.getColor(R.color.white))
                     holder.tvRightMsg.setOnLongClickListener(OnLongClickListener {
-                        holder.builder3.asAttachList(
+                        holder.rightPopBuild.asAttachList(
                             arrayOf<String>("复制","回复"), null,
                             object : OnSelectListener {
                                 override fun onSelect(position: Int, text: String) {
@@ -648,20 +636,18 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                                 listener?.onShowOriginal(v?.tag as Int)
                             }
                         })
-                        holder.tvRightReplyOrigin.setLines(1)
+                        holder.tvRightReplyOrigin.maxLines = 1
                     }else{
                         holder.ivRightReplyImage.visibility = View.GONE
                         holder.tvRightReplyOrigin.text = item.replyItem?.content?: ""
-                        holder.tvRightReplyOrigin.setLines(5)
+                        holder.tvRightReplyOrigin.maxLines = 5
                     }
-
-
                     holder.llReplyRight.visibility = View.VISIBLE
-                    //holder.tvRightReplyOrigin.text = text.substring(0,text.indexOf("回复："))
                 }else{
                     holder.llReplyRight.visibility = View.GONE
                 }
-            } else {
+            }
+            else {
                 holder.llReplyLeft.tag = position
                 holder.tvLeftMsg.tag = position
                 holder.tvLeftTime.text = localTime
@@ -752,7 +738,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 //                        val builder: XPopup.Builder = XPopup.Builder(act)
 //                            .watchView(holder.tvLeftMsg)
                         holder.tvLeftMsg.setOnLongClickListener(OnLongClickListener {
-                            holder.builder.asAttachList(
+                            holder.leftPopBuild.asAttachList(
                                 arrayOf<String>("复制"), null,
                                 object : OnSelectListener {
                                     override fun onSelect(position: Int, text: String) {
@@ -773,11 +759,9 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         e.printStackTrace()
                     }
                 }else{
-                    // 必须在事件发生前，调用这个方法来监视View的触摸
-//                    val builder: XPopup.Builder = XPopup.Builder(act)
-//                        .watchView(holder.tvLeftMsg)
+                    holder.tvLeftMsg.setTextColor(act.getColor(R.color.black))
                     holder.tvLeftMsg.setOnLongClickListener(OnLongClickListener {
-                        holder.builder.asAttachList(
+                        holder.leftPopBuild.asAttachList(
                             arrayOf<String>("复制","回复"), null,
                             object : OnSelectListener {
                                 override fun onSelect(position: Int, text: String) {
@@ -816,11 +800,11 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                                 listener?.onShowOriginal(v?.tag as Int)
                             }
                         })
-                        holder.tvRightReplyOrigin.setLines(1)
+                        holder.tvRightReplyOrigin.maxLines = 1
                     }else {
                         holder.ivLeftReplyImage.visibility = View.GONE
                         holder.tvLeftReplyOrigin.text = item.replyItem?.content ?: ""
-                        holder.tvRightReplyOrigin.setLines(5)
+                        holder.tvRightReplyOrigin.maxLines = 5
                     }
                     holder.llReplyLeft.visibility = View.VISIBLE
                 }else{
@@ -993,8 +977,8 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var ivLeftImage =  binding.ivLeftImage
         var ivLeftPlay = binding.ivPlay
         var rlLeftImagecontainer = binding.rlLeftImagecontainer
-        val builder: XPopup.Builder = XPopup.Builder(act).watchView(tvLeftMsg)
-        val builder3: XPopup.Builder = XPopup.Builder(act).watchView(tvRightMsg)
+        val leftPopBuild: XPopup.Builder = XPopup.Builder(act).watchView(tvLeftMsg)
+        val rightPopBuild: XPopup.Builder = XPopup.Builder(act).watchView(tvRightMsg)
         init {
             tvLeftMsg.movementMethod = LinkMovementMethod.getInstance()
             tvRightMsg.movementMethod = LinkMovementMethod.getInstance()

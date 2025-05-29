@@ -20,7 +20,7 @@
         />
     <LinearLayout
         android:id="@+id/ly_left_content"
-        android:layout_width="230dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginStart="10dp"
@@ -58,7 +58,6 @@
         android:layout_marginBottom="3dp"
         android:orientation="vertical"
         >
-
         <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
             android:id="@+id/tv_left_msg"
             android:elevation="2dp"
@@ -71,17 +70,15 @@
             android:textColor="@color/ps_color_4e4d4e"
             android:text="这是怎么一回事"
             android:textSize="14sp"
-            android:layout_marginBottom="5dp"
             android:visibility="visible" />
 
         <RelativeLayout
             android:id="@+id/rl_left_Imagecontainer"
             android:layout_width="106dp"
             android:layout_height="176dp"
-            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_gravity="center"
             android:layout_marginBottom="@dimen/dp_10"
             >
-
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/iv_left_image"
                 android:layout_width="match_parent"
@@ -187,7 +184,6 @@
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_corner_blue"
             android:gravity="fill_horizontal"
-            android:layout_marginBottom="3dp"
             android:orientation="vertical"
             >
             <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
@@ -215,7 +211,7 @@
 
             <RelativeLayout
                 android:id="@+id/rlImagecontainer"
-                android:layout_gravity="right"
+                android:layout_gravity="center"
                 android:layout_marginBottom="@dimen/dp_10"
                 android:layout_width="106dp"
                 android:layout_height="176dp">
