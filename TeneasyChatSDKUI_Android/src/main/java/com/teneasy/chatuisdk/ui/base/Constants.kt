@@ -51,7 +51,7 @@ class Constants {
 
         // 用户设置
         var userName = "Wang Wu"  // 用户名称
-        var maxSessionMins = 19999999  // 最大会话时长
+        var maxSessionMins = 2  // 最大会话时长
         var userLevel = 88  // 用户等级
 
         // 运行时属性
