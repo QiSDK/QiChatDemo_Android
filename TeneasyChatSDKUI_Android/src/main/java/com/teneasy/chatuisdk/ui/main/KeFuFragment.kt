@@ -95,7 +95,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
     
     // 状态变量
     private var mIProgressLoader: IProgressLoader? = null
-    private var chatLib: ChatLib? = null
+    private var chatLib = ChatLib.getInstance()
     private var isConnected = false
     private var isFirstLoad = true
     private var tempContent = ""
@@ -188,7 +188,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         Log.i(TAG, "x-token: ${Constants.xToken}, time: ${Date()}")
 
         try {
-            chatLib = ChatLib(
+           chatLib.init(
                 Constants.cert,
                 Constants.xToken,
                 wssUrl,
@@ -198,9 +198,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                 getCustomParam(),
                 Constants.maxSessionMins
             )
-            chatLib?.listener = this
+            chatLib.listener = this
             Log.i(TAG, "开始初始化SDK")
-            chatLib?.makeConnect()
+            chatLib.makeConnect()
         } catch (e: Exception) {
             Log.e(TAG, "初始化SDK失败: ${e.message}")
             showTip("初始化SDK失败，请稍后重试")
@@ -907,10 +907,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
      */
     private fun releaseResources() {
         closeTimer()
-        chatLib?.apply {
-            disConnect()
-            chatLib = null
-        }
+        chatLib.disConnect()
     }
 
     /**
