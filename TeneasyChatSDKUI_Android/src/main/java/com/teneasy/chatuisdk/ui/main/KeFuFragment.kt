@@ -1072,6 +1072,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         /*
         code: 1010 在别处登录了
 code: 1002 无效的Token
+code: 1005 会话超时
          */
         Log.i(TAG, msg.msg)
         if (msg.code in 1000..1010) {
