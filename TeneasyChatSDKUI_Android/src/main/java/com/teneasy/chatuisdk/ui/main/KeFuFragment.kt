@@ -187,23 +187,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         val wssUrl = "wss://$baseUrl/v1/gateway/h5?"
         Log.i(TAG, "x-token: ${Constants.xToken}, time: ${Date()}")
 
-        try {
-           chatLib.init(
-                Constants.cert,
-                Constants.xToken,
-                wssUrl,
-                Constants.userId,
-                "9zgd9YUc",
-                0L,
-                getCustomParam(),
-                Constants.maxSessionMins
-            )
-            chatLib.listener = this
-            Log.i(TAG, "开始初始化SDK")
-            chatLib.makeConnect()
-        } catch (e: Exception) {
-            Log.e(TAG, "初始化SDK失败: ${e.message}")
-            showTip("初始化SDK失败，请稍后重试")
+        chatLib.apply {
+            listener = this@KeFuFragment
+            init(Constants.cert, Constants.xToken, wssUrl, Constants.userId, "9zgd9YUc", 0L, getCustomParam(), Constants.maxSessionMins)
+            runCatching {
+                makeConnect()
+            }.onFailure() {
+                showTip("初始化SDK失败，请稍后重试")
+            }
         }
     }
 
@@ -803,7 +794,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
 
     private fun handleVideoOrFileUpload(file: File, ext: String) {
         val maxFileSize = 300 * 1024 * 1024 // 300MB
-        val compressionThreshold = 30 * 1024 * 1024 // 30MB
+        val compressionThreshold = 900 * 1024 * 1024 // 30MB, 900M(压缩库不能用了，所以直接上传）
 
         //uploadProgress = 1
 
@@ -1406,6 +1397,8 @@ code: 1005 会话超时
     }
 
     override fun uploadFailed(msg: String) {
+        com.teneasy.sdk.UploadUtil.uploadProgress = 0
+        print("上传失败：" + msg)
         runOnUiThread {
             ToastUtils.showToast(requireContext(), msg)
             mIProgressLoader?.dismissLoading()
