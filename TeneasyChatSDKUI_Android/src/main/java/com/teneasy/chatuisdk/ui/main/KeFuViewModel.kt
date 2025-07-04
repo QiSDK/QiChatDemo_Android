@@ -413,7 +413,8 @@ class KeFuViewModel : BaseViewModel() {
         
         val request = XHttp.custom().accessToken(false)
         request.headers("X-Token", Constants.xToken)
-        request.headers("x-trace-id", UUID.randomUUID().toString())
+        var xtraceid = UUID.randomUUID().toString()
+        request.headers("x-trace-id", xtraceid)
         
         val requestUrl = "${Constants.baseUrlApi()}/v1/api/message/sync"
         request.call(
@@ -428,14 +429,14 @@ class KeFuViewModel : BaseViewModel() {
                     }
                     if (res.code != 0) {
                         val resp = Gson().toJson(res)
-                        logError(res.code, "", "x-token ${Constants.xToken}", resp, requestUrl)
+                        logError(res.code, "", "x-token ${Constants.xToken}, x-trace-id: ${xtraceid}", resp, requestUrl)
                     }
                 }
                 
                 override fun onError(e: ApiException?) {
                     super.onError(e)
                     Log.e(TAG, "查询聊天历史失败: ${e?.message}")
-                    logError(e?.code ?: 500, "", "x-token ${Constants.xToken}", e?.message ?: "", requestUrl)
+                    logError(e?.code ?: 500, "", "x-token ${Constants.xToken}, x-trace-id: ${xtraceid}", e?.message ?: "", requestUrl)
                 }
             }
         )

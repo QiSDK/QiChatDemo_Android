@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter
 import com.donkingliang.groupedadapter.holder.BaseViewHolder
@@ -81,8 +82,12 @@ class GroupedQAdapter(
     ) {
         val bean = data[position]
         var tvTitle = holder?.get<TextView>(R.id.tv_Title)
-        if (bean.related?.get(childPosition)?.clicked?:false){
+
+        val isChecked = bean.related?.get(childPosition)?.clicked?:false
+        if (isChecked){
             tvTitle?.setTextColor(ContextCompat.getColor(context, com.luck.picture.lib.R.color.ps_color_light_grey))
+        }else{
+            tvTitle?.setTextColor(ContextCompat.getColor(context, R.color.black4848))
         }
         tvTitle?.text = (childPosition + 1).toString() + ") " + bean.related?.get(childPosition)?.question?.content?.data ?:""
     }

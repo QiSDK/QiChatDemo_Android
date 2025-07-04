@@ -53,7 +53,6 @@ class SettingsFragment : Fragment() {
             // 将已保存的配置填充到输入框中
             this.etLine?.setText(Constants.lines)           // 服务器线路
             this.etWssCert?.setText(Constants.cert)        // 访问证书
-
             // 商户ID（如果大于0才显示）
             if (Constants.merchantId > 0) {
                 this.etMerchanId?.setText(Constants.merchantId.toString())
