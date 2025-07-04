@@ -67,6 +67,7 @@ class GroupedQAdapter(
             rightArrow?.setImageResource(R.drawable.arrowdown)
         }
 
+        rightArrow?.visibility = View.VISIBLE
         if (bean.related == null || bean.related.size == 0){
             rightArrow?.visibility = View.GONE
         }

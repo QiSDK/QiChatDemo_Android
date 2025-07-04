@@ -43,22 +43,22 @@ class Constants {
         //新环境
         //var lines = "https://csh5-3-test.qlbig05.xyz"  // 服务器线路地址
         //var cert = "CO8CEAUYASDIAyjd4eSD-jI.Uv6jzpPQvkKsXgmVYzhLp08H_NBAt4zNm7J5UxUfsFHXhresw0YJDrWvcgb00MxD59avzaS_MDC2dF-tvcimDA"
-        var baseUrlImage = "https://images-3-test.qlbig05.xyz"  // 图片服务器地址
+        //var baseUrlImage = "https://images-3-test.qlbig05.xyz"  // 图片服务器地址
 
         // 基础配置属性
-        var lines = "https://csapi.hfxg.xyz,https://xxxapi.qixin14.xyz"  // 服务器线路地址
+        //var lines = "https://csapi.hfxg.xyz,https://xxxapi.qixin14.xyz"  // 服务器线路地址
         //var cert = "CMUCEAUYASCUAyjs8YWbyTI.xnc1L2bV5n21oQ2RNN8ojJD4IS-hTvXo2cgvFka4SLjsQ6rdhFFyfWKnNX3iU2VYtZtGn2-BfpI5J_xuYiy8CA"  // 认证证书
         //var cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQcLftyD2KBMIdYetjTYQEyQwWLy7Lfkm8cs3aogaThAw"
-        var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
+        //var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
         var merchantId = 367  // 商户ID
         var userId = 666677   // 用户ID
         //var baseUrlImage = "https://imagesacc.hfxg.xyz"  // 图片服务器地址
 
 
         //九月
-//        var cert = "CAEQBRgBIIcCKPHr3dPoMg.ed_euM3a4Ew7QTiJKg4XQskD5KTzvqXdFKRPnVyNmyZNF-Cyq7g9XMr3a41OvVtoovp15IBrfYveDZTJPEldBA"
-//        var lines = "https://d2jt4g8mgfvbcl.cloudfront.net"
-//        var baseUrlImage = "https://d2uzsk40324g7l.cloudfront.net"
+        var cert = "CAEQBRgBIIcCKPHr3dPoMg.ed_euM3a4Ew7QTiJKg4XQskD5KTzvqXdFKRPnVyNmyZNF-Cyq7g9XMr3a41OvVtoovp15IBrfYveDZTJPEldBA"
+        var lines = "https://d2jt4g8mgfvbcl.cloudfront.net"
+        var baseUrlImage = "https://d2uzsk40324g7l.cloudfront.net"
 
 
         // 用户设置
