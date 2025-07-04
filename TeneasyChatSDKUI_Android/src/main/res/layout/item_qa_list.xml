@@ -17,45 +17,49 @@
         app:layout_constraintTop_toTopOf="parent"
         android:text="21:57:52"
         />
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ly_left_content"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@+id/tv_left_time"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toEndOf="parent"
         >
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/civ_kefu_image"
             android:layout_width="38dp"
             android:src="@drawable/group_25"
             app:civ_border_color="#80ffffff"
-            android:layout_height="38dp" />
+            android:layout_height="38dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
         <ImageView
             android:id="@+id/iv_arrow"
             android:layout_width="11dp"
             android:layout_height="11dp"
             android:elevation="2dp"
-            android:layout_marginEnd="-3dp"
             android:backgroundTint="@color/white"
             android:background="@drawable/polygon_2"
             android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
-            ></ImageView>
-
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/civ_kefu_image"
+            app:layout_constraintTop_toTopOf="@+id/civ_kefu_image"
+            />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_qa_content"
             android:background="@color/white"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:elevation="2dp"
             android:minWidth="168dp"
             android:padding="@dimen/dp_10"
-            android:layout_marginBottom="@dimen/dp_10"
             android:layout_marginEnd="15dp"
-            android:orientation="vertical">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_arrow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            >
             <TextView
                 android:id="@+id/tvTitle"
                 android:text="Title"
@@ -63,16 +67,20 @@
                 android:textSize="14sp"
                 android:textColor="@color/black4848"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-            </TextView>
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
             <androidx.recyclerview.widget.RecyclerView
-                android:layout_marginTop="0dp"
                 android:id="@+id/rcv_qa"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
 
-        </LinearLayout>
-    </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
