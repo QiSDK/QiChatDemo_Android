@@ -309,9 +309,16 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         ): Boolean {
                             val bitmap = Utils().drawableToBitmap(resource);
                             print(bitmap.width)
-                            if (bitmap.height > bitmap.width) {
+                            if (bitmap.height == bitmap.width) {
                                 Utils().updateLayoutParams(
-                                    holder.rlImagecontainer,
+                                    holder.rlLeftImagecontainer,
+                                    Utils().dp2px(176.0f),
+                                    Utils().dp2px(176.0f)
+                                )
+                            }
+                            else if (bitmap.height > bitmap.width) {
+                                Utils().updateLayoutParams(
+                                    holder.rlLeftImagecontainer,
                                     Utils().dp2px(106.0f),
                                     Utils().dp2px(176.0f)
                                 )
@@ -396,7 +403,14 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         ): Boolean {
                             val bitmap = Utils().drawableToBitmap(resource);
                             print(bitmap.width)
-                            if (bitmap.height > bitmap.width) {
+                            if (bitmap.height == bitmap.width) {
+                                Utils().updateLayoutParams(
+                                    holder.rlLeftImagecontainer,
+                                    Utils().dp2px(176.0f),
+                                    Utils().dp2px(176.0f)
+                                )
+                            }
+                            else if (bitmap.height > bitmap.width) {
                                 Utils().updateLayoutParams(
                                     holder.rlLeftImagecontainer,
                                     Utils().dp2px(106.0f),
