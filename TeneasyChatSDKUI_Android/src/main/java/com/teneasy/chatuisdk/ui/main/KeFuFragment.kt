@@ -282,7 +282,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                     var ext = url?.split(".")?.last()?: ""
                     if (ext.lowercase() == "pdf" || ext.lowercase() == "csv") {
                         //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
-                        ToastUtils.showToast(requireActivity(), "暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，页确保您的设备里有查看PDF和CSV文件的应用程序")
+                        ToastUtils.showToast(requireActivity(), "暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序")
                         return
                     }
 
