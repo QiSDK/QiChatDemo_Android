@@ -1152,6 +1152,10 @@ code: 1005 会话超时
             return
         }
 
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_AUTO_TRANSFER){
+           print("这种消息是自动分配客服的消息，不会计入未读消息")
+        }
+
         // 处理当前会话的消息
         processReceivedMessage(msg)
     }
