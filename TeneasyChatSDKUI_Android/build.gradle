@@ -128,6 +128,7 @@ dependencies {
 
     // ... other dependencies ...
     implementation 'io.github.beyka:Android-TiffBitmapFactory:0.9.9.1'
+    implementation 'com.github.VERO-Digital-Solutions:AndroidPdfViewerV2:1195a3d7d6'
 }
 
 afterEvaluate {

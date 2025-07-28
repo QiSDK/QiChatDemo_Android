@@ -47,6 +47,8 @@
         <activity android:name="com.teneasy.chatuisdk.ui.main.KeFuActivity"
             android:exported="true">
         </activity>
+        
+
 </application>
     <queries package="${applicationId}">
         <intent>

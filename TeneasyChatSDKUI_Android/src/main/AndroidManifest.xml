@@ -29,6 +29,10 @@
         <activity android:name=".WebViewActivity"
             android:exported="false">
         </activity>
+
+        <activity android:name="com.teneasy.chatuisdk.PdfViewerActivity"
+            android:exported="false">
+        </activity>
     </application>
 
 </manifest>

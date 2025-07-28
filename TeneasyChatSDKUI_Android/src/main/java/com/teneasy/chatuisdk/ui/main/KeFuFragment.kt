@@ -280,7 +280,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                     //Utils().openPdfInBrowser(requireContext(), Uri.parse(url))
                     //onPlayImage(url)
                     var ext = url?.split(".")?.last()?: ""
-                    if (ext.lowercase() == "pdf" || ext.lowercase() == "csv") {
+                    if (ext.lowercase() == "pdf"){
+                        //val pdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+                        Utils().openPdfFile(requireContext(), url, "示例PDF文档")
+                        return
+                    }
+                    else if (ext.lowercase() == "pdf") {
                         //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
                         ToastUtils.showToast(requireActivity(), "暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序")
                         return

@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegSession
 import com.google.protobuf.Timestamp
+import com.teneasy.chatuisdk.PdfViewerActivity
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -524,6 +525,20 @@ class Utils {
         } catch (e: Exception) {
 
         }
+    }
+
+    /**
+     * Opens a PDF file in the PdfViewerActivity
+     *
+     * @param context The context to start the activity
+     * @param pdfUrl The URL of the PDF file to open
+     * @param pdfTitle The title to display for the PDF file (optional)
+     */
+    fun openPdfFile(context: Context, pdfUrl: String, pdfTitle: String? = null) {
+        val intent = Intent(context, PdfViewerActivity::class.java)
+        intent.putExtra("pdf_url", pdfUrl)
+        pdfTitle?.let { intent.putExtra("pdf_title", it) }
+        context.startActivity(intent)
     }
 
     fun formatSize(bytes: Int): String {

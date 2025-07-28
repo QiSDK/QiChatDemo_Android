@@ -39,6 +39,13 @@ class MainFragment : Fragment(){
                 startActivity(keFuIntent)
             }
 
+            this.btnOpenPdf.setOnClickListener {
+                // Example PDF URL - replace with your own PDF URL
+                val pdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+                val utils = com.teneasy.chatuisdk.ui.base.Utils()
+                utils.openPdfFile(requireContext(), pdfUrl, "示例PDF文档")
+            }
+
             this.ivSettings.setOnClickListener {
                 findNavController().navigate(R.id.frg_settings)
             }
@@ -63,5 +70,3 @@ class MainFragment : Fragment(){
         }
     }
 }
-
-
