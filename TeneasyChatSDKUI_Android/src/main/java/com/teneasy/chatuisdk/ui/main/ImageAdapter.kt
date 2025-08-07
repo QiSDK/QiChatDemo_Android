@@ -15,10 +15,13 @@ import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.ARG_IMAGEURL
 import com.teneasy.chatuisdk.ARG_KEFUNAME
+import com.teneasy.chatuisdk.ARG_VIDEOURL
 import com.teneasy.chatuisdk.FullImageActivity
+import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.sdk.videoTypes
 
 interface ImageOnListener {
     fun onQuote(position: Int)
@@ -46,15 +49,29 @@ class ImageAdapter(private val imageUrls: List<String>, private val act: Activit
         fun bind(imageUrl: String) {
             // Use Glide (or your preferred image loading library) to load the image
             // You might need to prepend a base URL if the image URLs are relative
+            var imgUrl = Constants.baseUrlImage + imageUrl
+            var extension = imageUrl.substring(imageUrl.lastIndexOf(".") + 1).lowercase()
+            var isVideo = videoTypes.contains(extension)
+            if (isVideo) {
+                ivPlay.visibility = View.VISIBLE
+            } else {
+                ivPlay.visibility = View.GONE
+            }
+            if (imageUrl.startsWith("http")) {
+                imgUrl = imageUrl
+            }
             Glide.with(itemView.context)
-                .load(Constants.baseUrlImage + imageUrl) // If imageUrls are full URLs
+                .load(imgUrl) // If imageUrls are full URLs
                 // .load("YOUR_BASE_URL" + imageUrl) // If imageUrls are relative paths
                 .placeholder(R.drawable.image_default) // Optional: placeholder image
                 .error(R.drawable.loading_animation)         // Optional: error image
                 .into(imageView)
 
             imageView.setOnClickListener {
-                onPlayImage(Constants.baseUrlImage + imageUrl)
+                if (isVideo) {
+                    onPlayVideo(imgUrl)
+                } else
+                    onPlayImage(imgUrl)
             }
 
             val builder2: XPopup.Builder = XPopup.Builder(act)
@@ -71,7 +88,7 @@ class ImageAdapter(private val imageUrls: List<String>, private val act: Activit
                                 1 -> {
                                     //删除
                                     println("下载")
-                                    Utils().downloadFile(Constants.baseUrlImage + imageUrl, object :
+                                    Utils().downloadFile(imgUrl, object :
                                             (Int) -> Unit {
                                         override fun invoke(progress: Int) {
                                             if (progress == 100) {
@@ -105,6 +122,14 @@ class ImageAdapter(private val imageUrls: List<String>, private val act: Activit
         intent.putExtra(ARG_IMAGEURL, url)
         intent.putExtra(ARG_KEFUNAME, "")
         intent.setClass(act, FullImageActivity::class.java)
+        act.startActivity(intent)
+    }
+
+    fun onPlayVideo(url: String) {
+        val intent = Intent(this.act, FullVideoActivity::class.java)
+        intent.putExtra(ARG_VIDEOURL, url)
+        intent.putExtra(ARG_KEFUNAME, "")
+        intent.setClass(act, FullVideoActivity::class.java)
         act.startActivity(intent)
     }
 

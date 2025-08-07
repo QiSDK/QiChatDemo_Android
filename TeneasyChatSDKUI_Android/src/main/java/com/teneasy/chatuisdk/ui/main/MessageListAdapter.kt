@@ -513,7 +513,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
                         text = textBody.content
 
-                        holder.ivRightImg.visibility = View.VISIBLE
+                        holder.ivRightImage.visibility = View.VISIBLE
                         holder.ivRightPlay.visibility = View.GONE
                         holder.ivSendStatus.visibility = View.GONE
                         holder.tvRightMsg.setTextColor(Utils().hexToColor(textBody.color?:"#ffffff"))
@@ -522,7 +522,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
                         if ((textBody.video?:"").length > 0) {
                             meidaUrl = textBody.video
-                            holder.ivRightPlay.visibility = View.VISIBLE
+                            //holder.ivRightPlay.visibility = View.VISIBLE
                         }
 
                         if ((meidaUrl?:"").isNotEmpty()) {
@@ -531,15 +531,27 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                             holder.rlImagecontainer.visibility = View.GONE
                         }
 
-                        holder.ivRightImg.setOnClickListener {
-                            if ((textBody.video?:"").isNotEmpty()) {
-                                listener?.onPlayVideo(textBody.video?:"")
-                            }else {
-                                listener?.onPlayImage(textBody.image?:"")
+                        holder.ivRightImage.tag = position;
+                        val adapter = ImageAdapter((meidaUrl?:"").split(";"), act, object : ImageOnListener {
+                            override fun onQuote(position: Int) {
+                                var pos = holder.ivRightImage.tag?:0
+                                listener?.onQuote(pos as Int)
                             }
-                        }
+                        })
+                        holder.ivRightImage.adapter = adapter
+                        val layoutManager = GridLayoutManager(act, 2)
+                        layoutManager.orientation = GridLayoutManager.HORIZONTAL
+                        holder.ivRightImage.layoutManager = layoutManager
 
-                        var thumb = meidaUrl
+//                        holder.ivRightImg.setOnClickListener {
+//                            if ((textBody.video?:"").isNotEmpty()) {
+//                                listener?.onPlayVideo(textBody.video?:"")
+//                            }else {
+//                                listener?.onPlayImage(textBody.image?:"")
+//                            }
+//                        }
+
+                       /* var thumb = meidaUrl
                         Glide.with(act)
                             .load(thumb)
                             .apply(
@@ -582,7 +594,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                                     return false
                                 }
                             })
-                            .into(holder.ivRightImg)
+                            .into(holder.ivRightImg)*/
 
                         // 必须在事件发生前，调用这个方法来监视View的触摸
 //                        val builder: XPopup.Builder = XPopup.Builder(act)
@@ -686,14 +698,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
                         if ((textBody.video?:"").length > 0) {
                             meidaUrl = textBody.video
-                            holder.ivLeftPlay.visibility = View.VISIBLE
+                            //holder.ivLeftPlay.visibility = View.VISIBLE
                         }
 
                         if ((meidaUrl?:"").isNotEmpty()) {
                             holder.rlLeftImagecontainer.visibility = View.VISIBLE
                             holder.ivLeftImage.setOnClickListener {
                                 var tag = holder.tvLeftMsg.tag as Int
-                                val myItem = msgList!![tag]
 
                                 if ((textBody.video ?: "").isNotEmpty()) {
                                     listener?.onPlayVideo(textBody.video ?: "")
@@ -702,50 +713,17 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                                 }
                             }
 
-                            var thumb = meidaUrl
-                            Glide.with(act)
-                                .load(thumb)
-                                .apply(
-                                    RequestOptions()
-                                        .placeholder(R.drawable.loading_animation)
-                                        .dontAnimate().skipMemoryCache(true)
-                                )
-                                .listener(object : RequestListener<Drawable?> {
-                                    override fun onLoadFailed(
-                                        e: GlideException?,
-                                        model: Any?,
-                                        target: Target<Drawable?>,
-                                        isFirstResource: Boolean
-                                    ): Boolean {
-                                        return false
-                                    }
-
-                                    override fun onResourceReady(
-                                        resource: Drawable,
-                                        model: Any,
-                                        target: Target<Drawable?>?,
-                                        dataSource: DataSource,
-                                        isFirstResource: Boolean
-                                    ): Boolean {
-                                        val bitmap = Utils().drawableToBitmap(resource);
-                                        print(bitmap.width)
-                                        if (bitmap.height > bitmap.width) {
-                                            Utils().updateLayoutParams(
-                                                holder.rlLeftImagecontainer,
-                                                Utils().dp2px(106.0f),
-                                                Utils().dp2px(176.0f)
-                                            )
-                                        } else {
-                                            Utils().updateLayoutParams(
-                                                holder.rlLeftImagecontainer,
-                                                Utils().dp2px(176.0f),
-                                                Utils().dp2px(106.0f)
-                                            )
-                                        }
-                                        return false
-                                    }
-                                })
-                                .into(holder.ivLeftImage)
+                            holder.ivLeftImage.tag = position;
+                            val adapter = ImageAdapter((meidaUrl?:"").split(";"), act, object : ImageOnListener {
+                                override fun onQuote(position: Int) {
+                                    var pos = holder.ivLeftImage.tag?:0
+                                    listener?.onQuote(pos as Int)
+                                }
+                            })
+                            holder.ivLeftImage.adapter = adapter
+                            val layoutManager = GridLayoutManager(act, 2)
+                            layoutManager.orientation = LinearLayoutManager.HORIZONTAL
+                            holder.ivLeftImage.layoutManager = layoutManager
                         }
 
                         // 必须在事件发生前，调用这个方法来监视View的触摸
@@ -967,7 +945,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var ivArrow =  binding.ivArrow
         var ivRightChatarrow =  binding.ivRightChatarrow
         var ivKefuImage =  binding.civKefuImage
-        var ivRightImage =  binding.civRightImage
+        //var ivRightImage =  binding.civRightImage
 
         var llReplyLeft = binding.llReplyLeft
         var tvLeftReplyOrigin = binding.tvLeftReplyOrigin
@@ -984,7 +962,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var lyLeftContent = binding.lyLeftContent
         var lyRightContent = binding.lyRightContent
 
-        var ivRightImg =  binding.ivRightImage
+        var ivRightImage =  binding.ivRightImage
         var ivRightPlay = binding.ivRightPlay
         var rlImagecontainer = binding.rlImagecontainer
 
