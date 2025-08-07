@@ -41,6 +41,9 @@ public class MainApi {
         //@Headers({"Content-Type: application/json", "Accept: application/json"})
         Observable<ReturnData<Entrance>> queryEntrance(@Body JsonObject param);
 
+        @POST("v1/api/query-entrance-hidden")
+        Observable<ReturnData<Entrance>> queryEntranceHidden(@Body JsonObject param);
+
         @POST("v1/api/assign-worker")
         Observable<ReturnData<AssignWorker>> assignWorker(@Body JsonObject param);
 
