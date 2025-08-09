@@ -451,8 +451,10 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         listener?.onQuote(pos as Int)
                     }
                 })
+
+                var spanCount = if (textBody.imgs.size > 1) 2 else 1
                 holder.rvList.adapter = adapter
-                val layoutManager = GridLayoutManager(act, 2)
+                val layoutManager = GridLayoutManager(act, spanCount)
                 layoutManager.orientation = LinearLayoutManager.HORIZONTAL
                 holder.rvList.layoutManager = layoutManager
                 holder.tvMsg.text = textBody.message
@@ -532,6 +534,8 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         }
 
                         holder.ivRightImage.tag = position;
+                        var imgs = (meidaUrl?:"").split(";");
+                        var spanCount = if (imgs.size > 1) 2 else 1
                         val adapter = ImageAdapter((meidaUrl?:"").split(";"), act, object : ImageOnListener {
                             override fun onQuote(position: Int) {
                                 var pos = holder.ivRightImage.tag?:0
@@ -539,66 +543,9 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                             }
                         })
                         holder.ivRightImage.adapter = adapter
-                        val layoutManager = GridLayoutManager(act, 2)
+                        val layoutManager = GridLayoutManager(act, spanCount)
                         layoutManager.orientation = GridLayoutManager.HORIZONTAL
                         holder.ivRightImage.layoutManager = layoutManager
-
-//                        holder.ivRightImg.setOnClickListener {
-//                            if ((textBody.video?:"").isNotEmpty()) {
-//                                listener?.onPlayVideo(textBody.video?:"")
-//                            }else {
-//                                listener?.onPlayImage(textBody.image?:"")
-//                            }
-//                        }
-
-                       /* var thumb = meidaUrl
-                        Glide.with(act)
-                            .load(thumb)
-                            .apply(
-                                RequestOptions()
-                                    .placeholder(R.drawable.loading_animation)
-                                    .dontAnimate().skipMemoryCache(true)
-                            )
-                            .listener(object : RequestListener<Drawable?> {
-                                override fun onLoadFailed(
-                                    e: GlideException?,
-                                    model: Any?,
-                                    target: Target<Drawable?>,
-                                    isFirstResource: Boolean
-                                ): Boolean {
-                                    return false
-                                }
-
-                                override fun onResourceReady(
-                                    resource: Drawable,
-                                    model: Any,
-                                    target: Target<Drawable?>?,
-                                    dataSource: DataSource,
-                                    isFirstResource: Boolean
-                                ): Boolean {
-                                    val bitmap = Utils().drawableToBitmap(resource);
-                                    print(bitmap.width)
-                                    if (bitmap.height > bitmap.width) {
-                                        Utils().updateLayoutParams(
-                                            holder.rlImagecontainer,
-                                            Utils().dp2px(106.0f),
-                                            Utils().dp2px(176.0f)
-                                        )
-                                    } else {
-                                        Utils().updateLayoutParams(
-                                            holder.rlImagecontainer,
-                                            Utils().dp2px(176.0f),
-                                            Utils().dp2px(106.0f)
-                                        )
-                                    }
-                                    return false
-                                }
-                            })
-                            .into(holder.ivRightImg)*/
-
-                        // 必须在事件发生前，调用这个方法来监视View的触摸
-//                        val builder: XPopup.Builder = XPopup.Builder(act)
-//                            .watchView(holder.tvLeftMsg)
                         holder.tvRightMsg.setOnLongClickListener(OnLongClickListener {
                             holder.rightPopBuild.asAttachList(
                                 arrayOf<String>("复制"), null,
@@ -714,14 +661,17 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                             }
 
                             holder.ivLeftImage.tag = position;
-                            val adapter = ImageAdapter((meidaUrl?:"").split(";"), act, object : ImageOnListener {
+                            var imgs = (meidaUrl?:"").split(";");
+                            var spanCount = if (imgs.size > 1) 2 else 1
+                            val adapter = ImageAdapter(imgs, act, object : ImageOnListener {
                                 override fun onQuote(position: Int) {
                                     var pos = holder.ivLeftImage.tag?:0
                                     listener?.onQuote(pos as Int)
                                 }
                             })
                             holder.ivLeftImage.adapter = adapter
-                            val layoutManager = GridLayoutManager(act, 2)
+
+                            val layoutManager = GridLayoutManager(act, spanCount)
                             layoutManager.orientation = LinearLayoutManager.HORIZONTAL
                             holder.ivLeftImage.layoutManager = layoutManager
                         }
