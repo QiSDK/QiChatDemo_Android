@@ -6,4 +6,5 @@ class Custom : Serializable {
     var username: String? = null
     var platform: Int = 2
     var userlevel: Int = 28
+    var usertype: Int = 2
 }
