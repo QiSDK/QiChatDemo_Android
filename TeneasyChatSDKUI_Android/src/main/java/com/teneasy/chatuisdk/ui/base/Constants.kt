@@ -96,15 +96,12 @@ class Constants {
          * 用于SDK初始化时传递额外的用户信息
          * @return URL编码后的JSON字符串
          */
-
-        //会员建连 custom中增加usertype: 用户类型 1-官方会员 2-邀请好友 3-合营会员
-        //custom={"username":"asd101","platform":3,"user_level":384, "user_type":2}
         fun getCustomParam(): String {
             val custom = Custom().apply {
                 username = userName
                 platform = 2  // 2表示Android平台
                 userlevel = userLevel
-                usertype = userType
+                usertype = userType //usertype: 用户类型 1-官方会员 2-邀请好友 3-合营会员
             }
             return URLEncoder.encode(Gson().toJson(custom), "utf-8")
         }
