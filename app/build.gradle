@@ -21,7 +21,7 @@ android {
         versionName "1.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+        archivesBaseName = "QiChat-Demo"
         //ndk { abiFilters  "armeabi-v7a", "arm64-v8a"}// 其他忽略,  "x86_64", "x86"
     }
 
@@ -42,6 +42,12 @@ android {
             lintOptions {
                 checkReleaseBuilds false
                 abortOnError false
+            }
+        }
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                //outputFileName = "iPlanter_${variant.versionName}(${variant.versionCode}).apk"
+                outputFileName = "QiChat-Demo.apk"
             }
         }
     }
