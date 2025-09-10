@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.addCallback
 import androidx.navigation.fragment.findNavController
 import com.luck.picture.lib.utils.ToastUtils
@@ -19,6 +21,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_MERCHANT_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USERNAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_LEVEL
+import com.teneasy.chatuisdk.ui.base.PARAM_USER_TYPE
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -68,6 +71,20 @@ class SettingsFragment : Fragment() {
             this.etMaxSessionMins?.setText(Constants.maxSessionMins.toString())  // 最大会话时长
             this.etUserLevel?.setText(Constants.userLevel.toString())           // 用户等级
 
+            // 设置用户类型下拉菜单
+            val userTypeOptions = arrayOf("官方会员", "邀请好友", "合营会员")
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, userTypeOptions)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            this.spinnerUserType?.adapter = adapter
+            
+            // 设置当前选中的用户类型 (userType值为1,2,3，数组索引为0,1,2)
+            when (Constants.userType) {
+                1 -> this.spinnerUserType?.setSelection(0) // 官方会员
+                2 -> this.spinnerUserType?.setSelection(1) // 邀请好友
+                3 -> this.spinnerUserType?.setSelection(2) // 合营会员
+                else -> this.spinnerUserType?.setSelection(1) // 默认选择邀请好友
+            }
+
             // 保存按钮点击事件
             this.btnSave.setOnClickListener {
                 // 保存各项配置到Constants
@@ -81,6 +98,14 @@ class SettingsFragment : Fragment() {
                 Constants.userName = this.etUserName.text.toString().trim()
                 Constants.maxSessionMins = this.etMaxSessionMins.text.toString().trim().toIntOrZero()
                 Constants.userLevel = this.etUserLevel.text.toString().trim().toIntOrZero()
+                
+                // 保存用户类型 (数组索引0,1,2对应userType值1,2,3)
+                Constants.userType = when (this.spinnerUserType.selectedItemPosition) {
+                    0 -> 1 // 官方会员
+                    1 -> 2 // 邀请好友
+                    2 -> 3 // 合营会员
+                    else -> 2 // 默认邀请好友
+                }
 
                 // 将配置保存到SharedPreferences
                 UserPreferences().putString(PARAM_CERT, Constants.cert)
@@ -92,6 +117,7 @@ class SettingsFragment : Fragment() {
                 UserPreferences().putString(PARAM_USERNAME, Constants.userName)
                 UserPreferences().putInt(PARAM_MAXSESSIONMINS, Constants.maxSessionMins)
                 UserPreferences().putInt(PARAM_USER_LEVEL, Constants.userLevel)
+                UserPreferences().putInt(PARAM_USER_TYPE, Constants.userType)
 
                 // 显示保存成功提示
                 ToastUtils.showToast(requireContext(), "保存成功")

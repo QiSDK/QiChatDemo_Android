@@ -20,6 +20,7 @@ const val PARAM_IMAGEBASEURL = "baseUrlImage" // 图片服务器基础URL
 const val PARAM_USERNAME = "USER_NAME"        // 用户名
 const val PARAM_MAXSESSIONMINS = "MAXSESSIONMINS" // 最大会话时长(分钟)
 const val PARAM_USER_LEVEL = "USER_LEVEL"     // 用户等级
+const val PARAM_USER_TYPE = "USER_TYPE"       // 用户类型
 
 class Constants {
     companion object {
