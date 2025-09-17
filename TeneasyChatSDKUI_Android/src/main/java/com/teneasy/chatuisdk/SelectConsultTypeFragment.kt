@@ -9,6 +9,7 @@ import android.view.WindowInsetsController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
@@ -51,7 +52,14 @@ class SelectConsultTypeFragment : Fragment(){
         binding = FragmentSelectConsultTypeBinding.inflate(inflater, container, false)
         binding?.apply {
             // 初始化RecyclerView和适配器
-            adapter = SelectConsultTypeAdapter(ArrayList())
+            adapter = SelectConsultTypeAdapter(ArrayList()) { consult ->
+                Constants.CONSULT_ID = consult.consultId ?: 0L
+                val bundle = Bundle().apply {
+                    putString(PARAM_DOMAIN, Constants.domain)
+                }
+                this@SelectConsultTypeFragment.findNavController().navigate(R.id.frg_kefu_main, bundle)
+                viewModel.markRead()
+            }
             recyclerView = this.rvList
             recyclerView.adapter = adapter
             recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -61,7 +69,7 @@ class SelectConsultTypeFragment : Fragment(){
                 if (!it.isEmpty()) {
                     adapter.updateData(it)
                     this.tvEmpty.visibility = View.GONE
-                }else{
+                } else {
                     this.tvEmpty.text = "暂无数据"
                 }
             }
