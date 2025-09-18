@@ -87,6 +87,7 @@ class Utils {
 
         Constants.userName = UserPreferences().getString(PARAM_USERNAME, Constants.userName)
         Constants.userLevel = UserPreferences().getInt(PARAM_USER_LEVEL, Constants.userLevel)
+        Constants.userType = UserPreferences().getInt(PARAM_USER_TYPE, Constants.userType)
     }
 
     fun closeSoftKeyboard(view: View?) {
