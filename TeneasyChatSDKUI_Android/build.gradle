@@ -7,7 +7,17 @@ plugins {
 }
 
 android {
+    def propertyOrDefault = { propName, defaultValue ->
+        def value = project.findProperty(propName) ?: defaultValue
+        return value
+    }
+    def asEscapedString = { value ->
+        value.toString().replace("\\", "\\\\").replace("\"", "\\\"")
+    }
+
     namespace 'com.teneasy.chatuisdk'
+
+
     compileSdk 34
 
     defaultConfig {
@@ -16,8 +26,34 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-    }
 
+        def defaultLines = propertyOrDefault('chatSdk.defaultLines', 'https://csapi.hfxg.xyz,https://xxxapi.qixin14.xyz')
+        buildConfigField "String", "DEFAULT_LINES", '"' + asEscapedString(defaultLines) + '"'
+
+        def defaultCert = propertyOrDefault('chatSdk.defaultCert', 'COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ')
+        buildConfigField "String", "DEFAULT_CERT", '"' + asEscapedString(defaultCert) + '"'
+
+        def defaultBaseUrlImage = propertyOrDefault('chatSdk.defaultBaseUrlImage', 'https://imagesacc.hfxg.xyz')
+        buildConfigField "String", "DEFAULT_BASE_URL_IMAGE", '"' + asEscapedString(defaultBaseUrlImage) + '"'
+
+        def defaultMerchantId = propertyOrDefault('chatSdk.defaultMerchantId', '367').toString()
+        buildConfigField 'int', 'DEFAULT_MERCHANT_ID', defaultMerchantId
+
+        def defaultUserId = propertyOrDefault('chatSdk.defaultUserId', '666677').toString()
+        buildConfigField 'int', 'DEFAULT_USER_ID', defaultUserId
+
+        def defaultUserName = propertyOrDefault('chatSdk.defaultUserName', 'Wang Wu')
+        buildConfigField "String", "DEFAULT_USER_NAME", '"' + asEscapedString(defaultUserName) + '"'
+
+        def defaultMaxSessionMins = propertyOrDefault('chatSdk.defaultMaxSessionMins', '2000').toString()
+        buildConfigField 'int', 'DEFAULT_MAX_SESSION_MINS', defaultMaxSessionMins
+
+        def defaultUserLevel = propertyOrDefault('chatSdk.defaultUserLevel', '88').toString()
+        buildConfigField 'int', 'DEFAULT_USER_LEVEL', defaultUserLevel
+
+        def defaultUserType = propertyOrDefault('chatSdk.defaultUserType', '2').toString()
+        buildConfigField 'int', 'DEFAULT_USER_TYPE', defaultUserType
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -43,6 +79,7 @@ android {
         enabled = true
     }
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
     packagingOptions {

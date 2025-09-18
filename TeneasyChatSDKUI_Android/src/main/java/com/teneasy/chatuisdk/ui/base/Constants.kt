@@ -1,6 +1,7 @@
 package com.teneasy.chatuisdk.ui.base
 
 import com.google.gson.Gson
+import com.teneasy.chatuisdk.BuildConfig
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.teneasy.sdk.UploadListener
@@ -50,12 +51,22 @@ class Constants {
         //var cert = "CMUCEAUYASCUAyjs8YWbyTI.xnc1L2bV5n21oQ2RNN8ojJD4IS-hTvXo2cgvFka4SLjsQ6rdhFFyfWKnNX3iU2VYtZtGn2-BfpI5J_xuYiy8CA"  // 认证证书
         //var cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQcLftyD2KBMIdYetjTYQEyQwWLy7Lfkm8cs3aogaThAw"
 
-        var lines = "https://csapi.hfxg.xyz,https://xxxapi.qixin14.xyz"  // 服务器线路地址
-        var cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ"
-        var baseUrlImage = "https://imagesacc.hfxg.xyz"  // 图片服务器地址
+        private val defaultLines = BuildConfig.DEFAULT_LINES
+        private val defaultCert = BuildConfig.DEFAULT_CERT
+        private val defaultBaseUrlImage = BuildConfig.DEFAULT_BASE_URL_IMAGE
+        private val defaultMerchantId = BuildConfig.DEFAULT_MERCHANT_ID
+        private val defaultUserId = BuildConfig.DEFAULT_USER_ID
+        private val defaultUserName = BuildConfig.DEFAULT_USER_NAME
+        private val defaultMaxSessionMins = BuildConfig.DEFAULT_MAX_SESSION_MINS
+        private val defaultUserLevel = BuildConfig.DEFAULT_USER_LEVEL
+        private val defaultUserType = BuildConfig.DEFAULT_USER_TYPE
 
-        var merchantId = 367  // 商户ID
-        var userId = 666677   // 用户ID
+        var lines = defaultLines  // 服务器线路地址
+        var cert = defaultCert
+        var baseUrlImage = defaultBaseUrlImage  // 图片服务器地址
+
+        var merchantId = defaultMerchantId  // 商户ID
+        var userId = defaultUserId   // 用户ID
 
 
         //九月
@@ -65,11 +76,11 @@ class Constants {
 
 
         // 用户设置
-        var userName = "Wang Wu"  // 用户名称
-        var maxSessionMins = 2000  // 最大会话时长
-        var userLevel = 88  // 用户等级
+        var userName = defaultUserName  // 用户名称
+        var maxSessionMins = defaultMaxSessionMins  // 最大会话时长
+        var userLevel = defaultUserLevel  // 用户等级
         //用户类型 1-官方会员 2-邀请好友 3-合营会员
-        var userType = 2
+        var userType = defaultUserType
 
         // 运行时属性
         var xToken = ""  // HTTP请求Token
@@ -85,12 +96,45 @@ class Constants {
         // 消息存储
         var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
 
+        fun resetToDefaults() {
+            lines = defaultLines
+            cert = defaultCert
+            baseUrlImage = defaultBaseUrlImage
+            merchantId = defaultMerchantId
+            userId = defaultUserId
+            userName = defaultUserName
+            maxSessionMins = defaultMaxSessionMins
+            userLevel = defaultUserLevel
+            userType = defaultUserType
+            xToken = ""
+            domain = ""
+            workerId = 0
+            CONSULT_ID = 0
+            workerAvatar = ""
+            chatId = "0"
+            withAutoReplyU = null
+        }
+
         // 工具函数
         /**
          * 获取API基础URL
          * @return 完整的API基础URL，包含https前缀
          */
-        fun baseUrlApi(): String = "https://$domain"
+        fun baseUrlApi(): String {
+            val targetDomain = if (domain.isNotEmpty()) {
+                domain
+            } else {
+                defaultLines.split(",").firstOrNull()?.trim().orEmpty()
+            }
+            if (targetDomain.isEmpty()) {
+                return ""
+            }
+            return if (targetDomain.startsWith("http")) {
+                targetDomain
+            } else {
+                "https://${targetDomain}"
+            }
+        }
 
         /**
          * 获取自定义参数

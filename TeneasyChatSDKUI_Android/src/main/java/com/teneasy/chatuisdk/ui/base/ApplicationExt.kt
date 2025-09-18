@@ -14,6 +14,7 @@ class ApplicationExt: Application(){
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
+        //Constants.resetToDefaults()
         initXHttp2(this)
 
         val config = BundledEmojiCompatConfig(this)
@@ -32,8 +33,10 @@ class ApplicationExt: Application(){
 //        }
         //设置网络请求的全局基础地址
         if (Constants.domain.isEmpty()) {
-            Constants.domain = "https://localhost"
+            Constants.domain = Constants.lines.split(",").firstOrNull()?.trim().orEmpty()
         }
-        XHttpSDK.setBaseUrl(Constants.domain)
+        if (Constants.domain.isNotEmpty()) {
+            XHttpSDK.setBaseUrl(Constants.domain)
+        }
     }
 }
