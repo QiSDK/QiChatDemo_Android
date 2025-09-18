@@ -13,7 +13,7 @@ import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
 import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -25,7 +25,7 @@ import java.util.UUID
 open class BaseViewModel : ViewModel() {
 
     private val TAG = "BaseViewModel"
-    fun logError(code: Int, request: String, header: String, resp: String,  url: String) {
+    fun logError(code: Int, request: String, header: String, resp: String, url: String) {
         // 无可用线路是大事件，需要上报
         var errorItem = ErrorItem(url, code, "", 2, "")
         errorItem.code = code
@@ -62,7 +62,7 @@ open class BaseViewModel : ViewModel() {
 //            }, 3000) // 500 milliseconds delay
 
 
-            GlobalScope.launch {
+            viewModelScope.launch {
                 delay(3000) // Non-blocking delay
                 reportError()
             }

@@ -69,12 +69,16 @@ import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
-import java.util.*
+import java.util.Date
+import java.util.UUID
 import kotlin.collections.ArrayList
 
 
@@ -105,7 +109,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
     private var lastMsg: CMessage.Message? = null
     private var workInfo = WorkerInfo()
     private var lastActiveDateTime = Date()
-    private var reConnectTimer: Timer? = null
+    private var reConnectJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -687,10 +691,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         }
     }
 
-    //开一个定时器每隔几秒检查连接状态
+    // 启动协程定时检查连接状态
     private fun startTimer() {
         Log.i(TAG, "检查连接状态:${isConnected}")
-        if(isConnected) {
+        if (isConnected) {
             Log.i(TAG, "startTimer return")
             showTip("状态：已连接")
             return
@@ -701,12 +705,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
         }
 
         Constants.domain = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
-
-        // 确保在创建新Timer前清理旧Timer
         closeTimer()
-        reConnectTimer = Timer()
-        reConnectTimer?.schedule(object : TimerTask() {
-            override fun run() {
+        reConnectJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(6000)
+            while (isActive) {
                 when {
                     chatLib == null -> {
                         Log.d(TAG, "SDK重新初始化...")
@@ -718,26 +720,23 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate,
                         chatLib?.makeConnect()
                     }
                 }
-                // 更新上传进度
                 updateUploadProgressIfNeeded()
+                delay(3000)
             }
-
-            private fun updateUploadProgressIfNeeded() {
-                if (com.teneasy.sdk.UploadUtil.uploadProgress in 1..95 && (com.teneasy.sdk.UploadUtil.uploadProgress < 67 || com.teneasy.sdk.UploadUtil.uploadProgress >= 69)) {
-                    com.teneasy.sdk.UploadUtil.uploadProgress += 3
-                    uploadProgress(com.teneasy.sdk.UploadUtil.uploadProgress)
-                }
-            }
-        }, 6000, 3000) // 这里必须Delay 3s及以上，给初始化SDK足够的时间
+        }
     }
 
-    // 关闭连接状态定时器
-    private fun closeTimer() {
-        if(reConnectTimer != null) {
-            reConnectTimer?.purge()
-            reConnectTimer?.cancel()
-            reConnectTimer = null
+    private fun updateUploadProgressIfNeeded() {
+        if (com.teneasy.sdk.UploadUtil.uploadProgress in 1..95 && (com.teneasy.sdk.UploadUtil.uploadProgress < 67 || com.teneasy.sdk.UploadUtil.uploadProgress >= 69)) {
+            com.teneasy.sdk.UploadUtil.uploadProgress += 3
+            uploadProgress(com.teneasy.sdk.UploadUtil.uploadProgress)
         }
+    }
+
+    // 关闭连接状态任务
+    private fun closeTimer() {
+        reConnectJob?.cancel()
+        reConnectJob = null
     }
 
     fun getProgressLoader(): IProgressLoader? {
