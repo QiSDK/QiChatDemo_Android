@@ -1,6 +1,6 @@
 package com.teneasy.chatuisdk.ui.http.bean.ChatHistory
 
-import com.teneasy.chatuisdk.ui.http.Urls
+import com.teneasy.sdk.Urls
 import com.teneasyChat.api.common.CMessage
 
 data class ChatHistory (

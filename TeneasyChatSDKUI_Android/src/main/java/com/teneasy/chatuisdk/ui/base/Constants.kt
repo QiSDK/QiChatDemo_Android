@@ -91,10 +91,21 @@ class Constants {
         var chatId = "0"  // 聊天ID
         var withAutoReplyU: CMessage.WithAutoReply? = null  // 自动回复配置
         var errorReport = ErrorReport(arrayListOf())  // 错误报告
-        var uploadProgress = UploadUtil.uploadProgress  // 上传进度
+        //var uploadProgress = UploadUtil.uploadProgress  // 上传进度
 
         // 消息存储
         var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
+
+        fun sanitizeDomain(raw: String): String {
+            var result = raw.trim()
+            when {
+                result.startsWith("http://", ignoreCase = true) -> result = result.substring(7)
+                result.startsWith("https://", ignoreCase = true) -> result = result.substring(8)
+                result.startsWith("wss://", ignoreCase = true) -> result = result.substring(6)
+                result.startsWith("ws://", ignoreCase = true) -> result = result.substring(5)
+            }
+            return result.trimEnd('/')
+        }
 
         fun resetToDefaults() {
             lines = defaultLines
@@ -107,7 +118,7 @@ class Constants {
             userLevel = defaultUserLevel
             userType = defaultUserType
             xToken = ""
-            domain = ""
+            domain = sanitizeDomain(defaultLines.split(",").firstOrNull()?.trim().orEmpty())
             workerId = 0
             CONSULT_ID = 0
             workerAvatar = ""

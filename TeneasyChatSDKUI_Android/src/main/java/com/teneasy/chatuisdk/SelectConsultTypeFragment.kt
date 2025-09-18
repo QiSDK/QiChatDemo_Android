@@ -103,8 +103,9 @@ class SelectConsultTypeFragment : Fragment(){
             LineDetectDelegate {
             // 线路检测成功回调
             override fun useTheLine(line: String) {
-                Constants.domain = line
-                UserPreferences().putString(line, PARAM_DOMAIN)
+                val sanitized = Constants.sanitizeDomain(line)
+                Constants.domain = sanitized
+                UserPreferences().putString(PARAM_DOMAIN, sanitized)
                 // 设置网络请求的全局基础地址
                 XHttpSDK.setBaseUrl(Constants.baseUrlApi())
                 activity?.runOnUiThread {

@@ -33,10 +33,10 @@ class ApplicationExt: Application(){
 //        }
         //设置网络请求的全局基础地址
         if (Constants.domain.isEmpty()) {
-            Constants.domain = Constants.lines.split(",").firstOrNull()?.trim().orEmpty()
+            Constants.domain = Constants.sanitizeDomain(Constants.lines.split(",").firstOrNull()?.trim().orEmpty())
         }
         if (Constants.domain.isNotEmpty()) {
-            XHttpSDK.setBaseUrl(Constants.domain)
+            XHttpSDK.setBaseUrl(Constants.baseUrlApi())
         }
     }
 }

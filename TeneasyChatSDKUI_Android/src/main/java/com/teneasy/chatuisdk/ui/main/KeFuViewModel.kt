@@ -204,9 +204,9 @@ class KeFuViewModel : BaseViewModel() {
             if (videoPath.isNotEmpty()) {
                 videoBuilder.uri = videoPath
             } else if (history?.video != null) {
-                videoBuilder.uri = history.video.uri
-                videoBuilder.hlsUri = history.video.hlsUri
-                videoBuilder.thumbnailUri = history.video.thumbnailUri
+                videoBuilder.uri = history?.video.uri
+                videoBuilder.hlsUri = history?.video.hlsUri
+                videoBuilder.thumbnailUri = history?.video.thumbnailUri
             }
             setVideo(videoBuilder)
         }

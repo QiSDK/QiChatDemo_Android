@@ -14,6 +14,7 @@ import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
 import com.xuexiang.xhttp2.exception.ApiException
 import androidx.lifecycle.viewModelScope
+import java.util.LinkedHashMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -24,7 +25,34 @@ import java.util.UUID
 
 open class BaseViewModel : ViewModel() {
 
+    private val dedupLock = Any()
+    private val recentErrorSignatures = LinkedHashMap<String, Long>()
+
+    companion object {
+        private const val ERROR_DEDUP_WINDOW_MS = 300_000L
+    }
+
     private val TAG = "BaseViewModel"
+    private fun shouldSkipDuplicate(signature: String, now: Long): Boolean {
+        synchronized(dedupLock) {
+            val iterator = recentErrorSignatures.entries.iterator()
+            while (iterator.hasNext()) {
+                val entry = iterator.next()
+                if (now - entry.value > ERROR_DEDUP_WINDOW_MS) {
+                    iterator.remove()
+                } else {
+                    break
+                }
+            }
+
+            val exists = recentErrorSignatures.containsKey(signature)
+            if (!exists) {
+                recentErrorSignatures[signature] = now
+            }
+            return exists
+        }
+    }
+
     fun logError(code: Int, request: String, header: String, resp: String, url: String) {
         // 无可用线路是大事件，需要上报
         var errorItem = ErrorItem(url, code, "", 2, "")
@@ -37,6 +65,13 @@ open class BaseViewModel : ViewModel() {
                 timeZone = TimeZone.getDefault()
             //timeZone = TimeZone.getTimeZone("GMT")
             }.format(Date())
+
+        val signature = "$url|$code|$resp"
+        val now = System.currentTimeMillis()
+        if (shouldSkipDuplicate(signature, now)) {
+            Log.d(TAG, "skip duplicate error log: $signature")
+            return
+        }
 
         val errorPayload = ErrorPayload().apply {
             this.request = request
