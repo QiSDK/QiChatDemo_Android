@@ -38,6 +38,7 @@ import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.baseUrlApi
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.chatLib
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.domain
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
@@ -48,6 +49,7 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
 import com.teneasy.chatuisdk.ui.base.GlobalChatListener
+import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
@@ -88,7 +90,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private lateinit var viewModel: KeFuViewModel
     private lateinit var dialogBottomMenu: DialogBottomMenu
     private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
-    private lateinit var connectionManager: ChatConnectionManager
     private lateinit var uploadHandler: ChatUploadHandler
 
     // 状态变量
@@ -105,17 +106,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initializeComponents()
         setupBackPressHandler()
-    }
-
-    /**
-     * 初始化组件
-     */
-    private fun initializeComponents() {
         viewModel = KeFuViewModel()
         ensureDomainExists()
-        initChatSDK(Constants.domain)
+        // SDK已在SelectConsultTypeFragment中通过GlobalChatManager初始化
+        // GlobalChatManager会自动管理连接，无需手动初始化
         mIProgressLoader = getProgressLoader()
         initializePickFileLauncher()
     }
@@ -141,34 +136,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        if(!EventBus.getDefault().isRegistered(this)) {
-//            EventBus.getDefault().register(this)
-//        }
-        connectionManager = ChatConnectionManager(
-            viewLifecycleOwner.lifecycleScope,
-            ChatConnectionManager.Config(
-                ensureDomain = {
-                    val stored = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
-                    Constants.domain = Constants.sanitizeDomain(stored.ifEmpty { Constants.domain })
-                },
-                isConnected = { isConnected },
-                showTip = { showTip(it) },
-                initSdk = {
-                    if (Constants.chatLib == null) {
-                        Log.d(TAG, "SDK重新初始化...")
-                        showTip("初始化SDK...")
-                        initChatSDK(Constants.domain)
-                    }
-                },
-                makeConnect = {
-                    if (!isConnected) {
-                        Log.d(TAG, "SDK连接中")
-                        Constants.chatLib?.makeConnect()
-                    }
-                },
-                updateUploadProgress = { updateUploadProgressIfNeeded()}
-            )
-        )
+        // GlobalChatManager 已在 SelectConsultTypeFragment 中初始化并自动管理连接
 
         uploadHandler = ChatUploadHandler(
             fragment = this,
@@ -227,41 +195,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
     }
 
-    //初始化聊天SDK
-    private fun initChatSDK(baseUrl: String) {
-        val sanitizedBase = Constants.sanitizeDomain(baseUrl)
-        if (sanitizedBase.isEmpty()) {
-            showTip("未配置域名，请检查设置")
-            return
-        }
-        val wssUrl = "wss://$sanitizedBase/v1/gateway/h5?"
-        Log.i(TAG, "x-token: ${Constants.xToken}, time: ${Date()}")
-
-        // 初始化全局chatLib
-        if (Constants.chatLib == null) {
-            Constants.chatLib = ChatLib.getInstance()
-        }
-
-        Constants.chatLib?.apply {
-            // 使用全局监听器
-            listener = GlobalChatListener.instance
-            init(
-                Constants.cert,
-                Constants.xToken,
-                wssUrl,
-                Constants.userId,
-                "9zgd9YUc",
-                0L,
-                getCustomParam(),
-                Constants.maxSessionMins
-            )
-            runCatching {
-                makeConnect()
-            }.onFailure() {
-                showTip("初始化SDK失败，请稍后重试")
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -275,8 +208,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         // 通知全局消息委托，未读数已更新
         Constants.globalMessageDelegate?.onMessageReceived(Constants.CONSULT_ID)
 
-        updateWorkerNameIfAvailable()
-        startTimer()
+
+            updateWorkerNameIfAvailable()
+
     }
 
     override fun onPause() {
@@ -572,6 +506,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 findNavController().popBackStack()
             }
         }
+
+        if (chatLib?.isConnected == true) {
+            afterConnected()
+        }
     }
 
     private fun selectImageOrVideo(i: Int) {
@@ -776,19 +714,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
     }
 
-    private fun startTimer() {
-        connectionManager.start(isFirstLoad)
-    }
-
     private fun updateUploadProgressIfNeeded() {
         if (com.teneasy.sdk.UploadUtil.uploadProgress in 1..95 && (com.teneasy.sdk.UploadUtil.uploadProgress < 67 || com.teneasy.sdk.UploadUtil.uploadProgress >= 69)) {
             com.teneasy.sdk.UploadUtil.uploadProgress += 3
             onUploadProgress(com.teneasy.sdk.UploadUtil.uploadProgress)
         }
-    }
-
-    private fun closeTimer() {
-        connectionManager.stop()
     }
 
     fun getProgressLoader(): IProgressLoader? {
@@ -833,8 +763,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      * 释放资源
      */
     private fun releaseResources() {
-        closeTimer()
-        //Constants.chatLib?.disConnect()
+        // GlobalChatManager 会自动管理连接，无需手动断开
     }
 
     /**
@@ -1002,15 +931,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     //聊天sdk连接成功的回调
     override fun connected(c: GGateway.SCHi) {
+        afterConnected()
+    }
+
+    private fun afterConnected(){
         //把连接状态放到当前页面
         isConnected = true;
-        println(c.id)
-        showTip("连接成功")
-        Log.i(TAG, "连接成功, xToekn:" + c.token)
-        UserPreferences().putString(PARAM_XTOKEN, c.token)
-        Constants.xToken = c.token
         viewModel.assignWorker(Constants.CONSULT_ID)
-        chatExpireTime = c.chatExpireTime.toInt()
+        //chatExpireTime = c.chatExpireTime.toInt()
+        showTip("连接成功")
+
 
         //检查并重发上次连接未发出去的消息
         if (unSentMessage[CONSULT_ID] == null || unSentMessage[CONSULT_ID]!!.isEmpty()) {

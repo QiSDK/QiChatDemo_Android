@@ -16,6 +16,7 @@ import android.util.Log
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.SelectConsultTypeAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.GlobalMessageDelegate
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
@@ -112,6 +113,11 @@ class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
                 UserPreferences().putString(PARAM_DOMAIN, sanitized)
                 // 设置网络请求的全局基础地址
                 XHttpSDK.setBaseUrl(Constants.baseUrlApi())
+
+                // 初始化全局聊天管理器
+                Log.d("SelectConsultType", "线路检测成功，初始化GlobalChatManager: $line")
+                GlobalChatManager.instance.initializeGlobalChat()
+
                 activity?.runOnUiThread {
                     binding?.tvLine?.text = "当前线路：" + line
                     // 获取线路之后，获取咨询类型列表

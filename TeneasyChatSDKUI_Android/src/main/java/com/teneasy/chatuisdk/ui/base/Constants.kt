@@ -1,5 +1,6 @@
 package com.teneasy.chatuisdk.ui.base
 
+import android.util.Log
 import com.google.gson.Gson
 import com.teneasy.chatuisdk.BuildConfig
 import com.teneasy.chatuisdk.ui.http.bean.Custom
@@ -10,6 +11,7 @@ import com.teneasy.sdk.UploadUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
 import java.net.URLEncoder
+import java.util.Date
 
 // SharedPreferences 键值对常量
 const val PARAM_USER_ID = "USER_ID"           // 用户ID
@@ -139,12 +141,7 @@ class Constants {
          * @param count 接口返回的未读数
          */
         fun syncUnreadCount(consultId: Long, count: Int) {
-            val existingItem = unReadList.find { it.consultId == consultId }
-            if (existingItem != null) {
-                existingItem.unReadCount = count
-            } else {
-                unReadList.add(UnReadItem(consultId, count))
-            }
+            GlobalMessageManager.instance.syncUnreadCount(consultId, count)
         }
 
         /**
@@ -152,12 +149,7 @@ class Constants {
          * @param consultId 咨询会话ID
          */
         fun incrementUnreadCount(consultId: Long) {
-            val existingItem = unReadList.find { it.consultId == consultId }
-            if (existingItem != null) {
-                existingItem.unReadCount++
-            } else {
-                unReadList.add(UnReadItem(consultId, 1))
-            }
+            GlobalMessageManager.instance.addUnReadMessage(consultId)
         }
 
         /**
@@ -165,8 +157,7 @@ class Constants {
          * @param consultId 咨询会话ID
          */
         fun clearUnreadCount(consultId: Long) {
-            val existingItem = unReadList.find { it.consultId == consultId }
-            existingItem?.unReadCount = 0
+            GlobalMessageManager.instance.clearUnReadCount(consultId)
         }
 
         /**
@@ -175,7 +166,15 @@ class Constants {
          * @return 未读消息数量
          */
         fun getUnreadCount(consultId: Long): Int {
-            return unReadList.find { it.consultId == consultId }?.unReadCount ?: 0
+            return GlobalMessageManager.instance.getUnReadCount(consultId)
+        }
+
+        /**
+         * 获取总未读数
+         * @return 所有会话的未读消息总数
+         */
+        fun getTotalUnreadCount(): Int {
+            return GlobalMessageManager.instance.getTotalUnReadCount()
         }
 
         // 工具函数
@@ -211,7 +210,8 @@ class Constants {
                 userlevel = userLevel
                 usertype = userType //usertype: 用户类型 1-官方会员 2-邀请好友 3-合营会员
             }
-            return URLEncoder.encode(Gson().toJson(custom), "utf-8")
+            return Gson().toJson(custom)
+            //return URLEncoder.encode(Gson().toJson(custom), "utf-8")
         }
     }
 }

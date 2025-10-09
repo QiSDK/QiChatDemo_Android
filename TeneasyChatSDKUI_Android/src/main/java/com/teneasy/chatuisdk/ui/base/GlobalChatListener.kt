@@ -24,39 +24,52 @@ class GlobalChatListener : TeneasySDKDelegate {
     // 实际的业务监听器（通常是当前活跃的Fragment）
     var activeListener: TeneasySDKDelegate? = null
 
+    // 全局处理器（GlobalChatManager）
+    var globalHandler: TeneasySDKDelegate? = null
+
     override fun connected(c: GGateway.SCHi) {
+        // 先通知全局处理器
+        globalHandler?.connected(c)
+        // 再通知活跃监听器
         activeListener?.connected(c)
     }
 
     override fun systemMsg(msg: Result) {
+        // 先通知全局处理器
+        globalHandler?.systemMsg(msg)
+        // 再通知活跃监听器
         activeListener?.systemMsg(msg)
     }
 
     override fun receivedMsg(msg: CMessage.Message) {
         Log.d(TAG, "GlobalChatListener收到消息: consultId=${msg.consultId}, currentChatConsultId=${Constants.currentChatConsultId}")
 
-        // 全局消息监听：如果不在当前聊天页面，增加未读数
-        if (msg.consultId != Constants.currentChatConsultId) {
-            // 不在当前聊天页面，增加未读数
-            Constants.incrementUnreadCount(msg.consultId)
-            Log.d(TAG, "增加未读数: consultId=${msg.consultId}, count=${Constants.getUnreadCount(msg.consultId)}")
-            // 通知全局消息委托
-            Constants.globalMessageDelegate?.onMessageReceived(msg.consultId)
-        }
+        // 先通知全局处理器（处理未读数和事件总线）
+        globalHandler?.receivedMsg(msg)
 
-        // 转发给活跃的监听器
+        // 再转发给活跃的监听器
         activeListener?.receivedMsg(msg)
     }
 
     override fun msgReceipt(msg: CMessage.Message?, payloadId: Long, msgId: Long, errMsg: String) {
+        Log.d(TAG, "GlobalChatListener收到回执: payloadId=$payloadId, msgId=$msgId")
+        // 先通知全局处理器
+        globalHandler?.msgReceipt(msg, payloadId, msgId, errMsg)
+        // 再通知活跃监听器
         activeListener?.msgReceipt(msg, payloadId, msgId, errMsg)
     }
 
     override fun msgDeleted(msg: CMessage.Message?, payloadId: Long, msgId: Long, errMsg: String) {
+        // 先通知全局处理器
+        globalHandler?.msgDeleted(msg, payloadId, msgId, errMsg)
+        // 再通知活跃监听器
         activeListener?.msgDeleted(msg, payloadId, msgId, errMsg)
     }
 
     override fun workChanged(msg: GGateway.SCWorkerChanged) {
+        // 先通知全局处理器
+        globalHandler?.workChanged(msg)
+        // 再通知活跃监听器
         activeListener?.workChanged(msg)
     }
 }
