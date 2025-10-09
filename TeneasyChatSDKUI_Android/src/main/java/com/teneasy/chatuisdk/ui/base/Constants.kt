@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.teneasy.chatuisdk.BuildConfig
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
+import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.UploadListener
 import com.teneasy.sdk.UploadUtil
 import com.teneasy.sdk.ui.MessageItem
@@ -96,6 +97,12 @@ class Constants {
         // 消息存储
         var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
 
+        // 全局消息监听相关
+        var unReadList: MutableList<UnReadItem> = mutableListOf()  // 未读消息列表
+        var globalMessageDelegate: GlobalMessageDelegate? = null  // 全局消息委托
+        var currentChatConsultId: Long = 0  // 当前正在聊天的consultId
+        var chatLib: ChatLib? = null  // 全局ChatLib实例
+
         fun sanitizeDomain(raw: String): String {
             var result = raw.trim()
             when {
@@ -124,6 +131,51 @@ class Constants {
             workerAvatar = ""
             chatId = "0"
             withAutoReplyU = null
+        }
+
+        /**
+         * 同步接口返回的未读数到全局未读列表
+         * @param consultId 咨询会话ID
+         * @param count 接口返回的未读数
+         */
+        fun syncUnreadCount(consultId: Long, count: Int) {
+            val existingItem = unReadList.find { it.consultId == consultId }
+            if (existingItem != null) {
+                existingItem.unReadCount = count
+            } else {
+                unReadList.add(UnReadItem(consultId, count))
+            }
+        }
+
+        /**
+         * 增加未读消息数
+         * @param consultId 咨询会话ID
+         */
+        fun incrementUnreadCount(consultId: Long) {
+            val existingItem = unReadList.find { it.consultId == consultId }
+            if (existingItem != null) {
+                existingItem.unReadCount++
+            } else {
+                unReadList.add(UnReadItem(consultId, 1))
+            }
+        }
+
+        /**
+         * 清零某个consultId的未读数
+         * @param consultId 咨询会话ID
+         */
+        fun clearUnreadCount(consultId: Long) {
+            val existingItem = unReadList.find { it.consultId == consultId }
+            existingItem?.unReadCount = 0
+        }
+
+        /**
+         * 获取某个consultId的未读数
+         * @param consultId 咨询会话ID
+         * @return 未读消息数量
+         */
+        fun getUnreadCount(consultId: Long): Int {
+            return unReadList.find { it.consultId == consultId }?.unReadCount ?: 0
         }
 
         // 工具函数

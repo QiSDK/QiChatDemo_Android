@@ -12,9 +12,11 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.util.Log
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.SelectConsultTypeAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.GlobalMessageDelegate
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -28,7 +30,7 @@ import com.xuexiang.xhttp2.XHttpSDK
  * 咨询类型选择页面的Fragment
  * 用于显示不同类型的客服咨询选项
  */
-class SelectConsultTypeFragment : Fragment(){
+class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
     // ViewModel实例，用于处理业务逻辑
     private val viewModel: SelectConsultTypeViewModel by viewModels()
     // RecyclerView用于显示咨询类型列表
@@ -90,6 +92,8 @@ class SelectConsultTypeFragment : Fragment(){
     override fun onResume() {
         super.onResume()
 
+        // 注册全局消息委托
+        Constants.globalMessageDelegate = this
         // 检查必要参数是否已配置
         if (Constants.lines.isEmpty() || Constants.cert.isEmpty() || Constants.baseUrlImage.isEmpty() || Constants.merchantId == 0 || Constants.userId == 0){
             binding?.tvLine?.text = "* 请在设置页面设置好参数 *";
@@ -140,5 +144,25 @@ class SelectConsultTypeFragment : Fragment(){
         
         // 开始检测线路
         lineLib.getLine()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // 取消注册全局消息委托
+        if (Constants.globalMessageDelegate == this) {
+            Constants.globalMessageDelegate = null
+        }
+    }
+
+    /**
+     * 全局消息委托回调
+     * 当收到新消息时，更新adapter中的未读数显示
+     */
+    override fun onMessageReceived(consultId: Long) {
+        Log.d("SelectConsultType", "onMessageReceived: consultId=$consultId, 未读数=${Constants.getUnreadCount(consultId)}")
+        activity?.runOnUiThread {
+            // 通知adapter更新未读数
+            adapter.notifyDataSetChanged()
+        }
     }
 }

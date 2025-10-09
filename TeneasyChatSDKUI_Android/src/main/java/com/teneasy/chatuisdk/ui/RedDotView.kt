@@ -28,8 +28,7 @@ class RedDotView @JvmOverloads constructor(
     }
 
     fun setUnreadCount(count: Int) {
-//        unreadCount.text = count.toString()
-//        unreadCount.visibility = if (count > 0) VISIBLE else GONE
-        unreadCount.visibility = View.GONE
+        unreadCount.text = count.toString()
+        unreadCount.visibility = if (count > 0) VISIBLE else GONE
     }
 }

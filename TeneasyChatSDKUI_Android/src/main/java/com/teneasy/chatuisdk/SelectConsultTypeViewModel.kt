@@ -48,6 +48,15 @@ class SelectConsultTypeViewModel : BaseViewModel() {
                 override fun onSuccess(res: ReturnData<Entrance>) {
                     _consultList.value = res.data.consults
 
+                    // 同步接口返回的未读数到全局未读列表
+                    res.data.consults.forEach { consult ->
+                        val consultId = consult.consultId ?: 0L
+                        val unreadCount = consult.unread ?: 0
+                        if (consultId > 0) {
+                            Constants.syncUnreadCount(consultId, unreadCount)
+                        }
+                    }
+
                     // 记录非成功状态的请求
                     if (res.code != 0) {
                         val resp = Gson().toJson(res)

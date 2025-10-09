@@ -26,8 +26,10 @@ class SelectConsultTypeAdapter(
         holder.tvTitle.text = item.name
         holder.itemView.setOnClickListener { onItemClick(item) }
 
-        if ((item.unread ?: 0) > 0) {
-            holder.tvRedDotView.setUnreadCount(item.unread ?: 0)
+        // 从全局未读数列表中获取实时未读数
+        val unreadCount = Constants.getUnreadCount(item.consultId ?: 0L)
+        if (unreadCount > 0) {
+            holder.tvRedDotView.setUnreadCount(unreadCount)
             holder.tvRedDotView.visibility = View.VISIBLE
         } else {
             holder.tvRedDotView.visibility = View.GONE
