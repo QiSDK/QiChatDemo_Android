@@ -10,9 +10,12 @@ import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 
 class PdfViewerActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompleteListener,
     OnPageErrorListener {
@@ -48,20 +51,36 @@ class PdfViewerActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompl
     private fun downloadAndOpenPdf(pdfUrl: String) {
         Thread {
             try {
-                val url = URL(pdfUrl)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.connect()
-                
-                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                    val inputStream = connection.inputStream
+                // 检查本地是否已下载
+                val localFile = getLocalPdfFile(pdfUrl)
+
+                if (localFile.exists()) {
+                    Log.d(TAG, "PDF已存在本地缓存: ${localFile.absolutePath}")
                     runOnUiThread {
-                        displayPdfFromStream(inputStream)
+                        displayPdfFromFile(localFile)
                     }
                 } else {
-                    runOnUiThread {
-                        textView.visibility = View.VISIBLE
-                        textView.text = "下载PDF文件失败，错误码: ${connection.responseCode}"
+                    // 下载PDF
+                    Log.d(TAG, "开始下载PDF: $pdfUrl")
+                    val url = URL(pdfUrl)
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.connect()
+
+                    if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                        val inputStream = connection.inputStream
+
+                        // 保存到本地
+                        saveToLocal(inputStream, localFile)
+
+                        runOnUiThread {
+                            displayPdfFromFile(localFile)
+                        }
+                    } else {
+                        runOnUiThread {
+                            textView.visibility = View.VISIBLE
+                            textView.text = "下载PDF文件失败，错误码: ${connection.responseCode}"
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -73,9 +92,53 @@ class PdfViewerActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompl
             }
         }.start()
     }
+
+    /**
+     * 获取本地PDF文件路径
+     */
+    private fun getLocalPdfFile(pdfUrl: String): File {
+        val cacheDir = File(cacheDir, "pdfs")
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs()
+        }
+
+        // 使用URL的MD5作为文件名
+        val fileName = pdfUrl.toMD5() + ".pdf"
+        return File(cacheDir, fileName)
+    }
+
+    /**
+     * 保存输入流到本地文件
+     */
+    private fun saveToLocal(inputStream: InputStream, file: File) {
+        try {
+            val outputStream = FileOutputStream(file)
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                outputStream.write(buffer, 0, bytesRead)
+            }
+
+            outputStream.close()
+            inputStream.close()
+            Log.d(TAG, "PDF已保存到本地: ${file.absolutePath}")
+        } catch (e: Exception) {
+            Log.e(TAG, "保存PDF到本地失败", e)
+            throw e
+        }
+    }
+
+    /**
+     * 字符串转MD5
+     */
+    private fun String.toMD5(): String {
+        val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
     
-    private fun displayPdfFromStream(inputStream: InputStream) {
-        pdfView.fromStream(inputStream)
+    private fun displayPdfFromFile(file: File) {
+        pdfView.fromFile(file)
             .defaultPage(pageNumber)
             .onPageChange(this)
             .enableAnnotationRendering(true)

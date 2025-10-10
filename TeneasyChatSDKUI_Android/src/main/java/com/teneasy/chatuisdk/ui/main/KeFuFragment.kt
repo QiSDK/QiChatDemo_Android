@@ -34,6 +34,7 @@ import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.FullImageActivity
 import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.SelectConsultTypeViewModel
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
@@ -98,6 +99,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private var isFirstLoad = true
     private var tempContent = ""
     private var chatExpireTime = 0 // 会话过期时间（秒）
+    private var uploadProgressTimer: Handler? = null
+    private var uploadProgressRunnable: Runnable? = null
 
     // 聊天相关数据
     private var lastMsg: CMessage.Message? = null
@@ -773,6 +776,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Constants.workerId = 0
         isConnected = false
         isFirstLoad = true
+        var sViewModel = SelectConsultTypeViewModel();
+        sViewModel.markRead()
     }
 
     //==========图片选择===========//
@@ -1281,9 +1286,42 @@ code: 1005 会话超时
         runOnUiThread {
             mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
         }
+
+        // 当进度为1时，启动定时器
+        if (progress == 1) {
+            startUploadProgressTimer()
+        }
+    }
+
+    /**
+     * 启动上传进度更新定时器
+     */
+    private fun startUploadProgressTimer() {
+        stopUploadProgressTimer() // 先停止现有的定时器
+
+        uploadProgressTimer = Handler(Looper.getMainLooper())
+        uploadProgressRunnable = object : Runnable {
+            override fun run() {
+                updateUploadProgressIfNeeded()
+                uploadProgressTimer?.postDelayed(this, 3000) // 每3秒执行一次
+            }
+        }
+        uploadProgressTimer?.postDelayed(uploadProgressRunnable!!, 3000)
+    }
+
+    /**
+     * 停止上传进度更新定时器
+     */
+    private fun stopUploadProgressTimer() {
+        uploadProgressRunnable?.let {
+            uploadProgressTimer?.removeCallbacks(it)
+        }
+        uploadProgressTimer = null
+        uploadProgressRunnable = null
     }
 
     private fun onUploadSuccess(urls: com.teneasy.sdk.Urls, isVideo: Boolean) {
+        stopUploadProgressTimer() // 停止定时器
         com.teneasy.sdk.UploadUtil.uploadProgress = 0
         if (isVideo) {
             sendVideoMsg(urls)
@@ -1297,6 +1335,7 @@ code: 1005 会话超时
     }
 
     private fun onUploadFailed(message: String) {
+        stopUploadProgressTimer() // 停止定时器
         com.teneasy.sdk.UploadUtil.uploadProgress = 0
         Log.i(TAG, "上传失败：$message")
         runOnUiThread {
