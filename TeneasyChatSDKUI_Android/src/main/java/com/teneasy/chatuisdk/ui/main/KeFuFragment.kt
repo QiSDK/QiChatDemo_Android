@@ -227,7 +227,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Constants.currentChatConsultId = 0
 
         viewModel.apply {
-            getUnSendMsg()
+           // getUnSendMsg()
             reportError()
         }
     }
@@ -948,10 +948,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
 
         //检查并重发上次连接未发出去的消息
-        if (unSentMessage[CONSULT_ID] == null || unSentMessage[CONSULT_ID]!!.isEmpty()) {
-            viewModel.getUnSendMsg()
-        }
-        msgAdapter.msgList?.let { Constants.chatLib?.let { it1 -> viewModel.handleUnSendMsg(it, it1) } }
+//        if (unSentMessage[CONSULT_ID] == null || unSentMessage[CONSULT_ID]!!.isEmpty()) {
+//            viewModel.getUnSendMsg()
+//        }
+        //msgAdapter.msgList?.let { Constants.chatLib?.let { it1 -> viewModel.handleUnSendMsg(it, it1) } }
     }
 
     //聊天sdk里面有什么异常，会从这个回调告诉
