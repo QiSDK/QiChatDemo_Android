@@ -97,7 +97,7 @@ class Constants {
         //var uploadProgress = UploadUtil.uploadProgress  // 上传进度
 
         // 消息存储
-        var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
+        //var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
 
         // 全局消息监听相关
         var unReadList: MutableList<UnReadItem> = mutableListOf()  // 未读消息列表
@@ -210,8 +210,8 @@ class Constants {
                 userlevel = userLevel
                 usertype = userType //usertype: 用户类型 1-官方会员 2-邀请好友 3-合营会员
             }
-            //return Gson().toJson(custom)
-            return URLEncoder.encode(Gson().toJson(custom), "utf-8")
+            return Gson().toJson(custom)
+            //return URLEncoder.encode(Gson().toJson(custom), "utf-8")
         }
     }
 }

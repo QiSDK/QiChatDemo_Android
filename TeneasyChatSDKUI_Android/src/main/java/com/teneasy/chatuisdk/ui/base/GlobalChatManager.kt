@@ -130,6 +130,8 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
         connectionJob?.cancel()
         connectionJob = null
         Constants.chatLib?.disConnect()
+        Constants.unReadList.clear()
+        //Constants.unSentMessage.clear()
         Log.i(TAG, "全局ChatLib已停止")
     }
 

@@ -44,7 +44,7 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.domain
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.imageTypes
-import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
+//import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.videoTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
@@ -506,6 +506,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             }
         }
 
+        print("已经连接？" + chatLib?.isConnected)
         if (chatLib?.isConnected == true) {
             afterConnected()
         }
@@ -942,6 +943,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private fun afterConnected(){
         //把连接状态放到当前页面
         isConnected = true;
+
         viewModel.assignWorker(Constants.CONSULT_ID)
         //chatExpireTime = c.chatExpireTime.toInt()
         //showTip("连接成功")
