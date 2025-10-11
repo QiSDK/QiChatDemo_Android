@@ -56,7 +56,7 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
     /**
      * 根据需要建立连接
      */
-    fun connectIfNeeded() {
+   fun connectIfNeeded() {
         val chatLib = Constants.chatLib
         if (chatLib == null) {
             Log.w(TAG, "chatLib为null，无法连接")
@@ -101,7 +101,7 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
                 }
             }
         } else {
-            Log.i(TAG, "重新连接")
+            Log.i(TAG, "重新连接 " + Date())
             try {
                 chatLib.makeConnect()
             } catch (e: Exception) {

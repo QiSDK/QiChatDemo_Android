@@ -201,6 +201,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     override fun onResume() {
         super.onResume()
+        GlobalChatManager.instance.connectIfNeeded()
         // 设置当前Fragment为活跃监听器
         GlobalChatListener.instance.activeListener = this
 
@@ -218,11 +219,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     override fun onPause() {
         super.onPause()
-        // 取消活跃监听器
-        if (GlobalChatListener.instance.activeListener == this) {
-            GlobalChatListener.instance.activeListener = null
-        }
-
         // 离开聊天页面时，重置当前聊天consultId
         Constants.currentChatConsultId = 0
 
@@ -618,17 +614,17 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
             Log.d(TAG, "assignWorker Id: ${workInfo.id}")
 
-            if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
-                this.lifecycleScope.launch {
-                    //delay(100L)
-                    if (isFirstLoad) {
-                        Log.d(TAG, "重新获取聊天历史")
+//            if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
+//                this.lifecycleScope.launch {
+//                    //delay(100L)
+//                    if (isFirstLoad) {
+//                        Log.d(TAG, "重新获取聊天历史")
                         viewModel.queryChatHistory(Constants.CONSULT_ID)
-                    }
-                }
-                Constants.workerId = workInfo.id
+//                    }
+//                }
+
                 updateWorkInf(workInfo)
-            }
+            //}
         }
 
         viewModel.mlNewWorkAssigned.observe(viewLifecycleOwner) {
@@ -776,6 +772,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Constants.workerId = 0
         isConnected = false
         isFirstLoad = true
+        // 取消活跃监听器
+        if (GlobalChatListener.instance.activeListener == this) {
+            GlobalChatListener.instance.activeListener = null
+        }
         var sViewModel = SelectConsultTypeViewModel();
         sViewModel.markRead()
     }
@@ -944,7 +944,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         isConnected = true;
         viewModel.assignWorker(Constants.CONSULT_ID)
         //chatExpireTime = c.chatExpireTime.toInt()
-        showTip("连接成功")
+        //showTip("连接成功")
 
 
         //检查并重发上次连接未发出去的消息
@@ -1136,7 +1136,7 @@ code: 1005 会话超时
      * @param msg 提示内容
      * @param duration 显示时长(毫秒)，0表示一直显示
      */
-    private fun showTip(msg: String, duration: Long = 0) {
+    private fun showTip(msg: String, duration: Long = 3000) {
         if (!isAdded) return // 防止Fragment已分离导致的崩溃
 
         runOnUiThread {
@@ -1174,10 +1174,13 @@ code: 1005 会话超时
     private fun updateWorkInf(workerInfo: WorkerInfo) {
         binding?.let {
             it.tvTitle.text = "${workerInfo.workerName}"
-            if (!isFirstLoad) {
+//            if (!isFirstLoad) {
+//                showTip("您好，${workerInfo.workerName}为您服务！")
+//            }
+            if (Constants.workerId != workInfo.id) {
                 showTip("您好，${workerInfo.workerName}为您服务！")
             }
-
+            Constants.workerId = workInfo.id
             // 更新头像
             if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
                 val url = Constants.baseUrlImage + workerInfo.workerAvatar
