@@ -1,6 +1,8 @@
 package com.teneasy.chatuisdk.ui.base
 
 import android.util.Log
+import com.google.protobuf.Extension
+import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.Result
 import com.teneasy.sdk.TeneasySDKDelegate
@@ -144,7 +146,10 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
         if (msg.consultId != Constants.currentChatConsultId) {
             GlobalMessageManager.instance.addUnReadMessage(msg.consultId)
         }
-
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_EVALUATE){
+            ToastUtils.showToast(ApplicationExt.context!!, "收到要求评估的消息！")
+            return
+        }
         // 通过事件总线分发消息
         ChatEventBus.post(ChatEvent.MessageReceived(msg))
     }
