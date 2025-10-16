@@ -259,8 +259,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     val messageItem = msgAdapter.msgList?.get(position)
                     var text = messageItem?.cMsg?.content?.data ?: ""
                     var srcType =
-                        messageItem?.cMsg?.msgSourceType ?: CMessage.MsgSourceType.MST_SYSTEM_WORKER
-                    if (text.contains("\"color\"")) {
+                        messageItem?.cMsg?.msgSourceType ?: CMessage.MsgSourceType.MST_DEFAULT
+                    if (srcType == CMessage.MsgSourceType.MST_SYSTEM_WORKER || srcType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
                         val gson = Gson()
                         try {
                             val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
@@ -644,11 +644,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 for (item in this.reversed()) {
                     // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
                     var isLeft = true
-                    if (item.sender == item.chatId || item.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER) {
+                    if (item.sender == item.chatId) {
                         isLeft = false
                     }
                     if (item.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
-                        isLeft = true
+                        isLeft = false
                     }
 
                     if (item.msgOp == "MSG_OP_DELETE") {
@@ -1071,7 +1071,7 @@ code: 1005 会话超时
      */
     private fun processReceivedMessage(msg: CMessage.Message) {
         var left = true;
-        if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER) {
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
             left = false;
         }
 

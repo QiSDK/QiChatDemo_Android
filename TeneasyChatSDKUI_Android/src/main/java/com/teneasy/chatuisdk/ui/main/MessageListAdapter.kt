@@ -509,7 +509,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
                 var text = item.cMsg!!.content.data
 
-                if (text.contains("\"color\"")){
+                if (item.cMsg!!.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER || item.cMsg!!.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER){
                     val gson = Gson()
                     try {
                         val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
@@ -632,7 +632,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.rlLeftImagecontainer.visibility = View.GONE
                 var text = item.cMsg!!.content.data
 
-                if (text.contains("\"color\"")){
+                if (item.cMsg!!.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER || item.cMsg!!.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER){
                     val gson = Gson()
                     try {
                         val textBody: TextBody = gson.fromJson(text, TextBody::class.java)

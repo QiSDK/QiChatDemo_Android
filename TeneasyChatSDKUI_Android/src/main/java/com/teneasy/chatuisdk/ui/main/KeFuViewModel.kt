@@ -231,6 +231,7 @@ class KeFuViewModel : BaseViewModel() {
             msgTime = Utils().getNowTimeStamp()
             msgFmt = CMessage.MessageFormat.MSG_TEXT
             msgId = (history.msgId ?: "0").toLong()
+            msgSourceType = history.msgSourceType
             
             // 处理回复消息
             val replyMsgId = (history.replyMsgId ?: "0").toLong()

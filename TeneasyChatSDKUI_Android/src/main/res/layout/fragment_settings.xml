@@ -19,49 +19,97 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"></TextView>
 
-    <EditText android:id="@+id/et_Line"
-        android:hint="输入线路，用逗号分开"
-        android:text=""
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <EditText android:id="@+id/et_Line"
+            android:hint="输入线路，用逗号分开"
+            android:text=""
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
 
-    <EditText android:id="@+id/etWssCert"
-        android:hint="输入访问证书 Cert"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
 
-    <EditText android:id="@+id/etMerchanId"
-        android:hint="输入商户Id"
-        android:inputType="phone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <EditText android:id="@+id/etWssCert"
+            android:hint="输入访问证书 Cert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText android:id="@+id/etUserId"
-        android:hint="输入User Id"
-        android:inputType="phone"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
 
-    <EditText android:id="@+id/etUserName"
-        android:hint="输入UserName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <EditText android:id="@+id/etMerchanId"
+            android:hint="输入商户Id"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText android:id="@+id/et_BaseImgUrl"
-        android:hint="请输入UrlImage"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
 
-    <EditText android:id="@+id/et_MaxSessionMins"
-        android:hint="最长会话时间，单位分钟"
-        android:inputType="phone"
+        <EditText android:id="@+id/etUserId"
+            android:hint="输入User Id"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <EditText android:id="@+id/et_UserLevel"
-        android:hint="用户级别"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <EditText android:id="@+id/etUserName"
+            android:hint="输入UserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <EditText android:id="@+id/et_BaseImgUrl"
+            android:hint="请输入UrlImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <EditText android:id="@+id/et_MaxSessionMins"
+            android:hint="最长会话时间，单位分钟"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <EditText android:id="@+id/et_UserLevel"
+            android:hint="用户级别"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Spinner
         android:id="@+id/spinner_UserType"
