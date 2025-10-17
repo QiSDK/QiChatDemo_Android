@@ -95,7 +95,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     // 状态变量
     private var mIProgressLoader: IProgressLoader? = null
-    private var isConnected = false
     private var isFirstLoad = true
     private var tempContent = ""
     private var chatExpireTime = 0 // 会话过期时间（秒）
@@ -133,7 +132,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private fun setupBackPressHandler() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             exitChat()
-            findNavController().popBackStack()
         }
     }
 
@@ -502,7 +500,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
             this.llClose.setOnClickListener {
                 exitChat()
-                findNavController().popBackStack()
             }
         }
 
@@ -753,6 +750,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         try {
             releaseResources()
             resetState()
+            //返回到上个页面
+            findNavController().popBackStack()
             Log.i(TAG, "聊天资源已释放")
         } catch (e: Exception) {
             Log.e(TAG, "释放聊天资源时发生错误: ${e.message}")
@@ -771,7 +770,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      */
     private fun resetState() {
         Constants.workerId = 0
-        isConnected = false
         isFirstLoad = true
         // 取消活跃监听器
         if (GlobalChatListener.instance.activeListener == this) {
@@ -941,9 +939,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     }
 
     private fun afterConnected(){
-        //把连接状态放到当前页面
-        isConnected = true;
-
         viewModel.assignWorker(Constants.CONSULT_ID)
         //chatExpireTime = c.chatExpireTime.toInt()
         //showTip("连接成功")
@@ -964,9 +959,6 @@ code: 1002 无效的Token
 code: 1005 会话超时
          */
         Log.i(TAG, msg.msg)
-        if (msg.code in 1000..1010) {
-            isConnected = false
-        }
         if (msg.code == 1002 || msg.code == 1010 || msg.code == 1005) {
             if (msg.code == 1002) {
                 //showTip("无效的Token")
@@ -979,12 +971,9 @@ code: 1005 会话超时
                 //1005，会话超时
                 toast(msg.msg)
                 //禁掉重试机制
-                runOnUiThread {
                     mIProgressLoader?.dismissLoading()
                     exitChat()
-                    //返回到上个页面
-                    findNavController().popBackStack()
-                }
+                GlobalChatManager.instance.stopGlobalChat()
                 Log.i(TAG, "返回页面")
             }
         } else {
