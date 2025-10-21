@@ -94,7 +94,7 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
                     "9zgd9YUc",
                     0L,
                     Constants.getCustomParam(),
-                    Constants.maxSessionMins
+                    Constants.maxSessionMins, ApplicationExt.context
                 )
                 try {
                     makeConnect()
