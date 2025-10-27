@@ -9,6 +9,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.teneasy.chatuisdk.Consults
 import com.teneasy.chatuisdk.databinding.ConsultTypeItemBinding
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 
 class SelectConsultTypeAdapter(
     private val dataList: ArrayList<Consults>,
@@ -27,7 +28,7 @@ class SelectConsultTypeAdapter(
         holder.itemView.setOnClickListener { onItemClick(item) }
 
         // 从全局未读数列表中获取实时未读数
-        val unreadCount = Constants.getUnreadCount(item.consultId ?: 0L)
+        val unreadCount = GlobalMessageManager.instance.getUnReadCount(item.consultId ?: 0L)
         if (unreadCount > 0) {
             holder.tvRedDotView.setUnreadCount(unreadCount)
             holder.tvRedDotView.visibility = View.VISIBLE

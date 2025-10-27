@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.xuexiang.xhttp2.XHttp
@@ -53,7 +54,7 @@ class SelectConsultTypeViewModel : BaseViewModel() {
                         val consultId = consult.consultId ?: 0L
                         val unreadCount = consult.unread ?: 0
                         if (consultId > 0) {
-                            Constants.syncUnreadCount(consultId, unreadCount)
+                            GlobalMessageManager.instance.syncUnreadCount(consultId, unreadCount)
                         }
                     }
 

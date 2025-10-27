@@ -51,6 +51,7 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
 import com.teneasy.chatuisdk.ui.base.GlobalChatListener
 import com.teneasy.chatuisdk.ui.base.GlobalChatManager
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
@@ -206,7 +207,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         // 设置当前聊天的consultId
         Constants.currentChatConsultId = Constants.CONSULT_ID
         // 清零当前会话的未读数
-        Constants.clearUnreadCount(Constants.CONSULT_ID)
+        GlobalMessageManager.instance.clearUnReadCount(Constants.CONSULT_ID)
         // 通知全局消息委托，未读数已更新
         Constants.globalMessageDelegate?.onMessageReceived(Constants.CONSULT_ID)
 

@@ -18,6 +18,7 @@ import com.teneasy.chatuisdk.ui.SelectConsultTypeAdapter
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.GlobalMessageDelegate
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -165,7 +166,7 @@ class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
      * 当收到新消息时，更新adapter中的未读数显示
      */
     override fun onMessageReceived(consultId: Long) {
-        Log.d("SelectConsultType", "onMessageReceived: consultId=$consultId, 未读数=${Constants.getUnreadCount(consultId)}")
+        Log.d("SelectConsultType", "onMessageReceived: consultId=$consultId, 未读数=${GlobalMessageManager.instance.getUnReadCount(consultId)}")
         activity?.runOnUiThread {
             // 通知adapter更新未读数
             adapter.notifyDataSetChanged()
