@@ -172,9 +172,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
                 autoReplyItem?.qa?.let {
                     holder.qaAdapter.setDataList(it)
-                    //holder.qaAdapter.expandGroup(0)
                     holder.tvTitle.visibility = View.VISIBLE
-
                     val localTime = Utils().timestampToDate(System.currentTimeMillis() + 700)
                     holder.tvLeftTime.text = localTime
                 }
