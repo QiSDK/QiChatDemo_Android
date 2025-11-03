@@ -60,16 +60,13 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             >
-            <TextView
+            <WebView
                 android:id="@+id/tvTitle"
-                android:text="Title"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="@color/black4848"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcv_qa"

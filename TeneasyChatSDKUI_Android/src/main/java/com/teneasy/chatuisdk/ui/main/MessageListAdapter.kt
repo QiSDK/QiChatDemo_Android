@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -141,7 +142,34 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         }
         else if (holder is QAViewHolder) {
             if (autoReplyItem != null){
-                holder.tvTitle.text = autoReplyItem?.title
+                // 配置WebView以显示HTML内容
+                holder.tvTitle.settings.apply {
+                    javaScriptEnabled = false // 如果不需要JavaScript，保持关闭以提高安全性
+                    setSupportZoom(false)
+                }
+
+                // 构建HTML内容，添加样式以匹配原有TextView的样式
+                val htmlContent = """
+                    <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                font-size: 14px;
+                                font-weight: bold;
+                                color: #484848;
+                                font-family: sans-serif;
+                            }
+                        </style>
+                    </head>
+                    <body>${autoReplyItem?.title ?: ""}</body>
+                    </html>
+                """.trimIndent()
+
+                holder.tvTitle.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+
                 autoReplyItem?.qa?.let {
                     holder.qaAdapter.setDataList(it)
                     //holder.qaAdapter.expandGroup(0)
