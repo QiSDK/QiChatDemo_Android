@@ -603,6 +603,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         viewModel.mlAssignWorker.observe(viewLifecycleOwner) {
             if (it == null) {
+
                 Log.d(TAG, "assignWorker 失败: null")
                 return@observe
             }
