@@ -1,14 +1,17 @@
 package com.teneasy.chatuisdk.ui.base
 
+import android.util.Log
 import com.google.gson.Gson
 import com.teneasy.chatuisdk.BuildConfig
 import com.teneasy.chatuisdk.ui.http.bean.Custom
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
+import com.teneasy.sdk.ChatLib
 import com.teneasy.sdk.UploadListener
 import com.teneasy.sdk.UploadUtil
 import com.teneasy.sdk.ui.MessageItem
 import com.teneasyChat.api.common.CMessage
 import java.net.URLEncoder
+import java.util.Date
 
 // SharedPreferences 键值对常量
 const val PARAM_USER_ID = "USER_ID"           // 用户ID
@@ -94,7 +97,13 @@ class Constants {
         //var uploadProgress = UploadUtil.uploadProgress  // 上传进度
 
         // 消息存储
-        var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
+        //var unSentMessage: MutableMap<Long, ArrayList<MessageItem>> = mutableMapOf()  // 未发送消息缓存
+
+        // 全局消息监听相关
+        var unReadList: MutableList<UnReadItem> = mutableListOf()  // 未读消息列表
+        var globalMessageDelegate: GlobalMessageDelegate? = null  // 全局消息委托
+        var currentChatConsultId: Long = 0  // 当前正在聊天的consultId
+        var chatLib: ChatLib? = null  // 全局ChatLib实例
 
         fun sanitizeDomain(raw: String): String {
             var result = raw.trim()
@@ -159,7 +168,8 @@ class Constants {
                 userlevel = userLevel
                 usertype = userType //usertype: 用户类型 1-官方会员 2-邀请好友 3-合营会员
             }
-            return URLEncoder.encode(Gson().toJson(custom), "utf-8")
+            return Gson().toJson(custom)
+            //return URLEncoder.encode(Gson().toJson(custom), "utf-8")
         }
     }
 }

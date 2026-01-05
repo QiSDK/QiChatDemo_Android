@@ -34,19 +34,24 @@ import com.teneasy.chatuisdk.BR
 import com.teneasy.chatuisdk.FullImageActivity
 import com.teneasy.chatuisdk.FullVideoActivity
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.SelectConsultTypeViewModel
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.baseUrlApi
+import com.teneasy.chatuisdk.ui.base.Constants.Companion.chatLib
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.domain
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.fileTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.getCustomParam
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.imageTypes
-import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
+//import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.videoTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
+import com.teneasy.chatuisdk.ui.base.GlobalChatListener
+import com.teneasy.chatuisdk.ui.base.GlobalChatManager
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
@@ -87,16 +92,15 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private lateinit var viewModel: KeFuViewModel
     private lateinit var dialogBottomMenu: DialogBottomMenu
     private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
-    private lateinit var connectionManager: ChatConnectionManager
     private lateinit var uploadHandler: ChatUploadHandler
 
     // 状态变量
     private var mIProgressLoader: IProgressLoader? = null
-    private var chatLib = ChatLib.getInstance()
-    private var isConnected = false
     private var isFirstLoad = true
     private var tempContent = ""
     private var chatExpireTime = 0 // 会话过期时间（秒）
+    private var uploadProgressTimer: Handler? = null
+    private var uploadProgressRunnable: Runnable? = null
 
     // 聊天相关数据
     private var lastMsg: CMessage.Message? = null
@@ -105,17 +109,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initializeComponents()
         setupBackPressHandler()
-    }
-
-    /**
-     * 初始化组件
-     */
-    private fun initializeComponents() {
         viewModel = KeFuViewModel()
         ensureDomainExists()
-        initChatSDK(Constants.domain)
+        // SDK已在SelectConsultTypeFragment中通过GlobalChatManager初始化
+        // GlobalChatManager会自动管理连接，无需手动初始化
         mIProgressLoader = getProgressLoader()
         initializePickFileLauncher()
     }
@@ -135,40 +133,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private fun setupBackPressHandler() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             exitChat()
-            findNavController().popBackStack()
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        if(!EventBus.getDefault().isRegistered(this)) {
-//            EventBus.getDefault().register(this)
-//        }
-        connectionManager = ChatConnectionManager(
-            viewLifecycleOwner.lifecycleScope,
-            ChatConnectionManager.Config(
-                ensureDomain = {
-                    val stored = UserPreferences().getString(PARAM_DOMAIN, Constants.domain)
-                    Constants.domain = Constants.sanitizeDomain(stored.ifEmpty { Constants.domain })
-                },
-                isConnected = { isConnected },
-                showTip = { showTip(it) },
-                initSdk = {
-                    if (chatLib == null) {
-                        Log.d(TAG, "SDK重新初始化...")
-                        showTip("初始化SDK...")
-                        initChatSDK(Constants.domain)
-                    }
-                },
-                makeConnect = {
-                    if (!isConnected) {
-                        Log.d(TAG, "SDK连接中")
-                        chatLib?.makeConnect()
-                    }
-                },
-                updateUploadProgress = { updateUploadProgressIfNeeded()}
-            )
-        )
+        // GlobalChatManager 已在 SelectConsultTypeFragment 中初始化并自动管理连接
 
         uploadHandler = ChatUploadHandler(
             fragment = this,
@@ -227,46 +197,32 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
     }
 
-    //初始化聊天SDK
-    private fun initChatSDK(baseUrl: String) {
-        val sanitizedBase = Constants.sanitizeDomain(baseUrl)
-        if (sanitizedBase.isEmpty()) {
-            showTip("未配置域名，请检查设置")
-            return
-        }
-        val wssUrl = "wss://$sanitizedBase/v1/gateway/h5?"
-        Log.i(TAG, "x-token: ${Constants.xToken}, time: ${Date()}")
-
-        chatLib.apply {
-            listener = this@KeFuFragment
-            init(
-                Constants.cert,
-                Constants.xToken,
-                wssUrl,
-                Constants.userId,
-                "9zgd9YUc",
-                0L,
-                getCustomParam(),
-                Constants.maxSessionMins
-            )
-            runCatching {
-                makeConnect()
-            }.onFailure() {
-                showTip("初始化SDK失败，请稍后重试")
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()
-        updateWorkerNameIfAvailable()
-        startTimer()
+        GlobalChatManager.instance.connectIfNeeded()
+        // 设置当前Fragment为活跃监听器
+        GlobalChatListener.instance.activeListener = this
+
+        // 设置当前聊天的consultId
+        Constants.currentChatConsultId = Constants.CONSULT_ID
+        // 清零当前会话的未读数
+        GlobalMessageManager.instance.clearUnReadCount(Constants.CONSULT_ID)
+        // 通知全局消息委托，未读数已更新
+        Constants.globalMessageDelegate?.onMessageReceived(Constants.CONSULT_ID)
+
+
+            updateWorkerNameIfAvailable()
+
     }
 
     override fun onPause() {
         super.onPause()
+        // 离开聊天页面时，重置当前聊天consultId
+        Constants.currentChatConsultId = 0
+
         viewModel.apply {
-            getUnSendMsg()
+           // getUnSendMsg()
             reportError()
         }
     }
@@ -292,7 +248,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 override fun onDelete(position: Int) {
                     val messageItem = msgAdapter.msgList?.get(position)
                     messageItem?.let {
-                        chatLib?.deleteMessage(it.cMsg?.msgId ?: 0)
+                        Constants.chatLib?.deleteMessage(it.cMsg?.msgId ?: 0)
                         viewModel.removeMsgItem(it)
                     }
                 }
@@ -302,8 +258,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     val messageItem = msgAdapter.msgList?.get(position)
                     var text = messageItem?.cMsg?.content?.data ?: ""
                     var srcType =
-                        messageItem?.cMsg?.msgSourceType ?: CMessage.MsgSourceType.MST_SYSTEM_WORKER
-                    if (text.contains("\"color\"")) {
+                        messageItem?.cMsg?.msgSourceType ?: CMessage.MsgSourceType.MST_DEFAULT
+                    if (srcType == CMessage.MsgSourceType.MST_SYSTEM_WORKER || srcType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
                         val gson = Gson()
                         try {
                             val textBody: TextBody = gson.fromJson(text, TextBody::class.java)
@@ -344,11 +300,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         //val pdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
                         Utils().openPdfFile(requireContext(), url, "示例PDF文档")
                         return
-                    } else if (ext.lowercase() == "pdf") {
+                    } else if (ext.lowercase() == "csv") {
                         //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
                         ToastUtils.showToast(
                             requireActivity(),
-                            "暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序"
+                            "暂不支持在线查看CSV文件，但您可以下载后再浏览。（确保您的设备里有查看CSV文件的应用程序）"
                         )
                         return
                     }
@@ -545,8 +501,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
             this.llClose.setOnClickListener {
                 exitChat()
-                findNavController().popBackStack()
             }
+        }
+
+        print("已经连接？" + chatLib?.isConnected)
+        if (chatLib?.isConnected == true) {
+            afterConnected()
         }
     }
 
@@ -643,6 +603,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         viewModel.mlAssignWorker.observe(viewLifecycleOwner) {
             if (it == null) {
+
                 Log.d(TAG, "assignWorker 失败: null")
                 return@observe
             }
@@ -653,17 +614,17 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
             Log.d(TAG, "assignWorker Id: ${workInfo.id}")
 
-            if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
-                this.lifecycleScope.launch {
-                    //delay(100L)
-                    if (isFirstLoad) {
-                        Log.d(TAG, "重新获取聊天历史")
+//            if (Constants.workerId == 0 || Constants.workerId != it.workerId) {
+//                this.lifecycleScope.launch {
+//                    //delay(100L)
+//                    if (isFirstLoad) {
+//                        Log.d(TAG, "重新获取聊天历史")
                         viewModel.queryChatHistory(Constants.CONSULT_ID)
-                    }
-                }
-                Constants.workerId = workInfo.id
+//                    }
+//                }
+
                 updateWorkInf(workInfo)
-            }
+            //}
         }
 
         viewModel.mlNewWorkAssigned.observe(viewLifecycleOwner) {
@@ -682,11 +643,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 for (item in this.reversed()) {
                     // sender如果=chatid就是 用户 发的，反之是 客服 或者系统发的
                     var isLeft = true
-                    if (item.sender == item.chatId || item.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER) {
+                    if (item.sender == item.chatId) {
                         isLeft = false
                     }
                     if (item.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
-                        isLeft = true
+                        isLeft = false
                     }
 
                     if (item.msgOp == "MSG_OP_DELETE") {
@@ -752,19 +713,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
     }
 
-    private fun startTimer() {
-        connectionManager.start(isFirstLoad)
-    }
-
     private fun updateUploadProgressIfNeeded() {
         if (com.teneasy.sdk.UploadUtil.uploadProgress in 1..95 && (com.teneasy.sdk.UploadUtil.uploadProgress < 67 || com.teneasy.sdk.UploadUtil.uploadProgress >= 69)) {
             com.teneasy.sdk.UploadUtil.uploadProgress += 3
             onUploadProgress(com.teneasy.sdk.UploadUtil.uploadProgress)
         }
-    }
-
-    private fun closeTimer() {
-        connectionManager.stop()
     }
 
     fun getProgressLoader(): IProgressLoader? {
@@ -799,6 +752,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         try {
             releaseResources()
             resetState()
+            //返回到上个页面
+            findNavController().popBackStack()
             Log.i(TAG, "聊天资源已释放")
         } catch (e: Exception) {
             Log.e(TAG, "释放聊天资源时发生错误: ${e.message}")
@@ -809,8 +764,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      * 释放资源
      */
     private fun releaseResources() {
-        closeTimer()
-        chatLib.disConnect()
+        // GlobalChatManager 会自动管理连接，无需手动断开
     }
 
     /**
@@ -818,8 +772,13 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      */
     private fun resetState() {
         Constants.workerId = 0
-        isConnected = false
         isFirstLoad = true
+        // 取消活跃监听器
+        if (GlobalChatListener.instance.activeListener == this) {
+            GlobalChatListener.instance.activeListener = null
+        }
+        var sViewModel = SelectConsultTypeViewModel();
+        sViewModel.markRead()
     }
 
     //==========图片选择===========//
@@ -856,7 +815,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      * 一般来讲，每发消息就需要跟当前时间做比较，除非设置force = true
      */
     fun sendMsg(txt: String, force: Boolean = false, replyMsgId: Long = 0) {
-        if (chatLib == null) {
+        if (Constants.chatLib == null) {
             showTip("SDK还未初始化")
             return
         }
@@ -886,7 +845,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
 
         // 发送消息
-        chatLib?.sendMessage(
+        Constants.chatLib?.sendMessage(
             trimmedText,
             CMessage.MessageFormat.MSG_TEXT,
             Constants.CONSULT_ID,
@@ -896,10 +855,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         // 添加到消息列表
         val messageItem = MessageItem().apply {
-            cMsg = chatLib?.sendingMessage
+            cMsg = Constants.chatLib?.sendingMessage
             isLeft = false
         }
-        viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+        viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
     }
 
@@ -907,7 +866,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
      * 根据传递的图片地址，发送图片消息。该方法会发送socket消息
      */
     fun sendImgMsg(url: com.teneasy.sdk.Urls) {
-        if (chatLib == null) {
+        if (Constants.chatLib == null) {
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
@@ -919,7 +878,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         val ext = url.uri.split(".").last()
         if (imageTypes.contains(ext.lowercase())) {
-            chatLib?.sendMessage(
+            Constants.chatLib?.sendMessage(
                 url.uri,
                 CMessage.MessageFormat.MSG_IMG,
                 Constants.CONSULT_ID,
@@ -927,7 +886,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 withAutoReplyU
             )
         } else if (fileTypes.contains(ext.lowercase())) {
-            chatLib?.sendMessage(
+            Constants.chatLib?.sendMessage(
                 url.uri,
                 CMessage.MessageFormat.MSG_FILE,
                 Constants.CONSULT_ID,
@@ -944,14 +903,14 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
 
         val messageItem = MessageItem()
-        messageItem.cMsg = chatLib?.sendingMessage
+        messageItem.cMsg = Constants.chatLib?.sendingMessage
         messageItem.isLeft = false
-        viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+        viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
     }
 
     fun sendVideoMsg(urls: com.teneasy.sdk.Urls) {
-        if (chatLib == null) {
+        if (Constants.chatLib == null) {
             Toast.makeText(context, "SDK还未初始化", Toast.LENGTH_SHORT).show()
             return
         }
@@ -961,7 +920,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             withAutoReplyU = null
         }
         //withAutoReplyU参数, 把用户点自动回复的最后一条消息带到客服端，方便客服端显示，仅用户主动发的第一条消息会这样做，其余会被SDK忽略
-        chatLib?.sendVideoMessage(
+        Constants.chatLib?.sendVideoMessage(
             urls.uri,
             urls.thumbnailUri,
             urls.hlsUri,
@@ -970,29 +929,28 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             withAutoReplyU
         )
         val messageItem = MessageItem()
-        messageItem.cMsg = chatLib?.sendingMessage
+        messageItem.cMsg = Constants.chatLib?.sendingMessage
         messageItem.isLeft = false
-        viewModel.addMsgItem(messageItem, chatLib?.payloadId ?: 0)
+        viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
     }
 
     //聊天sdk连接成功的回调
     override fun connected(c: GGateway.SCHi) {
-        //把连接状态放到当前页面
-        isConnected = true;
-        println(c.id)
-        showTip("连接成功")
-        Log.i(TAG, "连接成功, xToekn:" + c.token)
-        UserPreferences().putString(PARAM_XTOKEN, c.token)
-        Constants.xToken = c.token
+        afterConnected()
+    }
+
+    private fun afterConnected(){
         viewModel.assignWorker(Constants.CONSULT_ID)
-        chatExpireTime = c.chatExpireTime.toInt()
+        //chatExpireTime = c.chatExpireTime.toInt()
+        //showTip("连接成功")
+
 
         //检查并重发上次连接未发出去的消息
-        if (unSentMessage[CONSULT_ID] == null || unSentMessage[CONSULT_ID]!!.isEmpty()) {
-            viewModel.getUnSendMsg()
-        }
-        msgAdapter.msgList?.let { chatLib?.let { it1 -> viewModel.handleUnSendMsg(it, it1) } }
+//        if (unSentMessage[CONSULT_ID] == null || unSentMessage[CONSULT_ID]!!.isEmpty()) {
+//            viewModel.getUnSendMsg()
+//        }
+        //msgAdapter.msgList?.let { Constants.chatLib?.let { it1 -> viewModel.handleUnSendMsg(it, it1) } }
     }
 
     //聊天sdk里面有什么异常，会从这个回调告诉
@@ -1003,9 +961,6 @@ code: 1002 无效的Token
 code: 1005 会话超时
          */
         Log.i(TAG, msg.msg)
-        if (msg.code in 1000..1010) {
-            isConnected = false
-        }
         if (msg.code == 1002 || msg.code == 1010 || msg.code == 1005) {
             if (msg.code == 1002) {
                 //showTip("无效的Token")
@@ -1018,12 +973,9 @@ code: 1005 会话超时
                 //1005，会话超时
                 toast(msg.msg)
                 //禁掉重试机制
-                runOnUiThread {
                     mIProgressLoader?.dismissLoading()
                     exitChat()
-                    //返回到上个页面
-                    findNavController().popBackStack()
-                }
+                GlobalChatManager.instance.stopGlobalChat()
                 Log.i(TAG, "返回页面")
             }
         } else {
@@ -1082,6 +1034,8 @@ code: 1005 会话超时
     override fun receivedMsg(msg: CMessage.Message) {
         if (!isAdded) return // 防止Fragment已分离导致的崩溃
 
+        // 注意：全局消息监听和未读数逻辑已在GlobalChatListener中处理
+
         // 当用户端在当前会话，但是其他咨询类型客服发来了消息，给予提醒
         if (msg.consultId != Constants.CONSULT_ID) {
             handleOtherConsultMessage()
@@ -1108,7 +1062,7 @@ code: 1005 会话超时
      */
     private fun processReceivedMessage(msg: CMessage.Message) {
         var left = true;
-        if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER) {
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
             left = false;
         }
 
@@ -1175,7 +1129,7 @@ code: 1005 会话超时
      * @param msg 提示内容
      * @param duration 显示时长(毫秒)，0表示一直显示
      */
-    private fun showTip(msg: String, duration: Long = 0) {
+    private fun showTip(msg: String, duration: Long = 3000) {
         if (!isAdded) return // 防止Fragment已分离导致的崩溃
 
         runOnUiThread {
@@ -1213,10 +1167,13 @@ code: 1005 会话超时
     private fun updateWorkInf(workerInfo: WorkerInfo) {
         binding?.let {
             it.tvTitle.text = "${workerInfo.workerName}"
-            if (!isFirstLoad) {
+//            if (!isFirstLoad) {
+//                showTip("您好，${workerInfo.workerName}为您服务！")
+//            }
+            if (Constants.workerId != workInfo.id) {
                 showTip("您好，${workerInfo.workerName}为您服务！")
             }
-
+            Constants.workerId = workInfo.id
             // 更新头像
             if (workerInfo.workerAvatar != null && workerInfo.workerAvatar?.isEmpty() == false) {
                 val url = Constants.baseUrlImage + workerInfo.workerAvatar
@@ -1231,19 +1188,19 @@ code: 1005 会话超时
     }
 
     private fun sendLocalMsg(msg: String, isLeft: Boolean = true) {
-        if (chatLib == null) {
+        if (Constants.chatLib == null) {
             showTip("SDK还未初始化")
             return
         }
         var chatModel = MessageItem()
-        chatModel.cMsg = chatLib?.composeALocalMessage(msg)
+        chatModel.cMsg = Constants.chatLib?.composeALocalMessage(msg)
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功
         viewModel.addMsgItem(chatModel, 0)
     }
 
     private fun sendLocalImgMsg(imgPath: String, isLeft: Boolean = true) {
-        if (chatLib == null) {
+        if (Constants.chatLib == null) {
             showTip("SDK还未初始化")
             return
         }
@@ -1325,9 +1282,42 @@ code: 1005 会话超时
         runOnUiThread {
             mIProgressLoader?.updateMessage("上传中 " + progress.toString() + "%")
         }
+
+        // 当进度为1时，启动定时器
+        if (progress == 1) {
+            startUploadProgressTimer()
+        }
+    }
+
+    /**
+     * 启动上传进度更新定时器
+     */
+    private fun startUploadProgressTimer() {
+        stopUploadProgressTimer() // 先停止现有的定时器
+
+        uploadProgressTimer = Handler(Looper.getMainLooper())
+        uploadProgressRunnable = object : Runnable {
+            override fun run() {
+                updateUploadProgressIfNeeded()
+                uploadProgressTimer?.postDelayed(this, 3000) // 每3秒执行一次
+            }
+        }
+        uploadProgressTimer?.postDelayed(uploadProgressRunnable!!, 3000)
+    }
+
+    /**
+     * 停止上传进度更新定时器
+     */
+    private fun stopUploadProgressTimer() {
+        uploadProgressRunnable?.let {
+            uploadProgressTimer?.removeCallbacks(it)
+        }
+        uploadProgressTimer = null
+        uploadProgressRunnable = null
     }
 
     private fun onUploadSuccess(urls: com.teneasy.sdk.Urls, isVideo: Boolean) {
+        stopUploadProgressTimer() // 停止定时器
         com.teneasy.sdk.UploadUtil.uploadProgress = 0
         if (isVideo) {
             sendVideoMsg(urls)
@@ -1341,6 +1331,7 @@ code: 1005 会话超时
     }
 
     private fun onUploadFailed(message: String) {
+        stopUploadProgressTimer() // 停止定时器
         com.teneasy.sdk.UploadUtil.uploadProgress = 0
         Log.i(TAG, "上传失败：$message")
         runOnUiThread {

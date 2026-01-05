@@ -11,7 +11,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.chatId
-import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
+//import com.teneasy.chatuisdk.ui.base.Constants.Companion.unSentMessage
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
@@ -231,6 +231,7 @@ class KeFuViewModel : BaseViewModel() {
             msgTime = Utils().getNowTimeStamp()
             msgFmt = CMessage.MessageFormat.MSG_TEXT
             msgId = (history.msgId ?: "0").toLong()
+            msgSourceType = history.msgSourceType
             
             // 处理回复消息
             val replyMsgId = (history.replyMsgId ?: "0").toLong()
@@ -490,7 +491,7 @@ class KeFuViewModel : BaseViewModel() {
         )
     }
 
-    fun handleUnSendMsg(list: ArrayList<MessageItem>, chatLib: ChatLib): Boolean {
+    /*fun handleUnSendMsg(list: ArrayList<MessageItem>, chatLib: ChatLib): Boolean {
         unSentMessage[CONSULT_ID]?.let {
             Log.i(TAG, "handleUnSendMsg: " + it.size)
             for (item in it) {
@@ -520,7 +521,7 @@ class KeFuViewModel : BaseViewModel() {
 
         unSentMessage[CONSULT_ID] = filteredList as ArrayList<MessageItem>
         Log.i(TAG, "getUnSendMsg: " + filteredList.size)
-    }
+    }*/
 
     fun getReplyItem(oriMsg: hMessage) : ReplyMessageItem{
         var replyItem = ReplyMessageItem()

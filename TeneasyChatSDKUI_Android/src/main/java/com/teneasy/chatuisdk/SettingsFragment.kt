@@ -13,6 +13,8 @@ import androidx.navigation.fragment.findNavController
 import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.chatuisdk.databinding.FragmentSettingsBinding
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.GlobalChatManager
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.base.PARAM_CERT
 import com.teneasy.chatuisdk.ui.base.PARAM_IMAGEBASEURL
 import com.teneasy.chatuisdk.ui.base.PARAM_LINES
@@ -108,6 +110,7 @@ class SettingsFragment : Fragment() {
                 }
 
                 // 将配置保存到SharedPreferences
+                UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
                 UserPreferences().putString(PARAM_CERT, Constants.cert)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
@@ -118,6 +121,8 @@ class SettingsFragment : Fragment() {
                 UserPreferences().putInt(PARAM_MAXSESSIONMINS, Constants.maxSessionMins)
                 UserPreferences().putInt(PARAM_USER_LEVEL, Constants.userLevel)
                 UserPreferences().putInt(PARAM_USER_TYPE, Constants.userType)
+
+                GlobalChatManager.instance.stopGlobalChat()
 
                 // 显示保存成功提示
                 ToastUtils.showToast(requireContext(), "保存成功")

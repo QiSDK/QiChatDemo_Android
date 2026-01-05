@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.http.MainApi
 import com.teneasy.chatuisdk.ui.http.ReturnData
 import com.xuexiang.xhttp2.XHttp
@@ -47,6 +48,15 @@ class SelectConsultTypeViewModel : BaseViewModel() {
             object : ProgressLoadingCallBack<ReturnData<Entrance>>(null) {
                 override fun onSuccess(res: ReturnData<Entrance>) {
                     _consultList.value = res.data.consults
+
+                    // 同步接口返回的未读数到全局未读列表
+                    res.data.consults.forEach { consult ->
+                        val consultId = consult.consultId ?: 0L
+                        val unreadCount = consult.unread ?: 0
+                        if (consultId > 0) {
+                            GlobalMessageManager.instance.syncUnreadCount(consultId, unreadCount)
+                        }
+                    }
 
                     // 记录非成功状态的请求
                     if (res.code != 0) {
