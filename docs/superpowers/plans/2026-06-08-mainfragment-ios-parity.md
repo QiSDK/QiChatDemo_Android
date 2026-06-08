@@ -24,13 +24,13 @@
 
 ---
 
-## Task 1: 备用网页 URL 配置（Constants + Utils）
+## ✅ Task 1: 备用网页 URL 配置（Constants + Utils） — 已完成（commit 68a7e89）
 
 **Files:**
 - Modify: `TeneasyChatSDKUI_Android/src/main/java/com/teneasy/chatuisdk/ui/base/Constants.kt`
 - Modify: `TeneasyChatSDKUI_Android/src/main/java/com/teneasy/chatuisdk/ui/base/Utils.kt`
 
-- [ ] **Step 1: 新增常量 key**
+- [x] **Step 1: 新增常量 key**
 
 在 `Constants.kt` 顶部常量区（`PARAM_USER_TYPE` 之后，第 27 行后）追加：
 
@@ -38,7 +38,7 @@
 const val PARAM_BACKUP_WEB_URL = "PARAM_BACKUP_WEB_URL"  // 备用客服网页URL
 ```
 
-- [ ] **Step 2: 新增运行时属性**
+- [x] **Step 2: 新增运行时属性**
 
 在 `Constants.kt` 的 `companion object` 内，`var userType = defaultUserType` 之后（约第 86 行后）追加：
 
@@ -46,7 +46,7 @@ const val PARAM_BACKUP_WEB_URL = "PARAM_BACKUP_WEB_URL"  // 备用客服网页UR
 var backupWebUrl = ""  // 备用客服网页URL（深链失败时回退）
 ```
 
-- [ ] **Step 3: resetToDefaults 重置该字段**
+- [x] **Step 3: resetToDefaults 重置该字段**
 
 在 `Constants.kt` 的 `resetToDefaults()` 内，`xToken = ""` 那一行附近追加：
 
@@ -54,7 +54,7 @@ var backupWebUrl = ""  // 备用客服网页URL（深链失败时回退）
 backupWebUrl = ""
 ```
 
-- [ ] **Step 4: readConfig 读取该字段**
+- [x] **Step 4: readConfig 读取该字段**
 
 在 `Utils.kt` 的 `readConfig()` 内（`Constants.userType = ...` 那一行之后，约第 90 行后）追加：
 
@@ -64,12 +64,12 @@ Constants.backupWebUrl = UserPreferences().getString(PARAM_BACKUP_WEB_URL, Const
 
 确保 `Utils.kt` 顶部已 `import com.teneasy.chatuisdk.ui.base.PARAM_BACKUP_WEB_URL`（若 `Utils.kt` 与 `Constants` 同包 `com.teneasy.chatuisdk.ui.base`，常量为同包顶层声明，无需 import；先确认包名，缺则加）。
 
-- [ ] **Step 5: 编译**
+- [x] **Step 5: 编译**
 
 Run: `./gradlew :TeneasyChatSDKUI_Android:compileReleaseKotlin`
 Expected: BUILD SUCCESSFUL（无未解析引用）
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add TeneasyChatSDKUI_Android/src/main/java/com/teneasy/chatuisdk/ui/base/Constants.kt \
@@ -79,13 +79,13 @@ git commit -m "feat: 新增备用客服网页URL配置项 (Constants + readConfi
 
 ---
 
-## Task 2: 设置页备用网页 URL 输入框
+## ✅ Task 2: 设置页备用网页 URL 输入框 — 已完成（commit 0d05458）
 
 **Files:**
 - Modify: `TeneasyChatSDKUI_Android/src/main/res/layout/fragment_settings.xml`
 - Modify: `TeneasyChatSDKUI_Android/src/main/java/com/teneasy/chatuisdk/SettingsFragment.kt`
 
-- [ ] **Step 1: 布局新增输入框**
+- [x] **Step 1: 布局新增输入框**
 
 在 `fragment_settings.xml` 中，`Spinner`（id `spinner_UserType`，约第 114 行）**之前**插入：
 
@@ -103,7 +103,7 @@ git commit -m "feat: 新增备用客服网页URL配置项 (Constants + readConfi
     </com.google.android.material.textfield.TextInputLayout>
 ```
 
-- [ ] **Step 2: SettingsFragment 填充已保存值**
+- [x] **Step 2: SettingsFragment 填充已保存值**
 
 在 `SettingsFragment.kt` 的 `binding?.apply { ... }` 内，`this.etUserLevel?.setText(...)`（约第 74 行）之后追加：
 
@@ -111,7 +111,7 @@ git commit -m "feat: 新增备用客服网页URL配置项 (Constants + readConfi
             this.etBackupWebUrl?.setText(Constants.backupWebUrl)  // 备用客服网页URL
 ```
 
-- [ ] **Step 3: SettingsFragment 保存该值**
+- [x] **Step 3: SettingsFragment 保存该值**
 
 在 `SettingsFragment.kt` 的 `btnSave` 点击回调内，`Constants.userLevel = ...`（约第 102 行）之后追加：
 
@@ -125,7 +125,7 @@ git commit -m "feat: 新增备用客服网页URL配置项 (Constants + readConfi
                 UserPreferences().putString(PARAM_BACKUP_WEB_URL, Constants.backupWebUrl)
 ```
 
-- [ ] **Step 4: 补充 import**
+- [x] **Step 4: 补充 import**
 
 在 `SettingsFragment.kt` 顶部 import 区追加：
 
@@ -133,12 +133,12 @@ git commit -m "feat: 新增备用客服网页URL配置项 (Constants + readConfi
 import com.teneasy.chatuisdk.ui.base.PARAM_BACKUP_WEB_URL
 ```
 
-- [ ] **Step 5: 编译**
+- [x] **Step 5: 编译**
 
 Run: `./gradlew :TeneasyChatSDKUI_Android:assembleDebug`
 Expected: BUILD SUCCESSFUL（`etBackupWebUrl` 由 ViewBinding 生成，能解析）
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add TeneasyChatSDKUI_Android/src/main/res/layout/fragment_settings.xml \
@@ -148,14 +148,14 @@ git commit -m "feat: 设置页新增备用客服网页URL输入框"
 
 ---
 
-## Task 3: ChatTheme 模型 + 11 套预设
+## ✅ Task 3: ChatTheme 模型 + 11 套预设 — 已完成（commit a199ab1）
 
 **Files:**
 - Create: `app/src/main/java/com/teneasy/qldemo/ChatTheme.kt`
 
 颜色按 iOS `ChatTheme.swift` 的 `presets` 忠实换算（0~1 → 0~255，四舍五入；alpha<1 用 `Color.argb`）。
 
-- [ ] **Step 1: 创建文件**
+- [x] **Step 1: 创建文件**
 
 写入 `app/src/main/java/com/teneasy/qldemo/ChatTheme.kt`：
 
@@ -289,12 +289,12 @@ data class ChatTheme(
 }
 ```
 
-- [ ] **Step 2: 编译**
+- [x] **Step 2: 编译**
 
 Run: `./gradlew :app:compileDebugKotlin`
 Expected: BUILD SUCCESSFUL
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 git add app/src/main/java/com/teneasy/qldemo/ChatTheme.kt
@@ -303,12 +303,12 @@ git commit -m "feat: 新增 demo 主题模型 ChatTheme + 11 套预设（移植�
 
 ---
 
-## Task 4: 重写主屏布局 fragment_main.xml
+## ✅ Task 4: 重写主屏布局 fragment_main.xml — 已完成（commit a7e8b1c）
 
 **Files:**
 - Modify: `app/src/main/res/layout/fragment_main.xml`
 
-- [ ] **Step 1: 整体替换布局内容**
+- [x] **Step 1: 整体替换布局内容**
 
 把 `fragment_main.xml` 全文替换为：
 
@@ -412,12 +412,12 @@ git commit -m "feat: 新增 demo 主题模型 ChatTheme + 11 套预设（移植�
 
 > 注意：`btn_open_pdf` 已移除；`btn_send`/`iv_settings`/`tv_version_number` 的 id 保留，避免后续代码改名。
 
-- [ ] **Step 2: 编译（仅资源/绑定生成）**
+- [x] **Step 2: 编译（仅资源/绑定生成）**
 
 Run: `./gradlew :app:assembleDebug`
 Expected: 此时 `MainFragment.kt` 仍引用旧的 `btnOpenPdf`，**预期编译失败**于 MainFragment（未解析 `btnOpenPdf`）。这是正常的，下个任务会改 MainFragment。若想单独验证布局，可改跑 `./gradlew :app:processDebugResources`，Expected: BUILD SUCCESSFUL。
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 git add app/src/main/res/layout/fragment_main.xml
@@ -426,12 +426,12 @@ git commit -m "feat: 重写主屏布局（主题色卡+两按钮），移除PDF�
 
 ---
 
-## Task 5: 重写 MainFragment（主题 + 备用客服）
+## ✅ Task 5: 重写 MainFragment（主题 + 备用客服） — 已完成（commit 3eae1c5；后续 31a9242 补 queries 可见性 + 释放视图绑定）
 
 **Files:**
 - Modify: `app/src/main/java/com/teneasy/qldemo/MainFragment.kt`
 
-- [ ] **Step 1: 整体替换 MainFragment.kt**
+- [x] **Step 1: 整体替换 MainFragment.kt**
 
 把 `MainFragment.kt` 全文替换为：
 
@@ -654,12 +654,12 @@ class MainFragment : Fragment() {
 }
 ```
 
-- [ ] **Step 2: 编译整个 app**
+- [x] **Step 2: 编译整个 app**
 
 Run: `./gradlew :app:assembleDebug`
 Expected: BUILD SUCCESSFUL（`btnBackup`/`tvTitle`/`themeContainer` 等由 Task 4 的布局 ViewBinding 生成）
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 git add app/src/main/java/com/teneasy/qldemo/MainFragment.kt
@@ -668,7 +668,7 @@ git commit -m "feat: MainFragment 对齐 iOS（主题切换+渐变+备用客服�
 
 ---
 
-## Task 6: 整体编译 + 手动验证
+## ⬜ Task 6: 整体编译 + 手动验证 — 待办（需真机/模拟器手动验证）
 
 **Files:** 无（验证任务）
 
