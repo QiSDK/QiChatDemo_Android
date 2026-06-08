@@ -61,5 +61,10 @@
 
             </action>
         </intent>
+        <!-- 备用客服深链：声明可见性，便于 resolveActivity 等查询命中 juhekefu 协议 -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="juhekefu" />
+        </intent>
     </queries>
 </manifest>

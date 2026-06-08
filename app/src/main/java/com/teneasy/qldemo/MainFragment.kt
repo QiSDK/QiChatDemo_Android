@@ -64,6 +64,13 @@ class MainFragment : Fragment() {
         return binding?.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // 避免视图绑定在返回栈期间持有已销毁的视图层级
+        swatches.clear()
+        binding = null
+    }
+
     // 构建主题色卡（每个预设一个圆形 swatch）
     private fun buildThemeSwatches() {
         val container = binding?.themeContainer ?: return
