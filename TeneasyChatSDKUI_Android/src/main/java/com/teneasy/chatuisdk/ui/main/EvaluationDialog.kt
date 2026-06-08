@@ -48,7 +48,9 @@ class EvaluationDialog(
     private val scene: EvaluationScene,
     private val config: EvaluationConfig,
     private val consultId: Long,
-    private val tintColor: Int
+    private val tintColor: Int,
+    /** 评价状态变化回调（1=已评价, 2=已关闭），对应 Flutter onStatusChanged */
+    private val onStatusChanged: ((Int) -> Unit)? = null
 ) : Dialog(context, android.R.style.Theme_Translucent_NoTitleBar) {
 
     companion object {
@@ -178,6 +180,7 @@ class EvaluationDialog(
         if (scene == EvaluationScene.TRIGGERED) {
             // 触发场景下关闭 = 通知后端不要再弹出，fire-and-forget
             postEvaluation(0, "", 1, null)
+            onStatusChanged?.invoke(2)
         }
         dismissSafely()
     }
@@ -193,6 +196,7 @@ class EvaluationDialog(
         postEvaluation(score, remark, 0) { success, errMsg ->
             submitting = false
             if (success) {
+                onStatusChanged?.invoke(1)
                 dismissSafely()
                 showFeedbackToastIfNeeded(score)
             } else {

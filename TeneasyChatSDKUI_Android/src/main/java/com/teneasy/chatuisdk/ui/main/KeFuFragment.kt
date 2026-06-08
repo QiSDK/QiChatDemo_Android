@@ -122,6 +122,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     // 仅统计本次会话内用户新发出的消息（不含历史记录），用于控制「客服评价」按钮的显示
     private var hasSentInSession = false
 
+    // 评价状态：0=未评价 1=已评价 2=已关闭 3=空会话。1/2 视为已完成，按钮置灰禁用
+    private var evaluationStatus: Int? = null
+    private val isEvaluationDone get() = evaluationStatus == 1 || evaluationStatus == 2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupBackPressHandler()
@@ -812,6 +816,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         Constants.workerId = 0
         isFirstLoad = true
         hasSentInSession = false
+        evaluationStatus = null
         // 取消活跃监听器
         if (GlobalChatListener.instance.activeListener == this) {
             GlobalChatListener.instance.activeListener = null
@@ -1416,6 +1421,7 @@ code: 1005 会话超时
                                 refreshEvaluationButtonVisibility()
                             }
                         }
+                        fetchEvaluationStatus()
                     }
                 }
 
@@ -1435,6 +1441,48 @@ code: 1005 会话超时
         if (!isAdded) return
         val show = evaluationConfig?.evaluationEnabled == true && hasSentInSession
         binding?.llEvaluationButton?.visibility = if (show) View.VISIBLE else View.GONE
+        if (show) {
+            val done = isEvaluationDone
+            // 已完成时按钮置灰，对应 Flutter _evaluationDone 配色
+            binding?.tvEvaluationStar?.setTextColor(
+                if (done) android.graphics.Color.parseColor("#C7C7C7")
+                else resources.getColor(R.color.blue, null)
+            )
+            binding?.tvEvaluationLabel?.setTextColor(
+                android.graphics.Color.parseColor(if (done) "#FF999999" else "#FF333333")
+            )
+            binding?.llEvaluationButton?.isEnabled = !done
+        }
+    }
+
+    /**
+     * 拉取当前会话的评价状态；1/2 表示已完成，用于按钮置灰禁用（对应 Flutter _fetchEvaluationStatus）
+     */
+    private fun fetchEvaluationStatus() {
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
+        val param = JsonObject().apply {
+            addProperty("consultId", Constants.CONSULT_ID)
+        }
+        request.call(
+            request.create(MainApi.IMainTask::class.java).evaluationStatus(param),
+            object : ProgressLoadingCallBack<ReturnData<EvaluationStatus>>(null) {
+                override fun onSuccess(res: ReturnData<EvaluationStatus>) {
+                    if (res.code == 0) {
+                        evaluationStatus = res.data?.status
+                        runOnUiThread {
+                            if (isAdded) refreshEvaluationButtonVisibility()
+                        }
+                    }
+                }
+
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    Log.w(TAG, "拉取评价状态失败: ${e?.message}")
+                }
+            }
+        )
     }
 
     /**
@@ -1449,6 +1497,7 @@ code: 1005 会话超时
      * 点击浮动 ★ 按钮：弹出评价框（手动场景）
      */
     private fun onEvaluationButtonClick() {
+        if (isEvaluationDone) return
         val cfg = evaluationConfig ?: return
         showEvaluationDialog(EvaluationScene.MANUAL, cfg)
     }
@@ -1497,7 +1546,11 @@ code: 1005 会话超时
             scene = scene,
             config = cfg,
             consultId = Constants.CONSULT_ID,
-            tintColor = tintColor
+            tintColor = tintColor,
+            onStatusChanged = { newStatus ->
+                evaluationStatus = newStatus
+                runOnUiThread { if (isAdded) refreshEvaluationButtonVisibility() }
+            }
         ).also { it.show() }
     }
 

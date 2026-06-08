@@ -90,6 +90,39 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toTopOf="@id/tv_tips" />
 
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_evaluation_button"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_evaluation_button"
+            android:paddingStart="10dp"
+            android:paddingEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tv_tips">
+
+            <TextView
+                android:id="@+id/tv_evaluation_star"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="★"
+                android:textColor="@color/blue"
+                android:textSize="16sp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_evaluation_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="客服评价"
+                android:textColor="#FF1A1A1A"
+                android:textSize="13sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_tips"
             android:layout_width="match_parent"
