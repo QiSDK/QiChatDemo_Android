@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import com.teneasy.chatuisdk.databinding.FragmentSelectConsultTypeBinding
 import com.teneasy.chatuisdk.ui.SelectConsultTypeAdapter
+import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.GlobalMessageDelegate
@@ -23,6 +24,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport
+import com.teneasy.chatuisdk.ui.main.KeFuFragment
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.Result
@@ -54,12 +56,17 @@ class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
     ): View? {
         // 初始化视图绑定
         binding = FragmentSelectConsultTypeBinding.inflate(inflater, container, false)
+        // 入口页主题：随机一套，并透传给聊天页保持一致（对齐 Flutter EntrancePage 把 theme 传给 ChatPage）
+        val theme = AppChatTheme.random()
+        val themeIndex = AppChatTheme.presets.indexOf(theme)
         binding?.apply {
+            applyEntranceTheme(theme)
             // 初始化RecyclerView和适配器
             adapter = SelectConsultTypeAdapter(ArrayList()) { consult ->
                 Constants.CONSULT_ID = consult.consultId ?: 0L
                 val bundle = Bundle().apply {
                     putString(PARAM_DOMAIN, Constants.domain)
+                    putInt(KeFuFragment.EXTRA_THEME_INDEX, themeIndex)
                 }
                 this@SelectConsultTypeFragment.findNavController().navigate(R.id.frg_kefu_main, bundle)
                 viewModel.markRead()
@@ -89,6 +96,19 @@ class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
             }
         }
         return binding?.root
+    }
+
+    /**
+     * 入口页主题：整页渐变背景 + 头部 / 列表气泡着色（对齐 Flutter EntrancePage）。
+     */
+    private fun FragmentSelectConsultTypeBinding.applyEntranceTheme(theme: AppChatTheme) {
+        root.background = theme.newGradientDrawable()
+        cardHeader.setCardBackgroundColor(theme.gradientStartColor)
+        tvTitle.setTextColor(theme.tintColor)
+        ivBack.setColorFilter(theme.tintColor)
+        // 列表气泡 + 指向箭头用左气泡色，背景透出渐变
+        rvList.background?.mutate()?.setTint(theme.leftBubbleColor)
+        ivArrow.background?.mutate()?.setTint(theme.leftBubbleColor)
     }
 
     override fun onResume() {

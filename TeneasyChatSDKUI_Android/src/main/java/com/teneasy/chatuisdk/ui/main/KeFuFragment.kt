@@ -37,6 +37,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.SelectConsultTypeViewModel
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.baseUrlApi
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.chatLib
@@ -93,6 +94,16 @@ import kotlin.collections.ArrayList
 class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     companion object {
         private const val PICK_FILE_REQUEST_CODE = 1001
+
+        /** 宿主可通过该 Intent extra 指定主题下标；缺省 / 负数表示随机一套。 */
+        const val EXTRA_THEME_INDEX = "theme_index"
+    }
+
+    // 聊天页主题：优先用入口页透传的主题（nav 参数），其次宿主 Intent extra，最后随机一套（对齐 Flutter AppChatTheme）
+    val chatTheme: AppChatTheme by lazy {
+        val fromArgs = arguments?.getInt(EXTRA_THEME_INDEX, -1) ?: -1
+        val index = if (fromArgs >= 0) fromArgs else activity?.intent?.getIntExtra(EXTRA_THEME_INDEX, -1) ?: -1
+        AppChatTheme.fromIndex(index)
     }
 
     // UI组件
@@ -438,7 +449,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         this@KeFuFragment.sendLocalImgMsg(msg, isLeft)
                     }
                 }
-            })
+            }, chatTheme)
 
             //初始化一个空的列表给adapter
             if (viewModel.mlMsgList.value?.isEmpty() == true) {
@@ -450,6 +461,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             this.rcvMsg.layoutManager = layoutManager
             this.rcvMsg.adapter = msgAdapter
+
+            // 应用聊天页主题（渐变背景 + 头部着色 + 平台名）
+            applyTheme()
 
             // 初始化输入框
             this.etMsg.setOnFocusChangeListener { v: View, hasFocus: Boolean ->
@@ -1434,6 +1448,24 @@ code: 1005 会话超时
     }
 
     /**
+     * 应用聊天页主题：整页渐变背景 + 头部着色 + 平台名展示（对齐 Flutter ChatPage build()）。
+     */
+    private fun applyTheme() {
+        val b = binding ?: return
+        // A2 整页渐变背景
+        b.main.background = chatTheme.newGradientDrawable()
+        // A3 头部着色：背景用渐变起始色，标题 / 返回键用 tintColor
+        b.llTop.setBackgroundColor(chatTheme.gradientStartColor)
+        b.tvTitle.setTextColor(chatTheme.tintColor)
+        b.llClose.setColorFilter(chatTheme.tintColor)
+        // 平台 / 商户名（对齐 Flutter AppBar actions）
+        val platform = Constants.platformName
+        b.tvPlatformName.text = platform
+        b.tvPlatformName.setTextColor(chatTheme.tintColor)
+        b.tvPlatformName.visibility = if (platform.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    /**
      * 评价浮动按钮的显示条件：评价已开启 且 本次会话用户已发过消息
      * （对应 Flutter _hasSentInSession 门控）
      */
@@ -1446,7 +1478,7 @@ code: 1005 会话超时
             // 已完成时按钮置灰，对应 Flutter _evaluationDone 配色
             binding?.tvEvaluationStar?.setTextColor(
                 if (done) android.graphics.Color.parseColor("#C7C7C7")
-                else resources.getColor(R.color.blue, null)
+                else chatTheme.tintColor
             )
             binding?.tvEvaluationLabel?.setTextColor(
                 android.graphics.Color.parseColor(if (done) "#FF999999" else "#FF333333")

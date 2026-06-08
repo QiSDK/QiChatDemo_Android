@@ -59,6 +59,18 @@
                 android:layout_gravity="center"
                 android:gravity="center">
             </androidx.appcompat.widget.AppCompatTextView>
+
+            <!-- 平台/商户名（对齐 Flutter AppBar actions 的 platformName） -->
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_platform_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginEnd="16dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </androidx.appcompat.widget.LinearLayoutCompat>
         <com.effective.android.panel.view.PanelSwitchLayout
             android:id="@+id/panel_switch_layout"

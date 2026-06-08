@@ -25,6 +25,7 @@
                 ></ImageView>
 
             <TextView
+                android:id="@+id/tv_title"
                 android:text="@string/str_kefu"
                 android:textStyle="bold"
                 android:textSize="18sp"

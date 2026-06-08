@@ -36,6 +36,7 @@ import com.teneasy.chatuisdk.databinding.ItemTextImagesMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTextMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.databinding.ItemVideoImageMessageBinding
+import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -66,7 +67,7 @@ data class QADisplayedEvent(val tag: Int)
 /**
  * 聊天界面列表adapter
  */
-class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateListener?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateListener?, private val theme: AppChatTheme? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var msgList: ArrayList<MessageItem>? = null
     val act: Activity = myContext
     private var listener: MessageItemOperateListener? = listener
@@ -136,6 +137,10 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (msgList == null) {
             return
+        }
+        // 主题：行背景透明，让聊天页渐变背景透出（cell 自带 @color/chatBody 会挡住渐变）
+        if (theme != null) {
+            holder.itemView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
         if (holder is ItemLastLineViewHolder) {
             holder.tvTitle.text = ""
@@ -215,6 +220,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.tvRightFileSize.text = Utils().formatSize(item.cMsg?.file?.size?: 0)
                 holder.tvRightFileName.text = item.cMsg!!.file.fileName
 
+                // 主题：右文件气泡背景 + 文字着色
+                theme?.let {
+                    holder.rlRightBubble.background?.mutate()?.setTint(it.resolvedRightBubbleColor)
+                    holder.tvRightFileName.setTextColor(it.rightBubbleTextColor)
+                    holder.tvRightFileSize.setTextColor(it.rightBubbleTextColor)
+                }
+
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
                 holder.llRightContent.tag = position
                 holder.llRightContent.setOnClickListener {
@@ -235,6 +247,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 //((item.replyItem?.size?:0)  * 0.001).toString() + "K"
                 holder.tvLeftFileSize.text = Utils().formatSize(item.cMsg?.file?.size?: 0)
                 holder.tvLeftFileName.text = item.cMsg!!.file.fileName
+
+                // 主题：左文件气泡背景 + 文字着色
+                theme?.let {
+                    holder.rlLeftBubble.background?.mutate()?.setTint(it.leftBubbleColor)
+                    holder.tvLeftFileName.setTextColor(it.leftBubbleTextColor)
+                    holder.tvLeftFileSize.setTextColor(it.leftBubbleTextColor)
+                }
 
                 var meidaUrl = Constants.baseUrlImage + item.cMsg!!.file.uri
                 holder.llLeftContent.tag = position
@@ -484,6 +503,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 layoutManager.orientation = LinearLayoutManager.HORIZONTAL
                 holder.rvList.layoutManager = layoutManager
                 holder.tvMsg.text = textBody.message
+
+                // 主题：左图文气泡背景 + 文字着色
+                theme?.let {
+                    holder.llTextImages.background?.mutate()?.setTint(it.leftBubbleColor)
+                    holder.tvMsg.setTextColor(it.leftBubbleTextColor)
+                }
+
                 val url = Constants.baseUrlImage + Constants.workerAvatar
                 Glide.with(act).load(url).dontAnimate()
                     .skipMemoryCache(true)
@@ -527,6 +553,9 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.lyLeftContent.visibility = View.GONE
                 holder.lyRightContent.visibility = View.VISIBLE
                 holder.rlImagecontainer.visibility = View.GONE
+
+                // 主题：右气泡背景着色
+                theme?.let { holder.llRight.background?.mutate()?.setTint(it.resolvedRightBubbleColor) }
 
                 if (item.sendStatus != MessageSendState.发送成功) {
                     holder.ivSendStatus.visibility = View.VISIBLE
@@ -593,7 +622,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         e.printStackTrace()
                     }
                 }else{
-                    holder.tvRightMsg.setTextColor(act.getColor(R.color.white))
+                    holder.tvRightMsg.setTextColor(theme?.rightBubbleTextColor ?: act.getColor(R.color.white))
                     holder.tvRightMsg.setOnLongClickListener(OnLongClickListener {
                         holder.rightPopBuild.asAttachList(
                             arrayOf<String>("复制","回复"), null,
@@ -656,6 +685,10 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.lyLeftContent.visibility = View.VISIBLE
                 holder.lyRightContent.visibility = View.GONE
                 holder.rlLeftImagecontainer.visibility = View.GONE
+
+                // 主题：左气泡背景着色
+                theme?.let { holder.llLeft.background?.mutate()?.setTint(it.leftBubbleColor) }
+
                 var text = item.cMsg!!.content.data
 
                 if (item.cMsg!!.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER || item.cMsg!!.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER){
@@ -727,7 +760,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         e.printStackTrace()
                     }
                 }else{
-                    holder.tvLeftMsg.setTextColor(act.getColor(R.color.black))
+                    holder.tvLeftMsg.setTextColor(theme?.leftBubbleTextColor ?: act.getColor(R.color.black))
                     holder.tvLeftMsg.setOnLongClickListener(OnLongClickListener {
                         holder.leftPopBuild.asAttachList(
                             arrayOf<String>("复制","回复"), null,
@@ -938,6 +971,10 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var lyLeftContent = binding.lyLeftContent
         var lyRightContent = binding.lyRightContent
 
+        // 气泡容器（用于主题着色）
+        var llLeft = binding.llLeft
+        var llRight = binding.llRight
+
         var ivRightImage =  binding.ivRightImage
         var ivRightPlay = binding.ivRightPlay
         var rlImagecontainer = binding.rlImagecontainer
@@ -1058,6 +1095,10 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
         var llLeftContent =  binding.llLeftContent
         var llRightContent =  binding.llRightContent
+
+        // 气泡卡片（承载 rounded_corner 背景，用于主题着色）
+        var rlLeftBubble = binding.rlLeftImagecontainer
+        var rlRightBubble = binding.rlImagecontainer
 
         init {
 
