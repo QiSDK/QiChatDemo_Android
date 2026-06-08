@@ -57,6 +57,10 @@ import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
+import com.teneasy.chatuisdk.ui.http.MainApi
+import com.teneasy.chatuisdk.ui.http.ReturnData
+import com.teneasy.chatuisdk.ui.http.bean.EvaluationConfig
+import com.teneasy.chatuisdk.ui.http.bean.EvaluationStatus
 import com.teneasy.chatuisdk.ui.http.bean.TextBody
 import com.teneasy.chatuisdk.ui.http.bean.TextImages
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo
@@ -69,6 +73,10 @@ import com.teneasy.sdk.ui.MessageSendState
 import com.teneasy.sdk.ui.ReplyMessageItem
 import com.teneasyChat.api.common.CMessage
 import com.teneasyChat.gateway.GGateway
+import com.google.gson.JsonObject
+import com.xuexiang.xhttp2.XHttp
+import com.xuexiang.xhttp2.callback.ProgressLoadingCallBack
+import com.xuexiang.xhttp2.exception.ApiException
 import com.xuexiang.xhttp2.subsciber.ProgressDialogLoader
 import com.xuexiang.xhttp2.subsciber.impl.IProgressLoader
 import kotlinx.coroutines.launch
@@ -106,6 +114,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private var lastMsg: CMessage.Message? = null
     private var workInfo = WorkerInfo()
     private var lastActiveDateTime = Date()
+
+    // 评价功能
+    private var evaluationConfig: EvaluationConfig? = null
+    private var evaluationDialog: EvaluationDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -195,6 +207,12 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         binding?.ivFile?.setOnClickListener {
             openFilePicker()
         }
+
+        binding?.llEvaluationButton?.setOnClickListener {
+            onEvaluationButtonClick()
+        }
+
+        fetchEvaluationConfig()
     }
 
 
@@ -376,7 +394,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                                 this@KeFuFragment.mIProgressLoader?.dismissLoading()
                                 ToastUtils.showToast(
                                     this@KeFuFragment.requireContext(),
-                                    "下载成功！"
+                                    "已保存到相册"
                                 );
                             } else if (progress == -1) {
                                 this@KeFuFragment.mIProgressLoader?.dismissLoading()
@@ -741,6 +759,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
+        dismissEvaluationDialog()
         exitChat()
         mIProgressLoader = null
     }
@@ -1046,6 +1065,12 @@ code: 1005 会话超时
             print("这种消息是自动回复的消息，不会计入未读消息")
         }
 
+        // 评价触发消息：匹配 triggerMessages 才弹评价；其他原文不进入聊天列表
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_EVALUATE) {
+            handleEvaluateTriggerMessage(msg.content?.data ?: "")
+            return
+        }
+
         // 处理当前会话的消息
         processReceivedMessage(msg)
     }
@@ -1338,6 +1363,100 @@ code: 1005 会话超时
             ToastUtils.showToast(requireContext(), message)
             mIProgressLoader?.dismissLoading()
         }
+    }
+
+    // ============================== 客服评价 ==============================
+
+    /**
+     * 进入聊天页时拉取评价配置；若开启则显示浮动按钮
+     */
+    private fun fetchEvaluationConfig() {
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
+        request.call(
+            request.create(MainApi.IMainTask::class.java).evaluationConfig(JsonObject()),
+            object : ProgressLoadingCallBack<ReturnData<EvaluationConfig>>(null) {
+                override fun onSuccess(res: ReturnData<EvaluationConfig>) {
+                    if (res.code == 0 && res.data?.evaluationEnabled == true) {
+                        evaluationConfig = res.data
+                        runOnUiThread {
+                            if (isAdded) {
+                                binding?.llEvaluationButton?.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+                }
+
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    Log.w(TAG, "拉取评价配置失败: ${e?.message}")
+                }
+            }
+        )
+    }
+
+    /**
+     * 点击浮动 ★ 按钮：弹出评价框（手动场景）
+     */
+    private fun onEvaluationButtonClick() {
+        val cfg = evaluationConfig ?: return
+        showEvaluationDialog(EvaluationScene.MANUAL, cfg)
+    }
+
+    /**
+     * 收到触发评价消息：先查 status，0 才弹
+     */
+    private fun handleEvaluateTriggerMessage(content: String) {
+        val cfg = evaluationConfig ?: return
+        if (cfg.evaluationEnabled != true) return
+        val triggers = cfg.triggerMessages ?: return
+        if (content.isBlank() || !triggers.contains(content)) return
+
+        val request = XHttp.custom().accessToken(false)
+        request.headers("X-Token", Constants.xToken)
+        request.headers("x-trace-id", UUID.randomUUID().toString())
+        val param = JsonObject().apply {
+            addProperty("consultId", Constants.CONSULT_ID)
+        }
+        request.call(
+            request.create(MainApi.IMainTask::class.java).evaluationStatus(param),
+            object : ProgressLoadingCallBack<ReturnData<EvaluationStatus>>(null) {
+                override fun onSuccess(res: ReturnData<EvaluationStatus>) {
+                    if (res.code == 0 && res.data?.status == 0) {
+                        runOnUiThread {
+                            if (isAdded) {
+                                showEvaluationDialog(EvaluationScene.TRIGGERED, cfg)
+                            }
+                        }
+                    }
+                }
+
+                override fun onError(e: ApiException?) {
+                    super.onError(e)
+                    Log.w(TAG, "查评价状态失败: ${e?.message}")
+                }
+            }
+        )
+    }
+
+    private fun showEvaluationDialog(scene: EvaluationScene, cfg: EvaluationConfig) {
+        if (evaluationDialog?.isShowing == true) return
+        val tintColor = resources.getColor(R.color.blue, null)
+        evaluationDialog = EvaluationDialog(
+            context = requireContext(),
+            scene = scene,
+            config = cfg,
+            consultId = Constants.CONSULT_ID,
+            tintColor = tintColor
+        ).also { it.show() }
+    }
+
+    private fun dismissEvaluationDialog() {
+        try {
+            evaluationDialog?.takeIf { it.isShowing }?.dismiss()
+        } catch (_: Exception) {}
+        evaluationDialog = null
     }
 }
 
