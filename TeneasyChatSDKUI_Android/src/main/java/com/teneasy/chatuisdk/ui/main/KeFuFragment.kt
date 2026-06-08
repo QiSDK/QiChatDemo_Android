@@ -119,6 +119,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private var evaluationConfig: EvaluationConfig? = null
     private var evaluationDialog: EvaluationDialog? = null
 
+    // 仅统计本次会话内用户新发出的消息（不含历史记录），用于控制「客服评价」按钮的显示
+    private var hasSentInSession = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupBackPressHandler()
@@ -808,6 +811,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private fun resetState() {
         Constants.workerId = 0
         isFirstLoad = true
+        hasSentInSession = false
         // 取消活跃监听器
         if (GlobalChatListener.instance.activeListener == this) {
             GlobalChatListener.instance.activeListener = null
@@ -895,6 +899,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         }
         viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
+        markSentInSession()
     }
 
     /**
@@ -942,6 +947,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
+        markSentInSession()
     }
 
     fun sendVideoMsg(urls: com.teneasy.sdk.Urls) {
@@ -968,6 +974,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         messageItem.isLeft = false
         viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
+        markSentInSession()
     }
 
     //聊天sdk连接成功的回调
@@ -1406,7 +1413,7 @@ code: 1005 会话超时
                         evaluationConfig = res.data
                         runOnUiThread {
                             if (isAdded) {
-                                binding?.llEvaluationButton?.visibility = View.VISIBLE
+                                refreshEvaluationButtonVisibility()
                             }
                         }
                     }
@@ -1418,6 +1425,24 @@ code: 1005 会话超时
                 }
             }
         )
+    }
+
+    /**
+     * 评价浮动按钮的显示条件：评价已开启 且 本次会话用户已发过消息
+     * （对应 Flutter _hasSentInSession 门控）
+     */
+    private fun refreshEvaluationButtonVisibility() {
+        if (!isAdded) return
+        val show = evaluationConfig?.evaluationEnabled == true && hasSentInSession
+        binding?.llEvaluationButton?.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * 标记本次会话用户已主动发过消息，并刷新评价按钮显示
+     */
+    private fun markSentInSession() {
+        hasSentInSession = true
+        runOnUiThread { refreshEvaluationButtonVisibility() }
     }
 
     /**
