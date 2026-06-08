@@ -14,12 +14,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.teneasy.qldemo.databinding.FragmentMainBinding
+import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.main.KeFuActivity
+import com.teneasy.chatuisdk.ui.main.KeFuFragment
 
 class MainFragment : Fragment() {
 
@@ -30,7 +34,7 @@ class MainFragment : Fragment() {
     var binding: FragmentMainBinding? = null
 
     private var selectedThemeIndex = 0
-    private val selectedTheme get() = ChatTheme.presets[selectedThemeIndex]
+    private val selectedTheme get() = AppChatTheme.presets[selectedThemeIndex]
     private val swatches = mutableListOf<View>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +52,11 @@ class MainFragment : Fragment() {
             buildThemeSwatches()
 
             btnSend.setOnClickListener {
-                startActivity(Intent(requireContext(), KeFuActivity::class.java))
+                // 把首页选中的主题透传给聊天页，使两端主题一致
+                startActivity(
+                    Intent(requireContext(), KeFuActivity::class.java)
+                        .putExtra(KeFuFragment.EXTRA_THEME_INDEX, selectedThemeIndex)
+                )
             }
 
             btnBackup.setOnClickListener { openBackupCustomerService() }
@@ -80,7 +88,7 @@ class MainFragment : Fragment() {
         val swatchSize = dp(60)
         val cellSize = dp(70)
 
-        ChatTheme.presets.forEachIndexed { index, theme ->
+        AppChatTheme.presets.forEachIndexed { index, theme ->
             val cell = FrameLayout(requireContext())
             val cellLp = ViewGroup.MarginLayoutParams(cellSize, cellSize)
             cellLp.marginEnd = dp(15)
@@ -90,7 +98,7 @@ class MainFragment : Fragment() {
             val swatchLp = FrameLayout.LayoutParams(swatchSize, swatchSize)
             swatchLp.gravity = Gravity.CENTER
             swatch.layoutParams = swatchLp
-            swatch.background = circleDrawable(theme.gradientEnd, selected = false)
+            swatch.background = circleDrawable(theme.gradientEndColor, selected = false)
             swatch.setOnClickListener { selectTheme(index) }
 
             cell.addView(swatch)
@@ -111,10 +119,11 @@ class MainFragment : Fragment() {
     // 刷新主屏外观（对齐 iOS updateThemeUI）
     private fun updateThemeUI() {
         val theme = selectedTheme
+        applyStatusBarColor(theme)
         binding?.apply {
             main.background = GradientDrawable(
-                orientationOf(theme.direction),
-                intArrayOf(theme.gradientStart, theme.gradientEnd)
+                theme.gradientOrientation,
+                intArrayOf(theme.gradientStartColor, theme.gradientEndColor)
             )
 
             val supportBg = GradientDrawable().apply {
@@ -138,7 +147,7 @@ class MainFragment : Fragment() {
 
             swatches.forEachIndexed { i, v ->
                 v.background = circleDrawable(
-                    ChatTheme.presets[i].gradientEnd,
+                    AppChatTheme.presets[i].gradientEndColor,
                     selected = i == selectedThemeIndex
                 )
                 val scale = if (i == selectedThemeIndex) 1.15f else 1f
@@ -146,6 +155,16 @@ class MainFragment : Fragment() {
                 v.scaleY = scale
             }
         }
+    }
+
+    // 状态栏颜色跟随主题（对齐屏幕顶部渐变色），并按亮度切换图标明暗
+    private fun applyStatusBarColor(theme: AppChatTheme) {
+        val window = activity?.window ?: return
+        val color = theme.statusBarColor
+        window.statusBarColor = color
+        // 浅色背景用深色图标，深色背景用浅色图标
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = ColorUtils.calculateLuminance(color) > 0.5
     }
 
     private fun circleDrawable(fill: Int, selected: Boolean): GradientDrawable {
@@ -156,15 +175,6 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun orientationOf(d: GradientDirection): GradientDrawable.Orientation = when (d) {
-        GradientDirection.TOP_TO_BOTTOM -> GradientDrawable.Orientation.TOP_BOTTOM
-        GradientDirection.BOTTOM_TO_TOP -> GradientDrawable.Orientation.BOTTOM_TOP
-        GradientDirection.LEFT_TO_RIGHT -> GradientDrawable.Orientation.LEFT_RIGHT
-        GradientDirection.RIGHT_TO_LEFT -> GradientDrawable.Orientation.RIGHT_LEFT
-        GradientDirection.TOP_LEFT_TO_BOTTOM_RIGHT -> GradientDrawable.Orientation.TL_BR
-        GradientDirection.TOP_RIGHT_TO_BOTTOM_LEFT -> GradientDrawable.Orientation.TR_BL
-    }
-
     // 备用客服：juhekefu:// 深链，失败回退网页（对齐 iOS backupClick）
     private fun openBackupCustomerService() {
         val params = linkedMapOf(
@@ -172,6 +182,7 @@ class MainFragment : Fragment() {
             "userId" to Constants.userId.toString(),
             "merchantId" to Constants.merchantId.toString(),
             "userName" to Constants.userName,
+            "platformName" to Constants.platformName,
             "userType" to Constants.userType.toString(),
             "themeIndex" to selectedThemeIndex.toString(),
         )

@@ -42,7 +42,7 @@ Flutter 新增 `lib/src/model/AppChatTheme.dart`（对齐 iOS `ChatTheme`），�
 - [x] **A5 EntrancePage 主题化**：`SelectConsultTypeFragment.applyEntranceTheme()` 套渐变背景 + 头部 tint + 列表/箭头 `leftBubbleColor`；并把所选主题下标经 nav 参数 `theme_index` 透传给聊天页保持一致。
 - [x] **A6 主题透传**：`MessageListAdapter` 构造新增 `theme: AppChatTheme?`，`KeFuFragment` 传入 `chatTheme`；主题下标支持 nav 参数 / Intent extra（`KeFuFragment.EXTRA_THEME_INDEX`），缺省随机。
 
-可选后续打磨（非阻塞）：聊天气泡尾巴箭头（`polygon_1/2` 的 `iv_arrow` / `iv_right_chatarrow`）目前仍是中性白/蓝，未随气泡色变化；Flutter 本身无尾巴。若要更统一可把左尾染 `leftBubbleColor`、右尾染 `resolvedRightBubbleColor`。
+- [x] **A7 气泡圆角 + 去尾巴箭头**：新增 `bg_bubble_left.xml`（左上角 0、其余 16dp）/ `bg_bubble_right.xml`（右上角 0、其余 16dp），对齐 Flutter `BorderRadius.only` 的尾角样式；文本/文件/图文 cell 的主气泡背景改用这两个 drawable。删除全部聊天气泡尾巴三角（`polygon_1/2` 的 `iv_arrow` / `iv_right_chatarrow`）及 adapter 中相关引用（Flutter 本身无尾巴）。图片/视频 cell 图片保持统一圆角（Flutter 图片用 `circular(12)`，非尾角）。
 
 参考：`ChatPage.dart` build()/_buildChat()，`entrancePage.dart`，`message_cell.dart`，`text_images_cell.dart`。
 实现：`AppChatTheme.kt`、`KeFuFragment.applyTheme()`、`MessageListAdapter`（构造参数 + onBindViewHolder 行透明 + 文本/文件/图文气泡着色）、`SelectConsultTypeFragment.applyEntranceTheme()`、`fragment_kefu.xml`（`tv_platform_name`）、`fragment_select_consult_type.xml`（`tv_title` id）。

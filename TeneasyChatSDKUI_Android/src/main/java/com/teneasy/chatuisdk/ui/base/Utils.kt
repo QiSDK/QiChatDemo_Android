@@ -89,6 +89,7 @@ class Utils {
         Constants.userLevel = UserPreferences().getInt(PARAM_USER_LEVEL, Constants.userLevel)
         Constants.userType = UserPreferences().getInt(PARAM_USER_TYPE, Constants.userType)
         Constants.backupWebUrl = UserPreferences().getString(PARAM_BACKUP_WEB_URL, Constants.backupWebUrl)
+        Constants.platformName = UserPreferences().getString(PARAM_PLATFORM_NAME, Constants.platformName)
     }
 
     fun closeSoftKeyboard(view: View?) {

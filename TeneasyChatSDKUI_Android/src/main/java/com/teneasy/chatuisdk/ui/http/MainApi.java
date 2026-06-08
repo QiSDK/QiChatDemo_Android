@@ -9,6 +9,8 @@ import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.ChatHistory;
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.Request;
 import com.teneasy.chatuisdk.ui.http.bean.ChatHistory.hMessage;
 import com.teneasy.chatuisdk.ui.http.bean.ErrorReport;
+import com.teneasy.chatuisdk.ui.http.bean.EvaluationConfig;
+import com.teneasy.chatuisdk.ui.http.bean.EvaluationStatus;
 import com.teneasy.chatuisdk.ui.http.bean.ReplyList;
 import com.teneasy.chatuisdk.ui.http.bean.WorkerInfo;
 
@@ -62,6 +64,15 @@ public class MainApi {
 
         @POST("v1/api/error-report/upload")
         Observable<ReturnData<Object>> repError(@Body ErrorReport param);
+
+        @POST("v1/tenant/evaluation/config/info")
+        Observable<ReturnData<EvaluationConfig>> evaluationConfig(@Body JsonObject param);
+
+        @POST("v1/tenant/evaluation/status/get")
+        Observable<ReturnData<EvaluationStatus>> evaluationStatus(@Body JsonObject param);
+
+        @POST("v1/tenant/evaluation/add")
+        Observable<ReturnData<Object>> evaluationAdd(@Body JsonObject param);
 
         @Multipart
         @POST("/v1/assets/upload/")

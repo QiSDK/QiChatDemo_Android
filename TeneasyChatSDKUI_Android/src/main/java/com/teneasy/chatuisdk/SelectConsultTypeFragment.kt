@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowInsetsController
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
@@ -56,9 +58,12 @@ class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
     ): View? {
         // 初始化视图绑定
         binding = FragmentSelectConsultTypeBinding.inflate(inflater, container, false)
-        // 入口页主题：随机一套，并透传给聊天页保持一致（对齐 Flutter EntrancePage 把 theme 传给 ChatPage）
-        val theme = AppChatTheme.random()
-        val themeIndex = AppChatTheme.presets.indexOf(theme)
+        // 入口页主题：优先用宿主透传的主题下标（首页选中的主题），缺省再随机一套；
+        // 并把同一套透传给聊天页保持一致（对齐 Flutter EntrancePage 把 theme 传给 ChatPage）
+        val hostThemeIndex = activity?.intent?.getIntExtra(KeFuFragment.EXTRA_THEME_INDEX, -1) ?: -1
+        val theme = AppChatTheme.fromIndex(hostThemeIndex)
+        val themeIndex = if (hostThemeIndex in AppChatTheme.presets.indices) hostThemeIndex
+        else AppChatTheme.presets.indexOf(theme)
         binding?.apply {
             applyEntranceTheme(theme)
             // 初始化RecyclerView和适配器
@@ -109,6 +114,16 @@ class SelectConsultTypeFragment : Fragment(), GlobalMessageDelegate {
         // 列表气泡 + 指向箭头用左气泡色，背景透出渐变
         rvList.background?.mutate()?.setTint(theme.leftBubbleColor)
         ivArrow.background?.mutate()?.setTint(theme.leftBubbleColor)
+        // 状态栏与头部同色，整页观感统一（与聊天页一致）
+        applyStatusBarColor(theme.gradientStartColor)
+    }
+
+    // 状态栏颜色跟随主题，并按背景亮度切换图标明暗（浅色背景用深色图标）
+    private fun applyStatusBarColor(color: Int) {
+        val window = activity?.window ?: return
+        window.statusBarColor = color
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = ColorUtils.calculateLuminance(color) > 0.5
     }
 
     override fun onResume() {

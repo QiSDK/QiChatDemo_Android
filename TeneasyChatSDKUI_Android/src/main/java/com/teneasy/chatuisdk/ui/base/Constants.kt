@@ -26,6 +26,7 @@ const val PARAM_MAXSESSIONMINS = "MAXSESSIONMINS" // 最大会话时长(分钟)
 const val PARAM_USER_LEVEL = "USER_LEVEL"     // 用户等级
 const val PARAM_USER_TYPE = "USER_TYPE"       // 用户类型
 const val PARAM_BACKUP_WEB_URL = "PARAM_BACKUP_WEB_URL"  // 备用客服网页URL
+const val PARAM_PLATFORM_NAME = "PARAM_PLATFORM_NAME"   // 平台/商户名称
 
 class Constants {
     companion object {
@@ -86,6 +87,7 @@ class Constants {
         //用户类型 1-官方会员 2-邀请好友 3-合营会员
         var userType = defaultUserType
         var backupWebUrl = ""  // 备用客服网页URL（深链失败时回退）
+        var platformName = ""  // 平台/商户名称（用于聊天页展示）
 
         // 运行时属性
         var xToken = ""  // HTTP请求Token
@@ -129,6 +131,7 @@ class Constants {
             userLevel = defaultUserLevel
             userType = defaultUserType
             backupWebUrl = ""
+            platformName = ""
             xToken = ""
             domain = sanitizeDomain(defaultLines.split(",").firstOrNull()?.trim().orEmpty())
             workerId = 0

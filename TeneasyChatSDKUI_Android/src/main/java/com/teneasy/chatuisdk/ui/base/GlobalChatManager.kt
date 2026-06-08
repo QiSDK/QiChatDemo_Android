@@ -146,8 +146,8 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
         if (msg.consultId != Constants.currentChatConsultId) {
             GlobalMessageManager.instance.addUnReadMessage(msg.consultId)
         }
-        if (msg.msgSourceType == CMessage.MsgSourceType.MST_EVALUATE){
-            ToastUtils.showToast(ApplicationExt.context!!, "收到要求评估的消息！")
+        if (msg.msgSourceType == CMessage.MsgSourceType.MST_EVALUATE) {
+            // 评价触发消息由当前活跃的聊天页（KeFuFragment）处理，不进事件总线
             return
         }
         // 通过事件总线分发消息

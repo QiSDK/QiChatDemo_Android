@@ -24,6 +24,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_USERNAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_LEVEL
 import com.teneasy.chatuisdk.ui.base.PARAM_BACKUP_WEB_URL
+import com.teneasy.chatuisdk.ui.base.PARAM_PLATFORM_NAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_TYPE
 import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
@@ -74,6 +75,7 @@ class SettingsFragment : Fragment() {
             this.etMaxSessionMins?.setText(Constants.maxSessionMins.toString())  // 最大会话时长
             this.etUserLevel?.setText(Constants.userLevel.toString())           // 用户等级
             this.etBackupWebUrl?.setText(Constants.backupWebUrl)  // 备用客服网页URL
+            this.etPlatformName?.setText(Constants.platformName)  // 平台/商户名称
 
             // 设置用户类型下拉菜单
             val userTypeOptions = arrayOf("官方会员", "邀请好友", "合营会员")
@@ -103,6 +105,7 @@ class SettingsFragment : Fragment() {
                 Constants.maxSessionMins = this.etMaxSessionMins.text.toString().trim().toIntOrZero()
                 Constants.userLevel = this.etUserLevel.text.toString().trim().toIntOrZero()
                 Constants.backupWebUrl = this.etBackupWebUrl.text.toString().trim()
+                Constants.platformName = this.etPlatformName.text.toString().trim()
 
                 // 保存用户类型 (数组索引0,1,2对应userType值1,2,3)
                 Constants.userType = when (this.spinnerUserType.selectedItemPosition) {
@@ -125,6 +128,7 @@ class SettingsFragment : Fragment() {
                 UserPreferences().putInt(PARAM_USER_LEVEL, Constants.userLevel)
                 UserPreferences().putInt(PARAM_USER_TYPE, Constants.userType)
                 UserPreferences().putString(PARAM_BACKUP_WEB_URL, Constants.backupWebUrl)
+                UserPreferences().putString(PARAM_PLATFORM_NAME, Constants.platformName)
 
                 GlobalChatManager.instance.stopGlobalChat()
 

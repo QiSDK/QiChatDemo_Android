@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_evaluation_dialog"
+    android:padding="20dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_evaluation_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="客服满意度评价"
+            android:textColor="#FF1A1A1A"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/iv_evaluation_close"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="4dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/close"
+            android:contentDescription="关闭" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_evaluation_stars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/tv_star1"
+            style="@style/EvaluationStarStyle" />
+
+        <TextView
+            android:id="@+id/tv_star2"
+            style="@style/EvaluationStarStyle" />
+
+        <TextView
+            android:id="@+id/tv_star3"
+            style="@style/EvaluationStarStyle" />
+
+        <TextView
+            android:id="@+id/tv_star4"
+            style="@style/EvaluationStarStyle" />
+
+        <TextView
+            android:id="@+id/tv_star5"
+            style="@style/EvaluationStarStyle" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_evaluation_remark">
+
+        <EditText
+            android:id="@+id/et_evaluation_remark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="4"
+            android:maxLines="4"
+            android:gravity="top|start"
+            android:background="@null"
+            android:hint="请留下宝贵意见"
+            android:textColorHint="#FF999999"
+            android:textColor="#FF1A1A1A"
+            android:textSize="14sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp"
+            android:inputType="textMultiLine"
+            android:maxLength="200" />
+
+        <TextView
+            android:id="@+id/tv_evaluation_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:paddingBottom="6dp"
+            android:text="0/200"
+            android:textColor="#FF999999"
+            android:textSize="12sp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/btn_evaluation_submit"
+            android:layout_width="140dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_evaluation_submit"
+            android:enabled="false"
+            android:gravity="center"
+            android:minHeight="0dp"
+            android:padding="0dp"
+            android:stateListAnimator="@null"
+            android:text="提交"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            android:textSize="15sp" />
+
+        <ProgressBar
+            android:id="@+id/pb_evaluation_loading"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

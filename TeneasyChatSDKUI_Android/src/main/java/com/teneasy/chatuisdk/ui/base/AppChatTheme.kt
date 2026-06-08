@@ -53,6 +53,13 @@ data class AppChatTheme(
             AppChatGradientDirection.TOP_RIGHT_TO_BOTTOM_LEFT -> GradientDrawable.Orientation.TR_BL
         }
 
+    /** 渐变顶部颜色：边到边渐变背景时用作状态栏色，使其与屏幕顶部视觉对齐。 */
+    val statusBarColor: Int
+        get() = when (gradientDirection) {
+            AppChatGradientDirection.BOTTOM_TO_TOP -> gradientEndColor
+            else -> gradientStartColor
+        }
+
     /** 构造整页背景用的渐变 Drawable。 */
     fun newGradientDrawable(): GradientDrawable =
         GradientDrawable(gradientOrientation, intArrayOf(gradientStartColor, gradientEndColor))

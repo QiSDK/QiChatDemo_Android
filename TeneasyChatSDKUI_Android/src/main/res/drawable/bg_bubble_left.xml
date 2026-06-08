@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 客服（左侧）气泡：尾角在左上(0)，其余 16dp，对齐 Flutter BorderRadius.only -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners
+        android:topLeftRadius="0dp"
+        android:topRightRadius="16dp"
+        android:bottomLeftRadius="16dp"
+        android:bottomRightRadius="16dp" />
+    <solid android:color="@android:color/white" />
+</shape>

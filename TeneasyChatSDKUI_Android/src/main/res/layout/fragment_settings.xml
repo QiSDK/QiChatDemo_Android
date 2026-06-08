@@ -123,6 +123,17 @@
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <EditText android:id="@+id/et_PlatformName"
+            android:hint="平台/商户名称（可选）"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <Spinner
         android:id="@+id/spinner_UserType"
         android:layout_width="match_parent"

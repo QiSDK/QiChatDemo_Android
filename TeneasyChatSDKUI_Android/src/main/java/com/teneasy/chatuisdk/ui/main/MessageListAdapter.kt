@@ -288,11 +288,9 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.tvRightTime.visibility = View.VISIBLE
                 holder.lySend.visibility = View.VISIBLE
                 holder.civKefuRightImage.visibility = View.VISIBLE
-                holder.ivRightChatarrow.visibility = View.VISIBLE
                 holder.ivRightPlay.visibility = View.VISIBLE
 
                 holder.ivKefuImage.visibility = View.GONE
-                holder.ivArrow.visibility = View.GONE
                 holder.tvLeftTime.visibility = View.GONE
                 holder.ivLeftImg.visibility = View.GONE
                 holder.ivPlay.visibility = View.GONE
@@ -383,10 +381,8 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.tvLeftTime.text = localTime
                 holder.tvLeftTime.visibility = View.VISIBLE
                 holder.ivKefuImage.visibility = View.VISIBLE
-                holder.ivArrow.visibility = View.VISIBLE
                 holder.ivPlay.visibility = View.VISIBLE
 
-                holder.ivRightChatarrow.visibility = View.GONE
                 holder.tvRightTime.visibility = View.GONE
                 holder.ivRightImg.visibility = View.GONE
                 holder.lySend.visibility = View.GONE
@@ -951,8 +947,6 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var tvRightTime =  binding.tvRightTime
         var tvRightMsg =  binding.tvRightMsg
         var ivSendStatus =  binding.ivSendStatus
-        var ivArrow =  binding.ivArrow
-        var ivRightChatarrow =  binding.ivRightChatarrow
         var ivKefuImage =  binding.civKefuImage
         //var ivRightImage =  binding.civRightImage
 
@@ -1005,9 +999,6 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
         var tvRightTime =  binding.tvRightTime
         var ivRightImg =  binding.ivRightImage
-
-        var ivArrow =  binding.ivArrow
-        var ivRightChatarrow =  binding.ivRightChatarrow
 
         var ivKefuImage =  binding.civKefuImage
         var civKefuRightImage =  binding.civKefuRightImage

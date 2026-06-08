@@ -15,6 +15,8 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -1456,6 +1458,8 @@ code: 1005 会话超时
         b.main.background = chatTheme.newGradientDrawable()
         // A3 头部着色：背景用渐变起始色，标题 / 返回键用 tintColor
         b.llTop.setBackgroundColor(chatTheme.gradientStartColor)
+        // 状态栏与头部同色，按亮度切换图标明暗，整页观感统一
+        applyStatusBarColor(chatTheme.gradientStartColor)
         b.tvTitle.setTextColor(chatTheme.tintColor)
         b.llClose.setColorFilter(chatTheme.tintColor)
         // 平台 / 商户名（对齐 Flutter AppBar actions）
@@ -1463,6 +1467,14 @@ code: 1005 会话超时
         b.tvPlatformName.text = platform
         b.tvPlatformName.setTextColor(chatTheme.tintColor)
         b.tvPlatformName.visibility = if (platform.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    // 状态栏颜色跟随主题，并按背景亮度切换图标明暗（浅色背景用深色图标）
+    private fun applyStatusBarColor(color: Int) {
+        val window = activity?.window ?: return
+        window.statusBarColor = color
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = ColorUtils.calculateLuminance(color) > 0.5
     }
 
     /**
