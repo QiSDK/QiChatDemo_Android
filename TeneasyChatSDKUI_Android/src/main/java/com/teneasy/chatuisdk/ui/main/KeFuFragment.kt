@@ -1102,6 +1102,14 @@ code: 1005 会话超时
      * 处理接收到的消息
      */
     private fun processReceivedMessage(msg: CMessage.Message) {
+        // 去重：同一条服务器消息可能因「历史拉取(HTTP)」与「实时推送(WS)」竞态各进一次。
+        // 例如用户退出后客服发消息，再次进入时 queryChatHistory 已含该条，WS 又推一遍。
+        if (msg.msgId > 0 &&
+            viewModel.mlMsgList.value?.any { it.msgId == msg.msgId } == true) {
+            Log.i(TAG, "重复消息，跳过 msgId=${msg.msgId}")
+            return
+        }
+
         var left = true;
         if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER) {
             left = false;
