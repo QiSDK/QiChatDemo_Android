@@ -669,6 +669,22 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     }
 
                     if (item.msgOp == "MSG_OP_DELETE") {
+                        // 历史里被撤回的消息显示为灰色提示条（对应 Flutter _buildHistory）
+                        val tipItem = MessageItem().apply {
+                            cMsg = CMessage.Message.newBuilder().apply {
+                                msgTime = Utils().getNowTimeStamp()
+                                msgId = (item.msgId ?: "0").toLong()
+                                val contentBuilder = CMessage.MessageContent.newBuilder().apply {
+                                    data = "对方撤回了一条消息"
+                                }
+                                setContent(contentBuilder)
+                            }.build()
+                            this.isLeft = isLeft
+                            this.cellType = CellType.TYPE_Tip
+                            this.msgId = (item.msgId ?: "0").toLong()
+                            this.sendStatus = MessageSendState.发送成功
+                        }
+                        historyList.add(tipItem)
                         continue
                     }
 
