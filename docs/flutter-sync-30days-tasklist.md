@@ -23,7 +23,7 @@
 | B | 客服评价（Evaluation） | ✅ 基本完成，少量待办 |
 | C | 撤回 / 编辑消息 | 🟡 撤回完成，编辑待办 |
 | D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ⏳ 待办 |
-| E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | 🟡 部分已有 |
+| E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（Android 用内联按钮等价覆盖，补齐 B6 悬浮按钮防遮挡） |
 | F | 设备信息页（device_info_page，全新） | ✅ 完成（入口暂放聊天页头部，E 组功能面板落地后迁入） |
 | G | 消息时间戳布局（移到气泡上方） | 🟡 待核实 |
 | H | 未读管理持久化（unread_manager） | ⏳ 待办 |
@@ -59,7 +59,7 @@ Flutter 新增 `lib/src/model/AppChatTheme.dart`（对齐 iOS `ChatTheme`），�
 | B4 | 评价按钮仅在本次会话发过消息后显示（`_hasSentInSession`） | ✅ 完成 |
 
 - [ ] **B5 初始化拉取评价状态**：进入会话时调 `evaluationStatus(consultId)`，据 status 1/2 初始化 `_evaluationDone`，避免已评价会话仍显示可点按钮。（Flutter `_fetchEvaluationStatus()`）
-- [ ] **B6 悬浮按钮防遮挡**：底部面板展开或键盘弹起时隐藏「客服评价」悬浮按钮（Flutter 用 `onExpandedChanged` + `viewInsets.bottom==0` 判定）。
+- [x] **B6 悬浮按钮防遮挡**：底部面板展开或键盘弹起时隐藏「客服评价」悬浮按钮。已随 E5 落地——见 `KeFuBaseFragment.onBottomExpandedChanged` 钩子驱动 `refreshEvaluationButtonVisibility()` 的 `!bottomExpanded` 门控（对应 Flutter `onExpandedChanged` + `viewInsets.bottom==0`）。
 - [x] **B7 评价按钮着色用主题 tintColor**：`refreshEvaluationButtonVisibility()` 用 `chatTheme.tintColor` 替代写死的 `R.color.blue`。
 
 参考：`ChatPage.dart` 评价相关段，`evaluation_dialog.dart`。
@@ -96,15 +96,16 @@ Flutter 新增 `lib/src/vc/MediaPagerView.dart` + `lib/src/model/MediaItem.dart`
 
 ## E. 输入栏重写（custom_bottom）
 
-Flutter `lib/src/vc/custom_bottom.dart` 大改（+813 行）。Android 已有部分（emoji 面板、回复条），需补齐。
+Flutter `lib/src/vc/custom_bottom.dart` 大改（+813 行）。Flutter 把功能收进一个「+」面板是因为它没有内联按钮；Android 输入栏是另一套架构（`com.effective.android.panel` 的 `PanelSwitchLayout` + 一排**内联**图标按钮），E1/E2/E4 已用内联方式等价覆盖，无需照搬面板。
 
-- [ ] **E1 功能面板（action panel）**：图片 / 视频 / **设备信息** 三个入口按钮（`_onPickImageTap` / `_onPickVideoTap` / `_onDeviceInfoTap`）。
-- [ ] **E2 图片来源选择**：点图片弹「拍照 / 相册」菜单（Android `DialogBottomMenu` 可复用）。
-- [ ] **E3 emoji 面板独立按钮**：emoji 面板内圆形「删除(backspace)」+「发送」按钮，随输入框文本是否为空启用/禁用。Android `EmojiFragment` 当前未见同名按钮，需补。
-- [ ] **E4 回复条 show/hide**：`showReply/hideReply`（Android `KeFuFragment` 已含 reply 相关，核实交互一致）。
-- [ ] **E5 面板占位回调**：emoji 面板 / 功能面板 / 回复条 任一可见即上报 `expanded=true`（供 B6 隐藏悬浮按钮）。
+- [x] **E1 功能面板（action panel）**：Android 已有内联入口——`ivPhoto`（相册）/ `ivVideo`（拍照）/ `ivFile`（文件），「设备信息」入口已在头部 `iv_device_info`（F4，E 组不再重复）。比 Flutter 折叠面板更直达，等价覆盖。
+- [x] **E2 图片来源选择**：Android 用独立按钮区分（`ivPhoto`→相册、`ivVideo`→拍照），另有 `DialogBottomMenu`(bottom_menu 数组) 兜底；功能等价于 Flutter 的「拍照/相册」弹窗。
+- [x] **E3 emoji 面板独立按钮**：emoji 面板（`layout_expression`）已含删除键 `iv_delete_chat`；发送用输入行常驻的 `btn_send`（Android 面板在输入行下方，输入行不被挤走，故无需面板内再放发送键）。等价覆盖。
+- [x] **E4 回复条 show/hide**：Android 已有 `tv_QuotedMsg` + `iv_Close` 回复条与显隐逻辑，交互一致。
+- [x] **E5 面板占位回调（=B6）**：在 `KeFuBaseFragment` 的 `OnPanelChangeListener` 里新增 `onBottomExpandedChanged(expanded)` 钩子（`onKeyboard`/`onPanel`→true、`onNone`→false），`KeFuFragment` 覆写后置 `bottomExpanded`，`refreshEvaluationButtonVisibility()` 增加 `&& !bottomExpanded`——键盘或任一面板弹起时隐藏「客服评价」悬浮按钮，对应 Flutter `onExpandedChanged`。同时落地了 B6。
 
 参考：`custom_bottom.dart`。
+实现：`KeFuBaseFragment`（`onBottomExpandedChanged` 钩子 + 面板监听接线）、`KeFuFragment`（`bottomExpanded` + 覆写 + 可见性门控）。
 
 ---
 

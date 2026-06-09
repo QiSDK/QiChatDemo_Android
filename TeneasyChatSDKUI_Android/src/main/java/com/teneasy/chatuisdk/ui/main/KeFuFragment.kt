@@ -139,6 +139,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     // 仅统计本次会话内用户新发出的消息（不含历史记录），用于控制「客服评价」按钮的显示
     private var hasSentInSession = false
 
+    /** 底部键盘/面板是否占用，占用时隐藏评价悬浮按钮（对应 Flutter onExpandedChanged 门控）。 */
+    private var bottomExpanded = false
+
     // 评价状态：0=未评价 1=已评价 2=已关闭 3=空会话。1/2 视为已完成，按钮置灰禁用
     private var evaluationStatus: Int? = null
     private val isEvaluationDone get() = evaluationStatus == 1 || evaluationStatus == 2
@@ -1492,9 +1495,15 @@ code: 1005 会话超时
      * 评价浮动按钮的显示条件：评价已开启 且 本次会话用户已发过消息
      * （对应 Flutter _hasSentInSession 门控）
      */
+    override fun onBottomExpandedChanged(expanded: Boolean) {
+        if (bottomExpanded == expanded) return
+        bottomExpanded = expanded
+        refreshEvaluationButtonVisibility()
+    }
+
     private fun refreshEvaluationButtonVisibility() {
         if (!isAdded) return
-        val show = evaluationConfig?.evaluationEnabled == true && hasSentInSession
+        val show = evaluationConfig?.evaluationEnabled == true && hasSentInSession && !bottomExpanded
         binding?.llEvaluationButton?.visibility = if (show) View.VISIBLE else View.GONE
         if (show) {
             val done = isEvaluationDone

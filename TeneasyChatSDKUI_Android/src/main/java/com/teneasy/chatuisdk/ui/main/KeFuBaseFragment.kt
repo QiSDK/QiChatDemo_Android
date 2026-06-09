@@ -301,11 +301,13 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
         override fun onKeyboard() {
             CfLog.d(TAG, "唤起系统输入法")
             updateEmojiButtonState(false)
+            onBottomExpandedChanged(true)
         }
 
         override fun onNone() {
             CfLog.d(TAG, "隐藏所有面板")
             updateEmojiButtonState(false)
+            onBottomExpandedChanged(false)
         }
 
         override fun onPanel(panel: IPanelView?) {
@@ -313,6 +315,7 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
             if (panel is PanelView && panel.id == R.id.panel_emotion) {
                 updateEmojiButtonState(true)
             }
+            onBottomExpandedChanged(true)
         }
 
         override fun onPanelSizeChange(
@@ -326,6 +329,13 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
             // 面板大小变化时的处理
         }
     }
+
+    /**
+     * 底部「占用区」（系统键盘 / emoji 面板 / 更多面板）显示或隐藏时回调。
+     * 对应 Flutter custom_bottom 的 onExpandedChanged：子类可据此隐藏悬浮在
+     * 底部的 UI（如客服评价悬浮按钮），避免被面板/键盘遮挡。默认空实现。
+     */
+    protected open fun onBottomExpandedChanged(expanded: Boolean) {}
 
     /**
      * 更新表情按钮状态
