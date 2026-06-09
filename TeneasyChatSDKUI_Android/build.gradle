@@ -27,7 +27,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
-        def defaultLines = propertyOrDefault('chatSdk.defaultLines', 'https://csapi.hfxg.xyz,https://xxxapi.qixin14.xyz')
+        def defaultLines = propertyOrDefault('chatSdk.defaultLines', 'https://csh5-3-test.qlbig05.xyz,https://xxxapi.qixin14.xyz')
         buildConfigField "String", "DEFAULT_LINES", '"' + asEscapedString(defaultLines) + '"'
 
         def defaultCert = propertyOrDefault('chatSdk.defaultCert', 'COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ')

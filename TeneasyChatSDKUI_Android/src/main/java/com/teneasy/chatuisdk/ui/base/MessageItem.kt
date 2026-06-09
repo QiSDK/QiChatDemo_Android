@@ -32,6 +32,8 @@ class MessageItem {//:Serializable
         var avatar: String = ""
         var cellType: CellType = CellType.TYPE_Text
         var replyItem: ReplyMessageItem? = null
+        //被编辑过的消息打上时间戳标记（对齐 Flutter metadata['editedAt']）；0 表示未编辑
+        var editedAt: Long = 0
     }
 
 class ReplyMessageItem {

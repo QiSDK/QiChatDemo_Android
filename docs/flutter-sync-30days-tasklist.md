@@ -21,7 +21,7 @@
 |----|------|------|
 | A | 聊天页主题化（渐变背景 / 气泡色 / AppBar） | ✅ 完成（图片/视频 cell 为纯媒体无文字气泡，无需着色） |
 | B | 客服评价（Evaluation） | ✅ 基本完成，少量待办 |
-| C | 撤回 / 编辑消息 | 🟡 撤回完成，编辑待办 |
+| C | 撤回 / 编辑消息 | ✅ 完成（撤回 + 编辑 MSG_OP_EDIT） |
 | D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ⏳ 待办 |
 | E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（重做为 Flutter 同款：圆角输入框+表情/更多两图标+功能面板四按钮） |
 | F | 设备信息页（device_info_page，全新） | ✅ 完成（入口已随 E 组迁入底部功能面板） |
@@ -58,7 +58,7 @@ Flutter 新增 `lib/src/model/AppChatTheme.dart`（对齐 iOS `ChatTheme`），�
 | B3 | 评价完成后按钮置灰禁用 + 状态回调（status 1=已评价/2=已关闭） | ✅ 完成 |
 | B4 | 评价按钮仅在本次会话发过消息后显示（`_hasSentInSession`） | ✅ 完成 |
 
-- [ ] **B5 初始化拉取评价状态**：进入会话时调 `evaluationStatus(consultId)`，据 status 1/2 初始化 `_evaluationDone`，避免已评价会话仍显示可点按钮。（Flutter `_fetchEvaluationStatus()`）
+- [x] **B5 初始化拉取评价状态**：核实结果——Android 已实现且与 Flutter 一致。`KeFuFragment.fetchEvaluationConfig()` 成功且 `evaluationEnabled==true` 后调 `fetchEvaluationStatus()`（`KeFuFragment.kt:1469`），将 `evaluationStatus` 置为服务端 status，`isEvaluationDone = status==1||==2` 驱动 `refreshEvaluationButtonVisibility()` 置灰禁用按钮——对应 Flutter `_fetchEvaluationConfig()`→`_fetchEvaluationStatus()`，无需改动。
 - [x] **B6 悬浮按钮防遮挡**：底部面板展开或键盘弹起时隐藏「客服评价」悬浮按钮。已随 E5 落地——见 `KeFuBaseFragment.onBottomExpandedChanged` 钩子驱动 `refreshEvaluationButtonVisibility()` 的 `!bottomExpanded` 门控（对应 Flutter `onExpandedChanged` + `viewInsets.bottom==0`）。
 - [x] **B7 评价按钮着色用主题 tintColor**：`refreshEvaluationButtonVisibility()` 用 `chatTheme.tintColor` 替代写死的 `R.color.blue`。
 
@@ -73,7 +73,8 @@ Flutter 新增 `lib/src/model/AppChatTheme.dart`（对齐 iOS `ChatTheme`），�
 | C1 | 历史记录中的撤回消息显示灰条 | ✅ 完成 |
 | C2 | 消息去重（历史 HTTP 与实时 WS 竞态） | ✅ 完成 |
 
-- [ ] **C3 编辑消息（MSG_OP_EDIT）**：编辑后保留**原作者**与**原 createdAt**（不要用当前时间/sender），`metadata` 写 `editedAt` 以便渲染「已编辑」徽标，并把 `tipText` 置回 false（撤回灰条被编辑后恢复普通样式）。Android `KeFuViewModel` 有提到 MSG_OP_EDIT，需核实是否完整实现。
+- [x] **C3 编辑消息（MSG_OP_EDIT）**：已完成。修复了一个隐藏 bug——C2 去重守卫按 `msgId` 拦截，而编辑消息复用原 `msgId`，导致实时编辑被去重直接丢弃、`addMsgItem` 里的编辑分支成了死代码。改动：① `KeFuFragment.processReceivedMessage` 去重守卫放行 `MSG_OP_EDIT`；② `KeFuViewModel.addMsgItem` 编辑分支重写为**保留原 `sender`/`msgTime`、仅替换 `content.data`**（用 `old.cMsg.toBuilder()`，不取编辑消息自带的作者/时间），并在 `MessageItem` 新增 `editedAt` 标记（对齐 Flutter `metadata['editedAt']`；Flutter 本身也只存标记不渲染徽标，故 Android 同样不加 UI 徽标），撤回灰条被编辑后 `TYPE_Tip→TYPE_Text` 恢复普通样式（对齐 `tipText=false`）；编辑消息只更新既有项、命不中则不追加（对齐 Flutter index<0 不处理）。
+  实现：`MessageItem.kt`（`editedAt` 字段）、`KeFuFragment.kt`（去重放行 EDIT）、`KeFuViewModel.kt`（编辑分支重写）。
 - [x] **C4 撤回文案统一**为「对方撤回了一条消息」（Flutter 把旧的 "1条" 改为 "一条"）。Android 已是「对方撤回了一条消息」——历史灰条 `KeFuFragment.kt:717`、实时撤回 `KeFuFragment.kt:1086` 两处文案一致，无需改动。
 
 参考：`ChatPage.dart` receivedMsg / queryHistory 中 `MSG_OP_DELETE`、`MSG_OP_EDIT` 段。

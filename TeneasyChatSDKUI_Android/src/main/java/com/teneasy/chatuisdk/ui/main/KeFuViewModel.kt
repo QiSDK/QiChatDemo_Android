@@ -81,14 +81,30 @@ class KeFuViewModel : BaseViewModel() {
             //说明文本消息里面包含有图片的链接
             newItem.cMsg?.content?.data != null && (newItem.cMsg?.content?.data ?:"").contains("\"imgs\"") -> CellType.TYPE_Text_Images
             else -> {
-                // 处理编辑消息的情况
+                // 处理编辑消息的情况（对齐 Flutter receivedMsg 的 MSG_OP_EDIT 分支）
                 if (newItem.cMsg?.msgOp == CMessage.MessageOperate.MSG_OP_EDIT) {
-                    val index = mlMsgList.value?.indexOfFirst { it.cMsg?.msgId == newItem.cMsg?.msgId }
+                    val list = mlMsgList.value
+                    val index = list?.indexOfFirst { it.cMsg?.msgId == newItem.cMsg?.msgId }
                     if (index != null && index != -1) {
-                        mlMsgList.value!![index].cMsg = newItem.cMsg
-                        mlMsgList.postValue(mlMsgList.value)
-                        return
+                        val old = list[index]
+                        val editedText = newItem.cMsg?.content?.data ?: ""
+                        // 保留原作者(sender) 与 原发送时间(msgTime)，仅替换正文；
+                        // 不要用编辑消息自带的 sender/时间（对齐 Flutter author: oldMsg.author, createdAt: oldMsg.createdAt）
+                        old.cMsg = (old.cMsg?.toBuilder() ?: CMessage.Message.newBuilder())
+                            .setContent(CMessage.MessageContent.newBuilder().setData(editedText))
+                            .setMsgOp(CMessage.MessageOperate.MSG_OP_EDIT)
+                            .build()
+                        // 标记已编辑（对齐 Flutter metadata['editedAt']）
+                        old.editedAt = System.currentTimeMillis()
+                        // 若该条之前是「对方撤回了一条消息」灰条，编辑后恢复普通文本样式（对齐 Flutter tipText=false）
+                        if (old.cellType == CellType.TYPE_Tip) {
+                            old.cellType = CellType.TYPE_Text
+                        }
+                        list[index] = old
+                        mlMsgList.postValue(list)
                     }
+                    // 编辑消息只更新既有项，从不作为新消息追加（对齐 Flutter index<0 时不处理）
+                    return
                 }
                 CellType.TYPE_Text
             }

@@ -829,11 +829,24 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         try {
             releaseResources()
             resetState()
-            //返回到上个页面
-            findNavController().popBackStack()
             Log.i(TAG, "聊天资源已释放")
         } catch (e: Exception) {
             Log.e(TAG, "释放聊天资源时发生错误: ${e.message}")
+        }
+
+        // 仅在 Fragment 仍处于附加状态时执行返回导航。
+        // onDestroy 也会调用 exitChat()，此时 isAdded=false，跳过导航避免把已经返回到的
+        // 上级页面也一起 finish 掉。
+        if (!isAdded) return
+        try {
+            // 返回上一页；若已在返回栈底（popBackStack 返回 false，无上级页面可回），
+            // 直接结束 Activity，避免「点了返回键没反应」（例如看完全屏图片回来后）。
+            if (!findNavController().popBackStack()) {
+                activity?.finish()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "返回上一页失败，直接结束页面: ${e.message}")
+            activity?.finish()
         }
     }
 
@@ -1161,7 +1174,9 @@ code: 1005 会话超时
     private fun processReceivedMessage(msg: CMessage.Message) {
         // 去重：同一条服务器消息可能因「历史拉取(HTTP)」与「实时推送(WS)」竞态各进一次。
         // 例如用户退出后客服发消息，再次进入时 queryChatHistory 已含该条，WS 又推一遍。
-        if (msg.msgId > 0 &&
+        // 注意：编辑消息(MSG_OP_EDIT)复用原消息的 msgId，必须放行去重以便命中编辑逻辑（对齐 Flutter receivedMsg）。
+        if (msg.msgOp != CMessage.MessageOperate.MSG_OP_EDIT &&
+            msg.msgId > 0 &&
             viewModel.mlMsgList.value?.any { it.msgId == msg.msgId } == true) {
             Log.i(TAG, "重复消息，跳过 msgId=${msg.msgId}")
             return
@@ -1485,10 +1500,13 @@ code: 1005 会话超时
         val b = binding ?: return
         // A2 整页渐变背景
         b.main.background = chatTheme.newGradientDrawable()
-        // A3 头部着色：背景用渐变起始色，标题 / 返回键用 tintColor
-        b.llTop.setBackgroundColor(chatTheme.gradientStartColor)
+        // A3 导航条着色：背景取 ChatTheme 的顶部渐变色（statusBarColor 已按渐变方向取顶端色），
+        // 标题 / 返回键用 tintColor。让导航条与页面顶部渐变无缝衔接。
+        b.llTop.setBackgroundColor(chatTheme.statusBarColor)
+        // 导航条可点击，独占自身触摸区域，避免其它视图盖到顶栏抢走返回键的点击
+        b.llTop.isClickable = true
         // 状态栏与头部同色，按亮度切换图标明暗，整页观感统一
-        applyStatusBarColor(chatTheme.gradientStartColor)
+        applyStatusBarColor(chatTheme.statusBarColor)
         b.tvTitle.setTextColor(chatTheme.tintColor)
         b.llClose.setColorFilter(chatTheme.tintColor)
         // 平台 / 商户名（对齐 Flutter AppBar actions）
