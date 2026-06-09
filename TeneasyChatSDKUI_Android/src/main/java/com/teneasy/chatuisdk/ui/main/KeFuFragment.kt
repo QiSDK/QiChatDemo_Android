@@ -367,16 +367,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
                 //长按消息，引用消息并回复
                 override fun onQuote(position: Int) {
-                    binding?.tvQuotedMsg?.visibility = View.VISIBLE
+                    binding?.llReplyBar?.visibility = View.VISIBLE
                     binding?.tvQuotedMsg?.tag = position
                     val msg = msgAdapter.msgList?.get(position)?.cMsg
                     val srcType = msg?.msgSourceType ?: CMessage.MsgSourceType.MST_SYSTEM_WORKER
                     if ((msg?.image?.uri ?: "").isNotEmpty()) {
-                        showQuotedMsg("回复：图片")
+                        showQuotedMsg("回复：【图片】")
                     } else if ((msg?.file?.uri ?: "").isNotEmpty()) {
-                        showQuotedMsg("回复：文件")
+                        showQuotedMsg("回复：【文件】")
                     } else if ((msg?.video?.uri ?: "").isNotEmpty()) {
-                        showQuotedMsg("回复：视频")
+                        showQuotedMsg("回复：【视频】")
                     } else {
                         var txt = msgAdapter.msgList?.get(position)?.cMsg?.content?.data ?: " "
                         txt = txt.split("回复：")[0]
@@ -1330,14 +1330,14 @@ code: 1005 会话超时
     }
 
     private fun hidetvQuotedMsg() {
-        binding?.tvQuotedMsg?.visibility = View.GONE
+        binding?.llReplyBar?.visibility = View.GONE
         binding?.tvQuotedMsg?.text = ""
         //切记在这需要把tag置为-1
         binding?.tvQuotedMsg?.tag = -1
     }
 
     private fun showQuotedMsg(txt: String) {
-        binding?.tvQuotedMsg?.visibility = View.VISIBLE
+        binding?.llReplyBar?.visibility = View.VISIBLE
         binding?.tvQuotedMsg?.text = txt
     }
 

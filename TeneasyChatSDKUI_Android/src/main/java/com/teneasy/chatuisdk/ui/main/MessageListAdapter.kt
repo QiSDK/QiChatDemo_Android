@@ -689,6 +689,8 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.lyLeftContent.visibility = View.VISIBLE
                 holder.lyRightContent.visibility = View.GONE
                 holder.rlLeftImagecontainer.visibility = View.GONE
+                // 发送状态勾已移到根布局（独立于 lyRightContent），接收消息须显式隐藏
+                holder.ivSendStatus.visibility = View.GONE
 
                 // 主题：左气泡背景着色
                 theme?.let { holder.llLeft.background?.mutate()?.setTint(it.leftBubbleColor) }

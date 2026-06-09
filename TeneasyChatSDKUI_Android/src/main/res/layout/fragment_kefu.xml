@@ -146,26 +146,45 @@
             android:alpha="0.7"
             android:elevation="0.3dp"
             android:layout_marginBottom="15dp"
-            app:layout_constraintBottom_toTopOf="@id/tv_QuotedMsg"
+            app:layout_constraintBottom_toTopOf="@id/ll_reply_bar"
           />
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_QuotedMsg"
-            app:layout_constraintLeft_toLeftOf="@id/et_msg"
-            app:layout_constraintBottom_toTopOf="@id/et_msg"
-            app:layout_constraintRight_toRightOf="@id/et_msg"
-            android:visibility="gone"
-            android:gravity="center_vertical|start"
+
+        <!-- 回复条：整条满宽浅灰背景 + 左侧引用文本 + 右侧蓝色关闭（对齐 Flutter custom_bottom._buildReplyBar） -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_reply_bar"
             android:layout_width="0dp"
-            android:layout_height="30dp">   </androidx.appcompat.widget.AppCompatTextView>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#FFEEEEEE"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/et_msg">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_QuotedMsg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#FF333333"
+                android:textSize="14sp" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/iv_Close"
-                app:layout_constraintLeft_toRightOf="@id/tv_QuotedMsg"
-                app:layout_constraintTop_toTopOf="@id/tv_QuotedMsg"
-                android:layout_marginStart="-10dp"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="4dp"
+                app:tint="@color/blue"
                 android:src="@drawable/close" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
         <!-- 输入栏：圆角输入框 + 表情 + 更多（对齐 Flutter custom_bottom._buildInputRow）。
              发送走键盘发送键(imeOptions=actionSend)与 emoji 面板发送键，不再常驻发送按钮。 -->
