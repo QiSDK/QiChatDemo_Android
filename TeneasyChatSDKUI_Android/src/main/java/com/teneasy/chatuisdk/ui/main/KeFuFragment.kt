@@ -39,6 +39,7 @@ import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.SelectConsultTypeViewModel
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.DeviceInfoActivity
 import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.baseUrlApi
@@ -107,6 +108,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         val index = if (fromArgs >= 0) fromArgs else activity?.intent?.getIntExtra(EXTRA_THEME_INDEX, -1) ?: -1
         AppChatTheme.fromIndex(index)
     }
+
+    /** 当前主题在预设中的下标，用于透传给设备信息页保持一致。 */
+    private val chatThemeIndex: Int get() = AppChatTheme.presets.indexOf(chatTheme)
 
     // UI组件
     private lateinit var msgAdapter: MessageListAdapter
@@ -1467,6 +1471,13 @@ code: 1005 会话超时
         b.tvPlatformName.text = platform
         b.tvPlatformName.setTextColor(chatTheme.tintColor)
         b.tvPlatformName.visibility = if (platform.isEmpty()) View.GONE else View.VISIBLE
+        // 设备信息入口
+        b.ivDeviceInfo.setColorFilter(chatTheme.tintColor)
+        b.ivDeviceInfo.setOnClickListener {
+            val intent = Intent(requireContext(), DeviceInfoActivity::class.java)
+            intent.putExtra(DeviceInfoActivity.EXTRA_THEME_INDEX, chatThemeIndex)
+            startActivity(intent)
+        }
     }
 
     // 状态栏颜色跟随主题，并按背景亮度切换图标明暗（浅色背景用深色图标）

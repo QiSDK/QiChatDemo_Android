@@ -24,7 +24,7 @@
 | C | 撤回 / 编辑消息 | 🟡 撤回完成，编辑待办 |
 | D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ⏳ 待办 |
 | E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | 🟡 部分已有 |
-| F | 设备信息页（device_info_page，全新） | ⏳ 待办 |
+| F | 设备信息页（device_info_page，全新） | ✅ 完成（入口暂放聊天页头部，E 组功能面板落地后迁入） |
 | G | 消息时间戳布局（移到气泡上方） | 🟡 待核实 |
 | H | 未读管理持久化（unread_manager） | ⏳ 待办 |
 | I | 杂项（token key / 引用内容弹窗） | ⏳ 待办 |
@@ -112,12 +112,14 @@ Flutter `lib/src/vc/custom_bottom.dart` 大改（+813 行）。Android 已有部
 
 Flutter 新增 `lib/src/vc/device_info_page.dart`（349 行），Android **完全没有**。
 
-- [ ] **F1 新建设备信息页**，展示字段：会员账号、手机型号、应用名称、手机系统版本、APP 当前版本、应用包名、当前时间（每秒刷新）、登录 IP、当前线路、线路等级、线路扫描（逐条 `线路N` 延迟）。
-- [ ] **F2 保存为图片到相册**：把信息卡片渲染成图片保存（Flutter 用 `RepaintBoundary`+`gal`；Android 用 View 截图 + MediaStore），含权限处理与「已保存到相册 / 未授予相册权限」提示。
-- [ ] **F3 主题化**（依赖 A 组）。
-- [ ] **F4 从输入栏功能面板进入**（见 E1）。
+- [x] **F1 新建设备信息页** `DeviceInfoActivity` + `activity_device_info.xml`：会员账号、手机型号(`Build.MODEL`)、应用名称、手机系统版本(`Android_${RELEASE}`)、APP 当前版本(`versionName_versionCode (V3)`)、应用包名、当前时间（每秒刷新）、登录 IP、当前线路(`Constants.lines` 中匹配 `domain` → `线路N`)、线路等级、线路扫描。行按 Flutter 风格在白卡里 label/value + 分隔线，programmatic 生成。
+  - 与 Flutter 一致：**登录IP / 线路等级 / 线路扫描** 当前为占位「—」（Flutter 实现里也是占位）。
+- [x] **F2 保存为图片到相册**：把白卡 `cardInfo` 渲染成 Bitmap（`card.draw(canvas)`）→ 复用 `CapturePhotoUtils.saveImageInQ()` 存入 MediaStore，后台线程执行，toast「已保存到相册 / 保存失败」。
+- [x] **F3 主题化**：整页渐变背景 + 头部着色 + 状态栏色（`statusBarColor`），主题下标经 `EXTRA_THEME_INDEX` 由聊天页透传保持一致。
+- [~] **F4 入口**：暂放聊天页头部 `iv_device_info` 图标（`ic_menu_info_details`，tint 主题色）。E 组功能面板落地后迁入面板（对应 Flutter `_onDeviceInfoTap`）。
 
 参考：`device_info_page.dart`（数据源 `device_info_plus`/`package_info_plus`，线路来自 `config.dart`）。
+实现：`DeviceInfoActivity.kt`、`activity_device_info.xml`、`fragment_kefu.xml`（`iv_device_info`）、`KeFuFragment`（`chatThemeIndex` + 点击打开）、`AndroidManifest.xml`（注册 NoActionBar）。
 
 ---
 

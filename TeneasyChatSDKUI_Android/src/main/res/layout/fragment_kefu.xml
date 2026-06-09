@@ -67,10 +67,20 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
+
+            <!-- 设备信息入口（E 组功能面板落地后可迁入面板） -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_device_info"
+                android:layout_width="47dp"
+                android:layout_height="47dp"
+                android:layout_gravity="center"
+                android:padding="13dp"
+                android:contentDescription="设备信息"
+                android:src="@android:drawable/ic_menu_info_details" />
         </androidx.appcompat.widget.LinearLayoutCompat>
         <com.effective.android.panel.view.PanelSwitchLayout
             android:id="@+id/panel_switch_layout"
