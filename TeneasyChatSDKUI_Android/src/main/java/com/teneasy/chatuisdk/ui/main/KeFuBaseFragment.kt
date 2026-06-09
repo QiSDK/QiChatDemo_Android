@@ -191,15 +191,18 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
                     mLimitInput = it
                 }
             }
-            if (TextUtils.isEmpty(binding?.etMsg?.text)) {
-                binding?.panelEmotion?.findViewById<View>(R.id.iv_delete_chat)?.isEnabled = false
-                binding?.btnSend?.visibility = View.GONE
+            val hasText = !TextUtils.isEmpty(binding?.etMsg?.text)
+            // 删除键与 emoji 面板发送键随是否有文字启用/禁用（对应 Flutter _EmojiBackspace/_EmojiSendButton）
+            binding?.panelEmotion?.findViewById<View>(R.id.iv_delete_chat)?.isEnabled = hasText
+            binding?.panelEmotion?.findViewById<View>(R.id.iv_emoji_send)?.apply {
+                isEnabled = hasText
+                alpha = if (hasText) 1f else 0.4f
+            }
+            if (!hasText) {
                 if (binding?.panelEmotion?.visibility != View.VISIBLE) {
                     binding?.etMsg?.clearFocus()
                 }
             } else {
-                binding?.panelEmotion?.findViewById<View>(R.id.iv_delete_chat)?.isEnabled = true
-                binding?.btnSend?.visibility = View.VISIBLE
                 binding?.etMsg?.requestFocus()
             }
         }
@@ -271,6 +274,10 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
                 getTargetPanelDefaultHeight { Utils().dp2px(250f) }
                 getPanelTriggerId { R.id.ivEmoj }
             }
+            .addPanelHeightMeasurer {
+                getTargetPanelDefaultHeight { Utils().dp2px(160f) }
+                getPanelTriggerId { R.id.iv_more }
+            }
             .logTrack(false)
             .build()
     }
@@ -301,20 +308,22 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
         override fun onKeyboard() {
             CfLog.d(TAG, "唤起系统输入法")
             updateEmojiButtonState(false)
+            updateMoreButtonState(false)
             onBottomExpandedChanged(true)
         }
 
         override fun onNone() {
             CfLog.d(TAG, "隐藏所有面板")
             updateEmojiButtonState(false)
+            updateMoreButtonState(false)
             onBottomExpandedChanged(false)
         }
 
         override fun onPanel(panel: IPanelView?) {
             CfLog.d(TAG, "唤起面板 : $panel")
-            if (panel is PanelView && panel.id == R.id.panel_emotion) {
-                updateEmojiButtonState(true)
-            }
+            val isEmoji = panel is PanelView && panel.id == R.id.panel_emotion
+            updateEmojiButtonState(isEmoji)
+            updateMoreButtonState(panel is PanelView && panel.id == R.id.panel_more)
             onBottomExpandedChanged(true)
         }
 
@@ -344,8 +353,18 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
     private fun updateEmojiButtonState(isSelected: Boolean) {
         binding?.ivEmoj?.apply {
             this.isSelected = isSelected
-            setImageResource(if (isSelected) R.drawable.ht_shuru else R.drawable.emoj)
+            setImageResource(if (isSelected) R.drawable.ht_shuru else R.drawable.biaoqing)
         }
+    }
+
+    /**
+     * 更新「更多」回形针图标状态：功能面板展开用蓝色 gengduo_0，否则灰色 gengduo_1
+     * （对应 Flutter custom_bottom `_panelShowing ? gengduo_0 : gengduo_1`）。
+     */
+    private fun updateMoreButtonState(isOpen: Boolean) {
+        binding?.ivMore?.setImageResource(
+            if (isOpen) R.drawable.gengduo_0 else R.drawable.gengduo_1
+        )
     }
     /**
      * 表情输入模式

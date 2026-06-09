@@ -1,11 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  功能面板：图片 / 视频 / 文件 / 设备信息 四个圆形入口。
+  对齐 Flutter custom_bottom._buildActionPanel（白色圆 + 图标 + 标签）。
+-->
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:id="@+id/ll_function"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/black4848"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:background="@color/chatBody"
+        android:gravity="top"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="16dp">
+
+        <!-- 图片 -->
+        <LinearLayout
+            android:id="@+id/ll_action_image"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_panel_action_circle"
+                android:padding="13dp"
+                android:src="@drawable/tupian" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="图片"
+                android:textColor="#FF333333"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- 视频 -->
+        <LinearLayout
+            android:id="@+id/ll_action_video"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_panel_action_circle"
+                android:padding="13dp"
+                android:src="@drawable/shipin" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="视频"
+                android:textColor="#FF333333"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- 文件 -->
+        <LinearLayout
+            android:id="@+id/ll_action_file"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_panel_action_circle"
+                android:padding="13dp"
+                android:src="@drawable/file_icon" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="文件"
+                android:textColor="#FF333333"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- 设备信息 -->
+        <LinearLayout
+            android:id="@+id/ll_action_device"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_panel_action_circle"
+                android:padding="13dp"
+                android:src="@drawable/shebeixinxi" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="设备信息"
+                android:textColor="#FF333333"
+                android:textSize="13sp" />
+        </LinearLayout>
     </LinearLayout>
 </layout>

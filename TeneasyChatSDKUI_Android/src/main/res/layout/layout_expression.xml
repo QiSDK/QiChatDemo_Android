@@ -67,5 +67,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/rcv_navigation"
             app:layout_constraintTop_toBottomOf="@id/rcv_navigation" />
+
+        <!-- emoji 面板内发送键（对齐 Flutter _EmojiSendButton，随输入框是否有文字启用/禁用） -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/iv_emoji_send"
+            android:layout_width="64dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_corner_blue"
+            android:enabled="false"
+            android:gravity="center"
+            android:text="@string/send"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

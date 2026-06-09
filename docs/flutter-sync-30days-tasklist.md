@@ -23,8 +23,8 @@
 | B | 客服评价（Evaluation） | ✅ 基本完成，少量待办 |
 | C | 撤回 / 编辑消息 | 🟡 撤回完成，编辑待办 |
 | D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ⏳ 待办 |
-| E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（Android 用内联按钮等价覆盖，补齐 B6 悬浮按钮防遮挡） |
-| F | 设备信息页（device_info_page，全新） | ✅ 完成（入口暂放聊天页头部，E 组功能面板落地后迁入） |
+| E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（重做为 Flutter 同款：圆角输入框+表情/更多两图标+功能面板四按钮） |
+| F | 设备信息页（device_info_page，全新） | ✅ 完成（入口已随 E 组迁入底部功能面板） |
 | G | 消息时间戳布局（移到气泡上方） | 🟡 待核实 |
 | H | 未读管理持久化（unread_manager） | ⏳ 待办 |
 | I | 杂项（token key / 引用内容弹窗） | ⏳ 待办 |
@@ -96,16 +96,18 @@ Flutter 新增 `lib/src/vc/MediaPagerView.dart` + `lib/src/model/MediaItem.dart`
 
 ## E. 输入栏重写（custom_bottom）
 
-Flutter `lib/src/vc/custom_bottom.dart` 大改（+813 行）。Flutter 把功能收进一个「+」面板是因为它没有内联按钮；Android 输入栏是另一套架构（`com.effective.android.panel` 的 `PanelSwitchLayout` + 一排**内联**图标按钮），E1/E2/E4 已用内联方式等价覆盖，无需照搬面板。
+Flutter `lib/src/vc/custom_bottom.dart` 大改（+813 行）。按用户要求把 Android 底栏**重做成 Flutter 同款视觉**：圆角输入框「说点什么吧」+ 右侧两图标（表情 / 更多）；点更多在下方 `panel_more` 展开「图片 / 视频 / 文件 / 设备信息」四个圆形按钮。原来那排内联按钮（图片/视频/文件/字数/发送）已撤掉。
 
-- [x] **E1 功能面板（action panel）**：Android 已有内联入口——`ivPhoto`（相册）/ `ivVideo`（拍照）/ `ivFile`（文件），「设备信息」入口已在头部 `iv_device_info`（F4，E 组不再重复）。比 Flutter 折叠面板更直达，等价覆盖。
-- [x] **E2 图片来源选择**：Android 用独立按钮区分（`ivPhoto`→相册、`ivVideo`→拍照），另有 `DialogBottomMenu`(bottom_menu 数组) 兜底；功能等价于 Flutter 的「拍照/相册」弹窗。
-- [x] **E3 emoji 面板独立按钮**：emoji 面板（`layout_expression`）已含删除键 `iv_delete_chat`；发送用输入行常驻的 `btn_send`（Android 面板在输入行下方，输入行不被挤走，故无需面板内再放发送键）。等价覆盖。
+- [x] **E1 功能面板（action panel）**：`layout_more_panel` 改为 图片/视频/文件/设备信息 四个白色圆 + 标签（`bg_panel_action_circle`）；`panel_more` 触发改为新增的「更多」图标 `iv_more`。比 Flutter 多一个「文件」（按用户选择保留 Android 既有发文件能力）。图标用用户提供的 Flutter 同款资源：表情 `biaoqing`、更多 `gengduo_1`(收起)/`gengduo_0`(展开，随面板开合切换)、图片 `tupian`、视频 `shipin`、设备信息 `shebeixinxi`；客服评价星标换 `pingjia`（`iv_evaluation_star` ImageView，按主题 `setColorFilter` 着色，对应 B7）。
+- [x] **E2 图片来源选择**：图片→相册(`selectImageOrVideo(0)`)、视频→相册仅视频(新增 `showSelectVideo` / `SelectMimeType.ofVideo()`)、文件→`openFilePicker`、设备信息→`openDeviceInfo`。
+- [x] **E3 emoji 面板独立按钮**：emoji 面板（`layout_expression`）已有删除键 `iv_delete_chat`，新增发送键 `iv_emoji_send`（`rounded_corner_blue`）；二者随输入框是否有文字 enable/disable（`KeFuBaseFragment` 文本监听里统一切换 + 发送键 alpha）。
 - [x] **E4 回复条 show/hide**：Android 已有 `tv_QuotedMsg` + `iv_Close` 回复条与显隐逻辑，交互一致。
-- [x] **E5 面板占位回调（=B6）**：在 `KeFuBaseFragment` 的 `OnPanelChangeListener` 里新增 `onBottomExpandedChanged(expanded)` 钩子（`onKeyboard`/`onPanel`→true、`onNone`→false），`KeFuFragment` 覆写后置 `bottomExpanded`，`refreshEvaluationButtonVisibility()` 增加 `&& !bottomExpanded`——键盘或任一面板弹起时隐藏「客服评价」悬浮按钮，对应 Flutter `onExpandedChanged`。同时落地了 B6。
+- [x] **E5 面板占位回调（=B6）**：`KeFuBaseFragment` 的 `OnPanelChangeListener` 新增 `onBottomExpandedChanged(expanded)` 钩子（`onKeyboard`/`onPanel`→true、`onNone`→false），`KeFuFragment` 覆写置 `bottomExpanded`，`refreshEvaluationButtonVisibility()` 增加 `&& !bottomExpanded`——键盘或任一面板弹起时隐藏「客服评价」悬浮按钮，对应 Flutter `onExpandedChanged`。同时落地 B6。
+
+> 发送方式（按用户选择）：移除常驻发送按钮，走 **键盘发送键**（`et_msg` 设 `inputType=text` + `imeOptions=actionSend`，`setOnEditorActionListener` → `doSend()`）**+ emoji 面板发送键**。
 
 参考：`custom_bottom.dart`。
-实现：`KeFuBaseFragment`（`onBottomExpandedChanged` 钩子 + 面板监听接线）、`KeFuFragment`（`bottomExpanded` + 覆写 + 可见性门控）。
+实现：`fragment_kefu.xml`（输入行重排：`et_msg` 圆角 pill + `ivEmoj` + `iv_more`，移除 ivPhoto/ivVideo/ivFile/tv_count/btn_send；`panel_more` 触发改 `iv_more`）、`layout_more_panel.xml`（四按钮）、`layout_expression.xml`（`iv_emoji_send`）、`bg_panel_action_circle.xml`、`KeFuBaseFragment`（删除键/发送键 enable + `onBottomExpandedChanged` 钩子）、`KeFuFragment`（`doSend` / IME 监听 / 面板四入口接线 / `openDeviceInfo` / `showSelectVideo` / `bottomExpanded`）。
 
 ---
 
@@ -117,7 +119,7 @@ Flutter 新增 `lib/src/vc/device_info_page.dart`（349 行），Android **完�
   - 与 Flutter 一致：**登录IP / 线路等级 / 线路扫描** 当前为占位「—」（Flutter 实现里也是占位）。
 - [x] **F2 保存为图片到相册**：把白卡 `cardInfo` 渲染成 Bitmap（`card.draw(canvas)`）→ 复用 `CapturePhotoUtils.saveImageInQ()` 存入 MediaStore，后台线程执行，toast「已保存到相册 / 保存失败」。
 - [x] **F3 主题化**：整页渐变背景 + 头部着色 + 状态栏色（`statusBarColor`），主题下标经 `EXTRA_THEME_INDEX` 由聊天页透传保持一致。
-- [~] **F4 入口**：暂放聊天页头部 `iv_device_info` 图标（`ic_menu_info_details`，tint 主题色）。E 组功能面板落地后迁入面板（对应 Flutter `_onDeviceInfoTap`）。
+- [x] **F4 入口**：已迁入底部功能面板 `panel_more` 的「设备信息」按钮（`ll_action_device` → `openDeviceInfo()`，对应 Flutter `_onDeviceInfoTap`）；原聊天页头部临时图标 `iv_device_info` 已移除。
 
 参考：`device_info_page.dart`（数据源 `device_info_plus`/`package_info_plus`，线路来自 `config.dart`）。
 实现：`DeviceInfoActivity.kt`、`activity_device_info.xml`、`fragment_kefu.xml`（`iv_device_info`）、`KeFuFragment`（`chatThemeIndex` + 点击打开）、`AndroidManifest.xml`（注册 NoActionBar）。

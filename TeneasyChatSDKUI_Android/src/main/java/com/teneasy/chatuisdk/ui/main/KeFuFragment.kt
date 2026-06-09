@@ -10,6 +10,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.addCallback
@@ -229,10 +230,6 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
 
         binding?.ivClose?.setOnClickListener {
             hidetvQuotedMsg()
-        }
-
-        binding?.ivFile?.setOnClickListener {
-            openFilePicker()
         }
 
         binding?.llEvaluationButton?.setOnClickListener {
@@ -501,41 +498,38 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     if (txt.length > 500) {
                         binding?.etMsg!!.setText(txt.substring(0, 500))
                     }
-                    binding?.tvCount?.text =
-                        binding?.etMsg?.text.toString().length.toString() + "/500"
                 }
             })
 
-            // 点击发送按钮，发送消息
-            this.btnSend.setOnClickListener { v: View ->
-                binding?.etMsg?.apply {
-                    if ((this.text ?: "").isEmpty()) {
-                        Utils().closeSoftKeyboard(v)
-                    } else {
-                        val txt = this.text.toString()
-                        var replayMsgId = 0L
-                        //这里的msgId是从列表的model里面拿，不是从消息体
-                        if (((binding?.tvQuotedMsg?.tag ?: 0) as Int) >= 0) {
-                            viewModel.mlMsgList.value?.get(
-                                (binding?.tvQuotedMsg?.tag ?: 0) as Int
-                            )?.msgId?.let {
-                                replayMsgId = it;
-                            }
-                        }
-                        sendMsg(txt.trim(), false, replayMsgId)
-                        hidetvQuotedMsg()
-                        binding?.etMsg?.text?.clear()
-                    }
+            // 发送走键盘发送键（imeOptions=actionSend），不再常驻发送按钮
+            this.etMsg.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    doSend()
+                    true
+                } else {
+                    false
                 }
             }
             this.etMsg.isFocusable = true
             this.etMsg.isFocusableInTouchMode = true;
 
-            this.ivPhoto.setOnClickListener { v: View ->
+            // emoji 面板内发送键
+            this.panelEmotion.findViewById<View>(R.id.iv_emoji_send)?.setOnClickListener {
+                doSend()
+            }
+
+            // 功能面板四个入口：图片 / 视频 / 文件 / 设备信息（对齐 Flutter _buildActionPanel）
+            this.panelMore.findViewById<View>(R.id.ll_action_image)?.setOnClickListener {
                 selectImageOrVideo(0)
             }
-            this.ivVideo.setOnClickListener { v: View ->
-                selectImageOrVideo(1)
+            this.panelMore.findViewById<View>(R.id.ll_action_video)?.setOnClickListener {
+                selectImageOrVideo(2)
+            }
+            this.panelMore.findViewById<View>(R.id.ll_action_file)?.setOnClickListener {
+                openFilePicker()
+            }
+            this.panelMore.findViewById<View>(R.id.ll_action_device)?.setOnClickListener {
+                openDeviceInfo()
             }
             // 底部菜单初始化
             dialogBottomMenu = DialogBottomMenu(context)
@@ -578,6 +572,21 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             1 -> {
                 // 拍照
                 showCamera(object : OnResultCallbackListener<LocalMedia> {
+                    override fun onResult(result: java.util.ArrayList<LocalMedia>) {
+                        if (result != null && result.size > 0) {
+                            val item = result[0]
+                            dialogBottomMenu.dismiss()
+                            uploadHandler.beforeUpload(item.realPath)
+                        }
+                    }
+
+                    override fun onCancel() {}
+                })
+            }
+
+            2 -> {
+                // 选择视频（相册，仅视频）
+                showSelectVideo(object : OnResultCallbackListener<LocalMedia> {
                     override fun onResult(result: java.util.ArrayList<LocalMedia>) {
                         if (result != null && result.size > 0) {
                             val item = result[0]
@@ -856,6 +865,16 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         PictureSelector.create(KeFuFragment@ this)
             .openCamera(SelectMimeType.TYPE_ALL)
             .setRecordVideoMaxSecond(300)
+            .forResult(resultCallbackListener)
+    }
+
+    // 选择视频（相册仅视频）
+    private fun showSelectVideo(resultCallbackListener: OnResultCallbackListener<LocalMedia>) {
+        PictureSelector.create(KeFuFragment@ this)
+            .openGallery(SelectMimeType.ofVideo())
+            .setImageEngine(GlideEngine.createGlideEngine())
+            .setMaxSelectNum(1)
+            .isDisplayCamera(false)
             .forResult(resultCallbackListener)
     }
 
@@ -1474,13 +1493,32 @@ code: 1005 会话超时
         b.tvPlatformName.text = platform
         b.tvPlatformName.setTextColor(chatTheme.tintColor)
         b.tvPlatformName.visibility = if (platform.isEmpty()) View.GONE else View.VISIBLE
-        // 设备信息入口
-        b.ivDeviceInfo.setColorFilter(chatTheme.tintColor)
-        b.ivDeviceInfo.setOnClickListener {
-            val intent = Intent(requireContext(), DeviceInfoActivity::class.java)
-            intent.putExtra(DeviceInfoActivity.EXTRA_THEME_INDEX, chatThemeIndex)
-            startActivity(intent)
+        // 设备信息入口已迁入底部功能面板（见 panelMore 的 ll_action_device），头部不再放图标
+    }
+
+    /** 打开设备信息页，主题下标透传保持配色一致（对应 Flutter _onDeviceInfoTap）。 */
+    private fun openDeviceInfo() {
+        val intent = Intent(requireContext(), DeviceInfoActivity::class.java)
+        intent.putExtra(DeviceInfoActivity.EXTRA_THEME_INDEX, chatThemeIndex)
+        startActivity(intent)
+    }
+
+    /** 发送当前输入：处理引用、清空输入框（替代原常驻发送按钮）。 */
+    private fun doSend() {
+        val et = binding?.etMsg ?: return
+        val raw = et.text ?: ""
+        if (raw.isEmpty()) return
+        val txt = raw.toString()
+        var replayMsgId = 0L
+        // 这里的 msgId 从列表 model 里拿，不是从消息体
+        if (((binding?.tvQuotedMsg?.tag ?: 0) as Int) >= 0) {
+            viewModel.mlMsgList.value?.get(
+                (binding?.tvQuotedMsg?.tag ?: 0) as Int
+            )?.msgId?.let { replayMsgId = it }
         }
+        sendMsg(txt.trim(), false, replayMsgId)
+        hidetvQuotedMsg()
+        et.text?.clear()
     }
 
     // 状态栏颜色跟随主题，并按背景亮度切换图标明暗（浅色背景用深色图标）
@@ -1508,7 +1546,7 @@ code: 1005 会话超时
         if (show) {
             val done = isEvaluationDone
             // 已完成时按钮置灰，对应 Flutter _evaluationDone 配色
-            binding?.tvEvaluationStar?.setTextColor(
+            binding?.ivEvaluationStar?.setColorFilter(
                 if (done) android.graphics.Color.parseColor("#C7C7C7")
                 else chatTheme.tintColor
             )
