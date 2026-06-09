@@ -174,7 +174,7 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
     override fun connected(c: GGateway.SCHi) {
         Log.i(TAG, "GlobalChatManager连接成功")
         Constants.xToken = c.token
-        UserPreferences().putString(PARAM_XTOKEN, c.token)
+        UserPreferences().putString(Constants.tokenStorageKey(), c.token)
         ChatEventBus.post(ChatEvent.Connected(c))
     }
 }

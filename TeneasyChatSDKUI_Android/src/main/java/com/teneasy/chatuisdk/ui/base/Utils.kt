@@ -75,10 +75,11 @@ class Utils {
     }
 
     fun readConfig() {
-        Constants.xToken = UserPreferences().getString(PARAM_XTOKEN, Constants.xToken)
         Constants.domain = Constants.sanitizeDomain(UserPreferences().getString(PARAM_DOMAIN, Constants.domain))
+        // 先读 userId / merchantId，xToken 的存储 key 依赖它们（按商户隔离 session）
         Constants.userId = UserPreferences().getInt(PARAM_USER_ID, Constants.userId)
         Constants.merchantId = UserPreferences().getInt(PARAM_MERCHANT_ID, Constants.merchantId)
+        Constants.xToken = UserPreferences().getString(Constants.tokenStorageKey(), Constants.xToken)
         Constants.lines = UserPreferences().getString(PARAM_LINES, Constants.lines)
         Constants.cert = UserPreferences().getString(PARAM_CERT, Constants.cert)
         Constants.baseUrlImage =

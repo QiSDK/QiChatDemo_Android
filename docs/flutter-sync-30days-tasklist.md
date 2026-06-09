@@ -25,9 +25,9 @@
 | D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ⏳ 待办 |
 | E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（重做为 Flutter 同款：圆角输入框+表情/更多两图标+功能面板四按钮） |
 | F | 设备信息页（device_info_page，全新） | ✅ 完成（入口已随 E 组迁入底部功能面板） |
-| G | 消息时间戳布局（移到气泡上方） | 🟡 待核实 |
+| G | 消息时间戳布局（移到气泡上方） | ✅ 已核实（四类 cell 时间戳均在气泡上方） |
 | H | 未读管理持久化（unread_manager） | ⏳ 待办 |
-| I | 杂项（token key / 引用内容弹窗） | ⏳ 待办 |
+| I | 杂项（token key / 引用内容弹窗） | ✅ 完成 |
 
 ---
 
@@ -74,7 +74,7 @@ Flutter 新增 `lib/src/model/AppChatTheme.dart`（对齐 iOS `ChatTheme`），�
 | C2 | 消息去重（历史 HTTP 与实时 WS 竞态） | ✅ 完成 |
 
 - [ ] **C3 编辑消息（MSG_OP_EDIT）**：编辑后保留**原作者**与**原 createdAt**（不要用当前时间/sender），`metadata` 写 `editedAt` 以便渲染「已编辑」徽标，并把 `tipText` 置回 false（撤回灰条被编辑后恢复普通样式）。Android `KeFuViewModel` 有提到 MSG_OP_EDIT，需核实是否完整实现。
-- [ ] **C4 撤回文案统一**为「对方撤回了一条消息」（Flutter 把旧的 "1条" 改为 "一条"，并补 `Content()` 初始化）。
+- [x] **C4 撤回文案统一**为「对方撤回了一条消息」（Flutter 把旧的 "1条" 改为 "一条"）。Android 已是「对方撤回了一条消息」——历史灰条 `KeFuFragment.kt:717`、实时撤回 `KeFuFragment.kt:1086` 两处文案一致，无需改动。
 
 参考：`ChatPage.dart` receivedMsg / queryHistory 中 `MSG_OP_DELETE`、`MSG_OP_EDIT` 段。
 
@@ -128,7 +128,7 @@ Flutter 新增 `lib/src/vc/device_info_page.dart`（349 行），Android **完�
 
 ## G. 消息时间戳布局
 
-- [ ] **G1 时间戳移到气泡上方**：所有 cell（文本/图文/图片/视频/文件）统一把时间戳放在气泡**外层上方**、按发送方对齐；`msgTime` 来自 `Util.formatTimestamp(createdAt)`。核实 Android `MessageListAdapter` 现有布局是否已是此样式（`msgTime` 字段已存在）。
+- [x] **G1 时间戳移到气泡上方**：核实结果——Android 四类 cell（`item_text_message` / `item_text_images_message` / `item_video_image_message` / `item_file_message`）的 `tv_left_time` / `tv_right_time` 均 `constraintTop_toTopOf="parent"`，气泡内容 `constraintTop_toBottomOf` 时间戳，并按发送方左右对齐——已是「时间戳在气泡外层上方」样式，与 Flutter 一致，无需改动。
 
 参考：Flutter commit `f83efcf`（move timestamp above bubble across message cells）。
 
@@ -147,8 +147,8 @@ Flutter `lib/src/manager/unread_manager.dart` 增强。Android `UnReadItem.kt` /
 
 ## I. 杂项
 
-- [ ] **I1 token 存储 key**：Flutter 把 `PARAM_XTOKEN` 固定 key 改为 `tokenStorageKey()`（按商户隔离）。核实 Android 是否需要等价的多商户隔离 key。
-- [ ] **I2 引用内容弹窗**：长按/点击引用条查看被引用完整内容（Flutter `message_cell` 的 `_showReplyContentDialog`）。
+- [x] **I1 token 存储 key**：新增 `Constants.tokenStorageKey()` = `"${PARAM_XTOKEN}_${merchantId}_${userId}"`，按 (商户, 用户) 维度隔离 session，对齐 Flutter `tokenStorageKey()`。读（`Utils.readConfig` 先读 userId/merchantId 再用 scoped key 读 xToken）/ 写（`GlobalChatManager.connected`、`SettingsFragment` 保存）三处全部改用 scoped key；并去掉 SettingsFragment 里重复的一次 token 写入与两处失效的 `PARAM_XTOKEN` import。
+- [x] **I2 引用内容弹窗**：文本类引用条点击弹出「回复内容」白色圆角弹窗（标题 + 可滚动正文，最大高度 60% 屏高），对齐 Flutter `_showReplyContentDialog`。新增监听 `MessageItemOperateListener.onShowReplyContent(text)`，`MessageListAdapter` 左右文本引用分支接线，`KeFuFragment.showReplyContentDialog()` 实现；文件类引用条保持原有「跳转/打开原件」(`onShowOriginal`) 行为。新增字符串 `reply_content_title`。顺手修正左侧文本引用误设 `tvRightReplyOrigin.maxLines` 的笔误。
 
 ---
 

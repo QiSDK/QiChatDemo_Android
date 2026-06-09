@@ -26,7 +26,6 @@ import com.teneasy.chatuisdk.ui.base.PARAM_USER_LEVEL
 import com.teneasy.chatuisdk.ui.base.PARAM_BACKUP_WEB_URL
 import com.teneasy.chatuisdk.ui.base.PARAM_PLATFORM_NAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_TYPE
-import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.base.toIntOrZero
@@ -116,12 +115,11 @@ class SettingsFragment : Fragment() {
                 }
 
                 // 将配置保存到SharedPreferences
-                UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
+                UserPreferences().putString(Constants.tokenStorageKey(), Constants.xToken)
                 UserPreferences().putString(PARAM_CERT, Constants.cert)
                 UserPreferences().putInt(PARAM_USER_ID, Constants.userId)
                 UserPreferences().putInt(PARAM_MERCHANT_ID, Constants.merchantId)
                 UserPreferences().putString(PARAM_LINES, Constants.lines)
-                UserPreferences().putString(PARAM_XTOKEN, Constants.xToken)
                 UserPreferences().putString(PARAM_IMAGEBASEURL, Constants.baseUrlImage)
                 UserPreferences().putString(PARAM_USERNAME, Constants.userName)
                 UserPreferences().putInt(PARAM_MAXSESSIONMINS, Constants.maxSessionMins)

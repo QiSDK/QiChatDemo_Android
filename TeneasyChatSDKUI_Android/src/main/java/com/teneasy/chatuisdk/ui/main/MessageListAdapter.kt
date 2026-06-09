@@ -60,6 +60,7 @@ interface MessageItemOperateListener {
     fun onPlayImage(url: String)
     fun onDownload(position: Int)
     fun onShowOriginal(position: Int)
+    fun onShowReplyContent(text: String)
     fun onOpenFile(url: String)
 }
 
@@ -663,8 +664,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         holder.tvRightReplyOrigin.maxLines = 1
                     }else{
                         holder.ivRightReplyImage.visibility = View.GONE
-                        holder.tvRightReplyOrigin.text = item.replyItem?.content?: ""
+                        val replyContent = item.replyItem?.content ?: ""
+                        holder.tvRightReplyOrigin.text = replyContent
                         holder.tvRightReplyOrigin.maxLines = 5
+                        // 点击引用条查看被引用的完整内容（对齐 Flutter _showReplyContentDialog）
+                        holder.llReplyRight.setOnClickListener {
+                            listener?.onShowReplyContent(replyContent)
+                        }
                     }
                     holder.llReplyRight.visibility = View.VISIBLE
                 }else{
@@ -800,8 +806,13 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                         holder.tvRightReplyOrigin.maxLines = 1
                     }else {
                         holder.ivLeftReplyImage.visibility = View.GONE
-                        holder.tvLeftReplyOrigin.text = item.replyItem?.content ?: ""
-                        holder.tvRightReplyOrigin.maxLines = 5
+                        val replyContent = item.replyItem?.content ?: ""
+                        holder.tvLeftReplyOrigin.text = replyContent
+                        holder.tvLeftReplyOrigin.maxLines = 5
+                        // 点击引用条查看被引用的完整内容（对齐 Flutter _showReplyContentDialog）
+                        holder.llReplyLeft.setOnClickListener {
+                            listener?.onShowReplyContent(replyContent)
+                        }
                     }
                     holder.llReplyLeft.visibility = View.VISIBLE
                 }else{

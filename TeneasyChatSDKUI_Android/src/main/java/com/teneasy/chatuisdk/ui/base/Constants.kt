@@ -143,6 +143,13 @@ class Constants {
 
         // 工具函数
         /**
+         * xToken 的存储 key——按 (merchantId, userId) 维度隔离。
+         * 同一 app 内多商户、或单商户多账号都需要各自独立 session，
+         * 用固定 key 会互相覆盖。对齐 Flutter tokenStorageKey()。
+         */
+        fun tokenStorageKey(): String = "${PARAM_XTOKEN}_${merchantId}_$userId"
+
+        /**
          * 获取API基础URL
          * @return 完整的API基础URL，包含https前缀
          */

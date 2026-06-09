@@ -59,7 +59,6 @@ import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.base.GlideEngine
 import com.teneasy.chatuisdk.ui.base.PARAM_DOMAIN
-import com.teneasy.chatuisdk.ui.base.PARAM_XTOKEN
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.http.MainApi
@@ -445,6 +444,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                             onOpenFile(Constants.baseUrlImage + fileName)
                         }
                     }
+                }
+
+                override fun onShowReplyContent(text: String) {
+                    showReplyContentDialog(text)
                 }
 
                 //这里实现自动回复的功能，属于本地消息
@@ -1519,6 +1522,60 @@ code: 1005 会话超时
         sendMsg(txt.trim(), false, replayMsgId)
         hidetvQuotedMsg()
         et.text?.clear()
+    }
+
+    /**
+     * 点击引用条时弹出被引用的完整内容（对齐 Flutter _showReplyContentDialog）。
+     * 白色圆角弹窗，标题「回复内容」，正文可滚动。
+     */
+    private fun showReplyContentDialog(text: String) {
+        if (!isAdded || text.isEmpty()) return
+        val ctx = requireContext()
+        val pad = Utils().dp2px(20f)
+
+        val title = android.widget.TextView(ctx).apply {
+            this.text = getString(R.string.reply_content_title)
+            textSize = 16f
+            setTextColor(ctx.getColor(R.color.black))
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            gravity = android.view.Gravity.CENTER
+        }
+        val body = android.widget.TextView(ctx).apply {
+            this.text = text
+            textSize = 14f
+            setTextColor(ctx.getColor(R.color.black4848))
+            setLineSpacing(0f, 1.5f)
+        }
+        val scroll = android.widget.ScrollView(ctx).apply {
+            val maxH = (resources.displayMetrics.heightPixels * 0.6f).toInt()
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = Utils().dp2px(16f) }
+            isFillViewport = false
+            addView(body)
+            // 限制最大高度
+            viewTreeObserver.addOnPreDrawListener(object : android.view.ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    if (height > maxH) {
+                        layoutParams = layoutParams.also { it.height = maxH }
+                        requestLayout()
+                    }
+                    viewTreeObserver.removeOnPreDrawListener(this)
+                    return true
+                }
+            })
+        }
+        val container = android.widget.LinearLayout(ctx).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(pad, pad, pad, pad)
+            addView(title)
+            addView(scroll)
+        }
+        androidx.appcompat.app.AlertDialog.Builder(ctx)
+            .setView(container)
+            .create()
+            .show()
     }
 
     // 状态栏颜色跟随主题，并按背景亮度切换图标明暗（浅色背景用深色图标）
