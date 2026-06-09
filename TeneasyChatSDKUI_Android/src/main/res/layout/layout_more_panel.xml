@@ -9,7 +9,7 @@
         android:id="@+id/ll_function"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/chatBody"
+        android:background="@android:color/transparent"
         android:gravity="top"
         android:orientation="horizontal"
         android:paddingHorizontal="8dp"

@@ -275,7 +275,9 @@ open class KeFuBaseFragment : BaseBindingFragment<FragmentKefuBinding>() {
                 getPanelTriggerId { R.id.ivEmoj }
             }
             .addPanelHeightMeasurer {
-                getTargetPanelDefaultHeight { Utils().dp2px(160f) }
+                // 不同步键盘高度，固定矮面板（否则会被拉到键盘高度，下方留大片空白）
+                synchronizeKeyboardHeight { false }
+                getTargetPanelDefaultHeight { Utils().dp2px(150f) }
                 getPanelTriggerId { R.id.iv_more }
             }
             .logTrack(false)
