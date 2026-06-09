@@ -654,7 +654,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                             holder.tvRightSize.text = ((item.replyItem?.size?:0)  * 0.001).toString() + "K"
                             holder.tvRightSize.visibility = View.VISIBLE
                         }
-                        holder.tvRightReplyOrigin.text = fileName
+                        holder.tvRightReplyOrigin.text = shortFileName(fileName)
                         holder.ivRightReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                         holder.ivRightReplyImage.visibility = View.VISIBLE
 
@@ -798,7 +798,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                             holder.tvLeftSize.text = ((item.replyItem?.size?:0)  * 0.001).toString() + "K"
                             holder.tvLeftSize.visibility = View.VISIBLE
                         }
-                        holder.tvLeftReplyOrigin.text = fileName
+                        holder.tvLeftReplyOrigin.text = shortFileName(fileName)
                         holder.ivLeftReplyImage.setImageResource(getFileThumbnail(fileName.split(".").last()))
                         holder.ivLeftReplyImage.visibility = View.VISIBLE
 
@@ -1193,6 +1193,19 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
 
     fun showBigImage(imageView: ImageView, url: String){
         listener?.onPlayImage(url)
+    }
+
+    /**
+     * 引用预览里图片/视频/文件的文件名显示：先取路径末段（对齐 Flutter url.split('/').last），
+     * 过长则中间用「...」省略，最多显示 12 个字符（含省略号）。
+     */
+    private fun shortFileName(raw: String, max: Int = 12): String {
+        val name = raw.substringAfterLast('/')
+        if (name.length <= max) return name
+        val keep = max - 3            // 预留「...」3 个字符
+        val head = (keep + 1) / 2     // 头部多保留 1 个，尾部尽量保住扩展名
+        val tail = keep - head
+        return name.substring(0, head) + "..." + name.substring(name.length - tail)
     }
 
     fun getFileThumbnail(ext: String) : Int{
