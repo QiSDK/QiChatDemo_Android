@@ -288,7 +288,8 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.tvRightTime.text = localTime
                 holder.tvRightTime.visibility = View.VISIBLE
                 holder.lySend.visibility = View.VISIBLE
-                holder.civKefuRightImage.visibility = View.VISIBLE
+                // 头像已统一隐藏（见各 cell 布局 civ_*_image visibility=gone）
+                holder.civKefuRightImage.visibility = View.GONE
                 holder.ivRightPlay.visibility = View.VISIBLE
 
                 holder.ivKefuImage.visibility = View.GONE
@@ -381,7 +382,8 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.ivLeftImg.tag = position
                 holder.tvLeftTime.text = localTime
                 holder.tvLeftTime.visibility = View.VISIBLE
-                holder.ivKefuImage.visibility = View.VISIBLE
+                // 头像已统一隐藏（见各 cell 布局 civ_*_image visibility=gone）
+                holder.ivKefuImage.visibility = View.GONE
                 holder.ivPlay.visibility = View.VISIBLE
 
                 holder.tvRightTime.visibility = View.GONE
@@ -818,13 +820,6 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 }else{
                     holder.llReplyLeft.visibility = View.GONE
                 }
-                //客服头像
-                val url = Constants.baseUrlImage + Constants.workerAvatar
-                print("avatar:$url")
-                Glide.with(holder.ivKefuImage).load(url).dontAnimate()
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(holder.ivKefuImage)
             }
         }
     }
@@ -958,8 +953,6 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var tvRightTime =  binding.tvRightTime
         var tvRightMsg =  binding.tvRightMsg
         var ivSendStatus =  binding.ivSendStatus
-        var ivKefuImage =  binding.civKefuImage
-        //var ivRightImage =  binding.civRightImage
 
         var llReplyLeft = binding.llReplyLeft
         var tvLeftReplyOrigin = binding.tvLeftReplyOrigin

@@ -2,297 +2,274 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/chatBody"
     android:layout_margin="5dp"
-    >
+    android:background="@color/chatBody">
+
     <TextView
         android:id="@+id/tv_left_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="54dp"
-        android:textSize="10sp"
         android:textColor="@color/grayc4c4"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="@+id/ly_left_content"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="21:57:52"
-        />
+        tools:text="21:57:52" />
+
     <LinearLayout
         android:id="@+id/ly_left_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginStart="10dp"
         android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_left_time"
-        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toStartOf="@+id/iv_receive_status"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintHorizontal_chainStyle="packed"
-        >
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/civ_kefu_image"
-            android:layout_width="38dp"
-            android:src="@drawable/group_25"
-            app:civ_border_color="#80ffffff"
-            android:layout_height="38dp" />
-    <LinearLayout
-        android:id="@+id/ll_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:gravity="fill_horizontal"
-        android:background="@drawable/bg_bubble_left"
-        android:layout_marginBottom="3dp"
-        android:orientation="vertical"
-        >
-        <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
-            android:id="@+id/tv_left_msg"
-            android:elevation="2dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxWidth="200dp"
-            android:layout_gravity="center"
-            android:gravity="start"
-            android:padding="10dp"
-            android:textColor="@color/ps_color_4e4d4e"
-            android:text="这是怎么一回事"
-            android:textSize="14sp"
-            android:visibility="visible" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_left_time">
 
-        <RelativeLayout
-            android:id="@+id/rl_left_Imagecontainer"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="@dimen/dp_10"
-            >
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/iv_left_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="1dp"
-                android:padding="3dp"
-                android:gravity="right"
-                android:adjustViewBounds="true"
-                />
-
-            <ImageView
-                android:id="@+id/iv_play"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_centerInParent="true"
-                android:src="@drawable/circel_play"
-                ></ImageView>
-        </RelativeLayout>
         <LinearLayout
-            android:background="@drawable/rounded_corner"
-            android:elevation="2dp"
-            android:id="@+id/ll_reply_left"
+            android:id="@+id/ll_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="200dp"
-            android:padding="5dp"
-            android:layout_marginBottom="5dp"
-            android:orientation="horizontal">
-            <TextView
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/bg_bubble_left"
+            android:gravity="fill_horizontal"
+            android:orientation="vertical">
+
+            <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
+                android:id="@+id/tv_left_msg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
-                android:textColor="@color/ps_color_4e4d4e"
-                android:text="回复："
-                ></TextView>
-            <ImageView
-                android:id="@+id/iv_left_reply_image"
+                android:layout_gravity="center"
                 android:elevation="2dp"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/image_default"
-                android:visibility="visible"
-                />
+                android:gravity="start"
+                android:maxWidth="200dp"
+                android:padding="10dp"
+                android:textColor="@color/ps_color_4e4d4e"
+                android:textSize="14sp"
+                tools:text="这是怎么一回事" />
+
+            <RelativeLayout
+                android:id="@+id/rl_left_Imagecontainer"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/dp_10">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/iv_left_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="1dp"
+                    android:adjustViewBounds="true"
+                    android:gravity="right"
+                    android:padding="3dp" />
+
+                <ImageView
+                    android:id="@+id/iv_play"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/circel_play" />
+            </RelativeLayout>
+
             <LinearLayout
-                android:orientation="vertical"
+                android:id="@+id/ll_reply_left"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
-                    android:id="@+id/tv_left_reply_origin"
-                    android:elevation="2dp"
-                    android:textColor="@color/ps_color_4e4d4e"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="middle"
-                    android:lines="1"
-                    android:text="文大打了仨风急浪大售房 的  的洒哥哥 饿饿件.jpg"
-                    android:layout_marginEnd="@dimen/dp_10"
-                    android:gravity="start"
-                    android:padding="3dp"
-                    android:textSize="14sp"
-                    android:visibility="visible" />
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/rounded_corner"
+                android:elevation="2dp"
+                android:maxWidth="200dp"
+                android:orientation="horizontal"
+                android:padding="5dp">
 
                 <TextView
-                    android:id="@+id/tv_left_reply_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="200.12KB"
-                    ></TextView>
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="5dp"
+                    android:text="回复："
+                    android:textColor="@color/ps_color_4e4d4e" />
+
+                <ImageView
+                    android:id="@+id/iv_left_reply_image"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center_vertical"
+                    android:elevation="2dp"
+                    android:src="@drawable/image_default" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
+                        android:id="@+id/tv_left_reply_origin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/dp_10"
+                        android:elevation="2dp"
+                        android:ellipsize="middle"
+                        android:gravity="start"
+                        android:lines="1"
+                        android:padding="3dp"
+                        android:textColor="@color/ps_color_4e4d4e"
+                        android:textSize="14sp"
+                        tools:text="文大打了仨风急浪大售房 的  的洒哥哥 饿饿件.jpg" />
+
+                    <TextView
+                        android:id="@+id/tv_left_reply_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="200.12KB" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-    </LinearLayout>
+
     <TextView
         android:id="@+id/tv_right_time"
-        android:textSize="10sp"
-        android:textColor="@color/grayc4c4"
-        android:layout_marginEnd="54dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintRight_toRightOf="parent"
+        android:textColor="@color/grayc4c4"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/ly_right_content"
         app:layout_constraintTop_toTopOf="parent"
-        android:visibility="visible"
-        android:text="21:57:52"
-        />
+        tools:text="21:57:52" />
+
     <LinearLayout
         android:id="@+id/ly_right_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/dp_10"
         android:layout_marginTop="4dp"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_right_time"
         app:layout_constraintBottom_toBottomOf="parent"
-        >
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_right_time">
+
         <LinearLayout
             android:id="@+id/ll_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
             android:background="@drawable/bg_bubble_right"
             android:gravity="fill_horizontal"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
+
             <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
                 android:id="@+id/tv_right_msg"
-                android:elevation="2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="200dp"
                 android:layout_gravity="center"
-
-                android:gravity="start"
-                android:textColor="@color/white"
-                android:padding="10dp"
                 android:layout_marginStart="@dimen/dp_10"
-                android:text="这是右边的消息"
+                android:elevation="2dp"
+                android:gravity="start"
+                android:maxWidth="200dp"
+                android:padding="10dp"
+                android:textColor="@color/white"
                 android:textSize="14sp"
-                android:visibility="visible" />
+                tools:text="这是右边的消息" />
+
             <ImageView
                 android:id="@+id/iv_send_status"
-                android:src="@drawable/h5_fszhong"
                 android:layout_width="wrap_content"
-                android:layout_gravity="end"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                />
+                android:layout_gravity="end"
+                android:src="@drawable/h5_fszhong" />
 
             <RelativeLayout
                 android:id="@+id/rlImagecontainer"
-                android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/dp_10"
                 android:layout_width="200dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/dp_10">
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/iv_right_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="1dp"
-                    android:padding="4dp"
                     android:adjustViewBounds="true"
-                    />
+                    android:padding="4dp" />
+
                 <ImageView
                     android:id="@+id/iv__right_play"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/circel_play"
-                    ></ImageView>
+                    android:src="@drawable/circel_play" />
             </RelativeLayout>
+
             <LinearLayout
-                android:background="@drawable/rounded_corner_blue"
-                android:elevation="2dp"
                 android:id="@+id/ll_reply_right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corner_blue"
+                android:elevation="2dp"
                 android:maxWidth="200dp"
-                android:padding="5dp"
                 android:orientation="horizontal"
-                >
+                android:padding="5dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="5dp"
-                    android:textColor="@color/white"
                     android:text="回复："
-                    ></TextView>
+                    android:textColor="@color/white" />
+
                 <ImageView
                     android:id="@+id/iv_right_reply_image"
-                    android:elevation="2dp"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:layout_gravity="center_vertical"
-                    android:src="@drawable/image_default"
-                    android:visibility="visible"
-                    />
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
-                    android:id="@+id/tv_right_reply_origin"
                     android:elevation="2dp"
+                    android:src="@drawable/image_default" />
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="150dp"
-                    android:lines="1"
-                    android:layout_marginEnd="@dimen/dp_10"
-                    android:textColor="@color/white"
-                    android:gravity="start"
-                    android:ellipsize="middle"
-                    android:padding="3dp"
-                    android:text="文大打了仨风急浪大售房 的  的洒哥哥 饿饿件.jpg"
-                    android:textSize="14sp"
-                    android:visibility="visible" />
+                    android:orientation="vertical">
+
+                    <com.teneasy.chatuisdk.ui.utils.emoji.EmoticonTextView
+                        android:id="@+id/tv_right_reply_origin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/dp_10"
+                        android:elevation="2dp"
+                        android:ellipsize="middle"
+                        android:gravity="start"
+                        android:lines="1"
+                        android:maxWidth="150dp"
+                        android:padding="3dp"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        tools:text="文大打了仨风急浪大售房 的  的洒哥哥 饿饿件.jpg" />
+
                     <TextView
                         android:id="@+id/tv_right_reply_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/white"
-                        android:text="200.12KB"
-                        ></TextView>
+                        tools:text="200.12KB" />
                 </LinearLayout>
             </LinearLayout>
-            </LinearLayout>
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/civ_right_image"
-                android:layout_width="38dp"
-                android:src="@drawable/group_25"
-                app:civ_border_color="#80ffffff"
-                android:layout_height="38dp" />
+        </LinearLayout>
     </LinearLayout>
+
     <ImageView
         android:id="@+id/iv_receive_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:src="@drawable/h5_fszhong"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/ly_left_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ly_left_content"
-        app:layout_constraintTop_toTopOf="@+id/ly_left_content"
-        app:layout_constraintBottom_toBottomOf="@+id/ly_left_content"
-        />
+        app:layout_constraintTop_toTopOf="@+id/ly_left_content" />
 </androidx.constraintlayout.widget.ConstraintLayout>
