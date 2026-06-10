@@ -60,10 +60,12 @@ class MainFragment : Fragment() {
 //            }
 
             btnSend.setOnClickListener {
-                // 把首页选中的主题透传给聊天页，使两端主题一致
+                // 把首页选中的主题透传给聊天页，使两端主题一致；
+                // 指定 consultId 跳过咨询类型入口页直达聊天页（测试值 1）
                 startActivity(
                     Intent(requireContext(), KeFuActivity::class.java)
                         .putExtra(KeFuFragment.EXTRA_THEME_INDEX, selectedThemeIndex)
+                        .putExtra(KeFuActivity.EXTRA_DIRECT_CONSULT_ID, 1L)
                 )
             }
 
