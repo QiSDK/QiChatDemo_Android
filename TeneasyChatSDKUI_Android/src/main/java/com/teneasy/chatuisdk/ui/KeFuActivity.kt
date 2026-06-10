@@ -80,6 +80,12 @@ class KeFuActivity : AppCompatActivity() {
         }
         Constants.CONSULT_ID = consultId
 
+        // 宿主已通过 TeneasyChatUISDK.init 完成初始化时，跳过重复线路检测零等待直进
+        if (GlobalChatManager.instance.initialized && Constants.domain.isNotEmpty()) {
+            enterDirectChat()
+            return
+        }
+
         LineDetectLib(Constants.lines, object : LineDetectDelegate {
             override fun useTheLine(line: String) {
                 runOnUiThread {

@@ -19,6 +19,8 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.teneasy.qldemo.databinding.FragmentMainBinding
+import com.teneasy.chatuisdk.ChatSDKConfig
+import com.teneasy.chatuisdk.TeneasyChatUISDK
 import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -40,6 +42,18 @@ class MainFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Utils().readConfig()
+        // 模拟宿主"打开 App 即初始化"：用设置页存的参数启动全局聊天，
+        // 首页期间即可实时收消息/未读数；参数未配置时 init 内部会安全跳过
+        TeneasyChatUISDK.init(
+            requireContext(),
+            ChatSDKConfig(
+                cert = Constants.cert,
+                userId = Constants.userId,
+                merchantId = Constants.merchantId,
+                lines = Constants.lines,
+                baseUrlImage = Constants.baseUrlImage,
+            )
+        )
     }
 
     override fun onCreateView(

@@ -1,6 +1,9 @@
 package com.teneasy.chatuisdk.ui.base
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.protobuf.Extension
 import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.sdk.ChatLib
@@ -20,7 +23,7 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
 
     companion object {
         private const val TAG = "GlobalChatManager"
-        private const val CONNECTION_CHECK_INTERVAL = 6000L // 6秒检查一次连接
+        private const val CONNECTION_CHECK_INTERVAL = 30_000L // 前台每30秒检查一次连接（对齐 iOS）
 
         val instance: GlobalChatManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             GlobalChatManager()
@@ -30,6 +33,9 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
     private var connectionJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var isInitialized = false
+
+    /** 是否已初始化（供宿主/直达流程判断可否跳过重复初始化） */
+    val initialized: Boolean get() = isInitialized
 
     /**
      * 初始化全局聊天管理器
@@ -59,6 +65,12 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
      * 根据需要建立连接
      */
    fun connectIfNeeded() {
+        // 参数未就绪（宿主尚未配置/未登录）时不能拿空 cert/userId 去建连
+        if (Constants.cert.isEmpty() || Constants.userId == 0) {
+            Log.w(TAG, "cert或userId未配置，跳过连接")
+            return
+        }
+
         val chatLib = Constants.chatLib
         if (chatLib == null) {
             Log.w(TAG, "chatLib为null，无法连接")
@@ -118,9 +130,12 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
     private fun startConnectionMonitoring() {
         connectionJob?.cancel()
         connectionJob = scope.launch {
-            while (isActive) {
-                delay(CONNECTION_CHECK_INTERVAL)
-                connectIfNeeded()
+            // 只在 App 前台轮询：回前台立即检查一次，退后台自动挂起，避免常驻耗电
+            ProcessLifecycleOwner.get().lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    connectIfNeeded()
+                    delay(CONNECTION_CHECK_INTERVAL)
+                }
             }
         }
     }
@@ -134,6 +149,8 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
         Constants.chatLib?.disConnect()
         Constants.unReadList.clear()
         //Constants.unSentMessage.clear()
+        // 重置标志位，否则停止后无法再次 initializeGlobalChat（对齐 iOS stopGlobalChat）
+        isInitialized = false
         Log.i(TAG, "全局ChatLib已停止")
     }
 
