@@ -26,7 +26,7 @@
 | E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（重做为 Flutter 同款：圆角输入框+表情/更多两图标+功能面板四按钮） |
 | F | 设备信息页（device_info_page，全新） | ✅ 完成（入口已随 E 组迁入底部功能面板） |
 | G | 消息时间戳布局（移到气泡上方） | ✅ 已核实（四类 cell 时间戳均在气泡上方） |
-| H | 未读管理持久化（unread_manager） | ⏳ 待办 |
+| H | 未读管理持久化（unread_manager） | ✅ 完成（SharedPreferences 持久化 + 兜底回填守卫） |
 | I | 杂项（token key / 引用内容弹窗） | ✅ 完成 |
 
 ---
@@ -139,8 +139,9 @@ Flutter 新增 `lib/src/vc/device_info_page.dart`（349 行），Android **完�
 
 Flutter `lib/src/manager/unread_manager.dart` 增强。Android `UnReadItem.kt` / `GlobalChatManager.kt` 未见持久化。
 
-- [ ] **H1 持久化未读数**：`consultId -> unreadCount` 写入本地（SharedPreferences），变更后 **debounce 写盘**；启动异步加载历史快照。
-- [ ] **H2 `setUnreadIfAbsent` 兜底回填**：从服务端 entrance 快照回填未读时，仅当本地无非零未读才写，避免服务端慢一拍的快照覆盖刚到的新消息（本地 WS 累加优先）。
+- [x] **H1 持久化未读数**：已完成。`GlobalMessageManager` 新增 SharedPreferences（`MySharedPreferences` / key `unread_counts_v1`）持久化——`consultId -> unreadCount` 以 JSON 存储，`addUnReadMessage`/`clearUnReadCount`/`setUnreadIfAbsent` 变更后经 `schedulePersist()` **debounce 300ms 写盘**（合并连续变更，对齐 Flutter）；`init()` 在 `ApplicationExt.onCreate` 启动时加载历史快照回填 `Constants.unReadList`（仅 count>0、去重），杀进程后未读不再丢失。
+- [x] **H2 `setUnreadIfAbsent` 兜底回填**：已完成。原 `syncUnreadCount` 无条件覆盖会被服务端慢一拍的快照盖掉本地刚到的新未读——改名为 `setUnreadIfAbsent` 并加守卫：`count<=0` 或本地已有非零未读则不写（本地 WS 累加优先），对齐 Flutter `setUnreadIfAbsent`。唯一调用方 `SelectConsultTypeViewModel`（entrance 快照回填）已改用新方法。
+  实现：`GlobalMessageManager.kt`（持久化 + 守卫）、`ApplicationExt.kt`（`init()` 加载）、`SelectConsultTypeViewModel.kt`（改用 `setUnreadIfAbsent`）。
 
 参考：`unread_manager.dart`。
 

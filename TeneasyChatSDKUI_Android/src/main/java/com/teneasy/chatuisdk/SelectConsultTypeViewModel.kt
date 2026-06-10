@@ -54,7 +54,7 @@ class SelectConsultTypeViewModel : BaseViewModel() {
                         val consultId = consult.consultId ?: 0L
                         val unreadCount = consult.unread ?: 0
                         if (consultId > 0) {
-                            GlobalMessageManager.instance.syncUnreadCount(consultId, unreadCount)
+                            GlobalMessageManager.instance.setUnreadIfAbsent(consultId, unreadCount)
                         }
                     }
 

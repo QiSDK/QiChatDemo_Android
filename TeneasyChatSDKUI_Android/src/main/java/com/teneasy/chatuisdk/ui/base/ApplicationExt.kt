@@ -15,6 +15,8 @@ class ApplicationExt: Application(){
         super.onCreate()
         context = applicationContext
         //Constants.resetToDefaults()
+        // 加载本地持久化的未读数快照（对齐 Flutter UnreadManager.init）
+        GlobalMessageManager.instance.init()
         initXHttp2(this)
 
         val config = BundledEmojiCompatConfig(this)
