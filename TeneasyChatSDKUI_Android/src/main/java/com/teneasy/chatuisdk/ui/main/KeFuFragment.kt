@@ -145,6 +145,9 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     private var evaluationStatus: Int? = null
     private val isEvaluationDone get() = evaluationStatus == 1 || evaluationStatus == 2
 
+    // 持有注册到 MediaPagerActivity 的收集器引用，onDestroy 按身份比较只注销自己的
+    private val mediaItemsProviderFn: () -> List<ChatMediaItem> = { currentMediaItems() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupBackPressHandler()
@@ -205,7 +208,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         hidetvQuotedMsg()
         isFirstLoad = true
         // 注册会话媒体收集器，供媒体浏览器左右滑浏览（对齐 Flutter ChatPage.currentMediaItems）
-        MediaPagerActivity.mediaItemsProvider = { currentMediaItems() }
+        MediaPagerActivity.mediaItemsProvider = mediaItemsProviderFn
         viewModel.mlAutoReplyItem.observe(viewLifecycleOwner, {
             if (it?.qa?.size ?: 0 > 0) {
                 msgAdapter.setAutoReply(it!!)
@@ -348,11 +351,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         return
                     }
 
-                    // D5：Office 文档用在线预览地址打开（对齐 Flutter File_cell onTap 的 officeapps 链接）
-                    val previewUrl = "https://view.officeapps.live.com/op/view.aspx?src=" +
-                        java.net.URLEncoder.encode(url, "UTF-8")
+                    // D5：Office 在线预览（officeapps src=url）的包装在 WebViewActivity 内部完成，
+                    // 这里必须传原始 URL，再包一层会双重包装导致预览打不开
                     val intent = Intent(requireContext(), WebViewActivity::class.java)
-                    intent.putExtra(ARG_IMAGEURL, previewUrl)
+                    intent.putExtra(ARG_IMAGEURL, url)
                     intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
                     intent.setClass(requireContext(), WebViewActivity::class.java)
                     requireActivity().startActivity(intent)
@@ -815,7 +817,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
-        MediaPagerActivity.mediaItemsProvider = null
+        // 只清除自己注册的收集器：replace 带转场动画时旧实例 onDestroy 可能晚于
+        // 新实例 onViewCreated，无条件置 null 会把新实例刚注册的 provider 抹掉
+        if (MediaPagerActivity.mediaItemsProvider === mediaItemsProviderFn) {
+            MediaPagerActivity.mediaItemsProvider = null
+        }
         dismissEvaluationDialog()
         exitChat()
         mIProgressLoader = null

@@ -136,5 +136,10 @@ class FullVideoActivity : FragmentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // 释放 onCreate 里创建的 ExoPlayer，否则每次打开全屏视频泄漏一个播放器实例
+        binding?.playerView?.let {
+            it.player?.release()
+            it.player = null
+        }
     }
 }

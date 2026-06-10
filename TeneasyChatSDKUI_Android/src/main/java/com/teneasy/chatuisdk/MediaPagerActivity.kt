@@ -144,6 +144,9 @@ class MediaPagerActivity : FragmentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         forEachVideoHolder { it.releasePlayer() }
+        // 置空 adapter 强制回收 RecyclerView 离屏缓存（mCachedViews）里的页，
+        // 触发 onViewRecycled → releasePlayer，否则缓存页的 ExoPlayer 随 Activity 泄漏
+        binding?.rvPager?.adapter = null
         binding = null
     }
 
