@@ -50,6 +50,15 @@ class FullImageActivity : FragmentActivity() {
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .into(it.ivImage)
+            // D3：下拉关闭 + 内容随拖拽淡出（对齐 Flutter FullImageView 手势）
+            it.dragRoot.scrollableChild = it.scrollContainer
+            it.dragRoot.onDismiss = {
+                finish()
+                overridePendingTransition(0, 0)
+            }
+            it.dragRoot.onDragFraction = { fraction ->
+                it.dragRoot.getChildAt(0)?.alpha = 1f - fraction
+            }
         }
     }
 

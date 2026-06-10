@@ -45,6 +45,16 @@ class FullVideoActivity : FragmentActivity() {
         binding?.ivBack?.setOnClickListener {
            finish()
         }
+        // D3：下拉关闭 + 内容随拖拽淡出（对齐 Flutter FullVideoPlayer 手势）
+        binding?.dragRoot?.let { root ->
+            root.onDismiss = {
+                finish()
+                overridePendingTransition(0, 0)
+            }
+            root.onDragFraction = { fraction ->
+                root.getChildAt(0)?.alpha = 1f - fraction
+            }
+        }
         binding?.playerView?.let {
             val player = ExoPlayer.Builder(this).build()
 

@@ -15,4 +15,11 @@
 
     </style>
 
+    <!-- 媒体浏览器：半透明窗口，下拉关闭时背景淡出可透出聊天页（对齐 Flutter 黑色遮罩淡出） -->
+    <style name="Theme.TeneasyMediaPager" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
 </resources>

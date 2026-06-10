@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.teneasy.chatuisdk.ui.base.DragDismissFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drag_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- 内容层：随下拉手势平移（必须是第一个子 View） -->
+    <FrameLayout
+        android:id="@+id/content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="没有媒体内容"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- 顶栏：返回 + 页码计数，固定不随拖拽平移（对齐 Flutter 透明 AppBar） -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="47dp"
+            android:layout_height="47dp"
+            android:padding="12dp"
+            android:src="@drawable/backicon" />
+
+        <TextView
+            android:id="@+id/tv_counter"
+            android:layout_width="0dp"
+            android:layout_height="47dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="47dp"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</com.teneasy.chatuisdk.ui.base.DragDismissFrameLayout>

@@ -22,7 +22,7 @@
 | A | 聊天页主题化（渐变背景 / 气泡色 / AppBar） | ✅ 完成（图片/视频 cell 为纯媒体无文字气泡，无需着色） |
 | B | 客服评价（Evaluation） | ✅ 基本完成，少量待办 |
 | C | 撤回 / 编辑消息 | ✅ 完成（撤回 + 编辑 MSG_OP_EDIT） |
-| D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ⏳ 待办 |
+| D | 媒体浏览（MediaPagerView / 全屏下拉关闭） | ✅ 完成（MediaPagerActivity + 下拉关闭 + Office 在线预览） |
 | E | 输入栏重写（功能面板 / emoji 按钮 / 回复条） | ✅ 完成（重做为 Flutter 同款：圆角输入框+表情/更多两图标+功能面板四按钮） |
 | F | 设备信息页（device_info_page，全新） | ✅ 完成（入口已随 E 组迁入底部功能面板） |
 | G | 消息时间戳布局（移到气泡上方） | ✅ 已核实（四类 cell 时间戳均在气泡上方） |
@@ -85,11 +85,13 @@ Flutter 新增 `lib/src/model/AppChatTheme.dart`（对齐 iOS `ChatTheme`），�
 
 Flutter 新增 `lib/src/vc/MediaPagerView.dart` + `lib/src/model/MediaItem.dart` + `ChatPage.currentMediaItems()`。
 
-- [ ] **D1 MediaItem 模型 + 会话媒体收集**：实现 `currentMediaItems()` 等价逻辑——遍历全会话消息，收集图片/视频（含：单图/单视频、多图 JSON 的 `imgs` 数组、系统图文消息 `TextBody.image`/`video` 字段），按时间正序输出 `{url, isVideo}`。注意相对 URL 补 `baseUrlImage` 前缀。
-- [ ] **D2 MediaPagerView（左右滑浏览）**：新建 `ViewPager2` Activity/Fragment，图片+视频混排，点击任一缩略图打开并定位到该项，可左右翻页浏览整会话媒体；替代现有 `FullImageActivity`/`FullVideoActivity` 的单项查看。
-- [ ] **D3 下拉关闭 + 背景淡出**：垂直拖拽 > 阈值(120) 关闭，否则回弹；背景透明度随拖拽距离淡出（`fadeDistance≈400`）。同样应用到现有 `FullImageActivity` / `FullVideoActivity`（Flutter 的 `FullImageView`/`FullVideoPlayer` 都加了这个手势）。
-- [ ] **D4 cell 点击改为打开 MediaPagerView**：`MessageListAdapter` 中 图片/视频/图文/文件 cell 的点击，从打开单项改为打开 `MediaPagerView`（传 startUrl/index）。
-- [ ] **D5 File_cell 在线预览**：Office 文档用在线预览地址打开（`view.officeapps.live.com/op/view.aspx?src=` 或 `docs.google.com/gview?embedded=true&url=`）。
+- [x] **D1 MediaItem 模型 + 会话媒体收集**：新建 `ui/base/ChatMediaItem.kt`（`{url, isVideo}` + `absUrl()` 相对路径补 `baseUrlImage`）；`KeFuFragment.currentMediaItems()` 遍历 `viewModel.mlMsgList`（已是时间正序）收集：单图/单视频（视频优先 hlsUri）、文件消息按扩展名识别媒体、多图 JSON `imgs` 数组、系统图文 `TextBody.image`/`video`；跳过 Tip/QA cell。
+- [x] **D2 MediaPagerView（左右滑浏览）**：新建 `MediaPagerActivity`（RecyclerView + PagerSnapHelper 实现翻页，零新增依赖）：图片页 PhotoView 可缩放、点击关闭；视频页按页建 ExoPlayer（m3u8→HLS / 其余 Progressive，循环播放），仅当前页自动播放、翻页暂停其它页（对齐 `_syncPlayback`）；顶栏「i / n」计数 + 返回。媒体列表经静态 `mediaItemsProvider` 收集（对齐 Flutter `ChatPage.currentMediaItems()` 静态获取），`KeFuFragment` onViewCreated 注册 / onDestroy 注销；列表空时回退单项浏览。
+- [x] **D3 下拉关闭 + 背景淡出**：新建 `ui/base/DragDismissFrameLayout`——下拉 >120dp 关闭、否则 200ms 回弹，拖拽进度回调驱动背景淡出（fadeDistance=400dp）；只平移第一个子 View（顶栏固定，对齐 Flutter 只 translate body）。`MediaPagerActivity` 用半透明主题（`Theme.TeneasyMediaPager`），下拉时聊天页透出；`FullImageActivity` / `FullVideoActivity` 布局根换成该容器同样支持下拉关闭（图片页设 `scrollableChild` 防与 ScrollView 滚动冲突）。
+- [x] **D4 cell 点击改为打开 MediaPagerView**：`KeFuFragment.onPlayImage/onPlayVideo` 与 `ImageAdapter`（多图 cell）全部改为 `MediaPagerActivity.start(startUrl)`，按 startUrl 定位初始页。文件 cell 点击**不开 pager**——核实 Flutter `File_cell.onTap` 实际走 PDF 查看器 / WebView（清单原描述与 Flutter 实际不符，按实际代码对齐）。
+- [x] **D5 File_cell 在线预览**：`KeFuFragment.onOpenFile` 非 pdf/csv 的文件改用 `https://view.officeapps.live.com/op/view.aspx?src=<URL编码后地址>` 经 `WebViewActivity` 在线预览（对齐 Flutter File_cell Android 分支；pdf→PdfViewer、csv→toast 保持不变）。
+
+实现：`ChatMediaItem.kt`、`DragDismissFrameLayout.kt`、`MediaPagerActivity.kt`、`activity_media_pager.xml`、`item_media_page_image/video.xml`、`themes.xml`（半透明主题）、`AndroidManifest.xml`、`KeFuFragment`（收集+provider+点击改线+D5）、`ImageAdapter`、`FullImageActivity/FullVideoActivity` + 两布局（D3）。
 
 参考：`MediaPagerView.dart`、`FullImageView.dart`、`FullVideoPlayer.dart`、`image_thumbnail_cell.dart`、`video_thumbnail_cell.dart`、`text_images_cell.dart`、`File_cell.dart`。
 

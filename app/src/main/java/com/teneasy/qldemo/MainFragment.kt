@@ -51,6 +51,14 @@ class MainFragment : Fragment() {
         binding?.apply {
             buildThemeSwatches()
 
+//            btnSend.setOnClickListener {
+//                // 把首页选中的主题透传给聊天页，使两端主题一致
+//                startActivity(
+//                    Intent(requireContext(), KeFuActivity::class.java)
+//                        .putExtra(KeFuFragment.EXTRA_THEME_INDEX, selectedThemeIndex)
+//                )
+//            }
+
             btnSend.setOnClickListener {
                 // 把首页选中的主题透传给聊天页，使两端主题一致
                 startActivity(

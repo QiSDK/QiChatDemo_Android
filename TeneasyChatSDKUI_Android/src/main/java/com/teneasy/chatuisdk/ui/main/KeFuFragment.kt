@@ -32,10 +32,9 @@ import com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread
 import com.luck.picture.lib.utils.ToastUtils
 import com.teneasy.chatuisdk.ARG_IMAGEURL
 import com.teneasy.chatuisdk.ARG_KEFUNAME
-import com.teneasy.chatuisdk.ARG_VIDEOURL
 import com.teneasy.chatuisdk.BR
-import com.teneasy.chatuisdk.FullImageActivity
-import com.teneasy.chatuisdk.FullVideoActivity
+import com.teneasy.chatuisdk.MediaPagerActivity
+import com.teneasy.chatuisdk.ui.base.ChatMediaItem
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.SelectConsultTypeViewModel
 import com.teneasy.chatuisdk.WebViewActivity
@@ -205,6 +204,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         requireActivity().title = "客服"
         hidetvQuotedMsg()
         isFirstLoad = true
+        // 注册会话媒体收集器，供媒体浏览器左右滑浏览（对齐 Flutter ChatPage.currentMediaItems）
+        MediaPagerActivity.mediaItemsProvider = { currentMediaItems() }
         viewModel.mlAutoReplyItem.observe(viewLifecycleOwner, {
             if (it?.qa?.size ?: 0 > 0) {
                 msgAdapter.setAutoReply(it!!)
@@ -326,11 +327,8 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 }
 
                 override fun onPlayVideo(url: String) {
-                    val intent = Intent(requireContext(), FullVideoActivity::class.java)
-                    intent.putExtra(ARG_VIDEOURL, url)
-                    intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
-                    intent.setClass(requireContext(), FullVideoActivity::class.java)
-                    requireActivity().startActivity(intent)
+                    // D4：打开会话媒体浏览器并定位到该视频（对齐 Flutter MediaPagerView(startUrl)）
+                    MediaPagerActivity.start(requireActivity(), url, isVideo = true)
                 }
 
                 override fun onOpenFile(url: String) {
@@ -350,19 +348,19 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                         return
                     }
 
+                    // D5：Office 文档用在线预览地址打开（对齐 Flutter File_cell onTap 的 officeapps 链接）
+                    val previewUrl = "https://view.officeapps.live.com/op/view.aspx?src=" +
+                        java.net.URLEncoder.encode(url, "UTF-8")
                     val intent = Intent(requireContext(), WebViewActivity::class.java)
-                    intent.putExtra(ARG_IMAGEURL, url)
+                    intent.putExtra(ARG_IMAGEURL, previewUrl)
                     intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
                     intent.setClass(requireContext(), WebViewActivity::class.java)
                     requireActivity().startActivity(intent)
                 }
 
                 override fun onPlayImage(url: String) {
-                    val intent = Intent(requireContext(), FullImageActivity::class.java)
-                    intent.putExtra(ARG_IMAGEURL, url)
-                    intent.putExtra(ARG_KEFUNAME, workInfo.workerName)
-                    intent.setClass(requireContext(), FullImageActivity::class.java)
-                    requireActivity().startActivity(intent)
+                    // D4：打开会话媒体浏览器并定位到该图片（对齐 Flutter MediaPagerView(startUrl)）
+                    MediaPagerActivity.start(requireActivity(), url, isVideo = false)
                 }
 
                 //长按消息，引用消息并回复
@@ -817,6 +815,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
+        MediaPagerActivity.mediaItemsProvider = null
         dismissEvaluationDialog()
         exitChat()
         mIProgressLoader = null
@@ -1459,6 +1458,76 @@ code: 1005 会话超时
             ToastUtils.showToast(requireContext(), message)
             mIProgressLoader?.dismissLoading()
         }
+    }
+
+    /**
+     * D1：收集当前会话的全部媒体（图片/视频），按时间正序输出，
+     * 供 [MediaPagerActivity] 左右滑浏览（对齐 Flutter ChatPage.currentMediaItems）。
+     * 覆盖：单图/单视频、文件消息按扩展名识别媒体、多图 JSON 的 imgs 数组、
+     * 系统图文消息 TextBody 的 image/video 字段；相对 URL 统一补 baseUrlImage 前缀。
+     */
+    private fun currentMediaItems(): List<ChatMediaItem> {
+        val result = ArrayList<ChatMediaItem>()
+        val list = viewModel.mlMsgList.value ?: return result
+        val gson = Gson()
+        // mlMsgList 已是时间正序（历史倒序翻转后追加实时消息）
+        for (item in list) {
+            val msg = item.cMsg ?: continue
+            if (item.cellType == CellType.TYPE_Tip || item.cellType == CellType.TYPE_QA) continue
+            val imgUri = msg.image?.uri ?: ""
+            val videoUri = msg.video?.uri ?: ""
+            val hlsUri = msg.video?.hlsUri ?: ""
+            val fileUri = msg.file?.uri ?: ""
+            when {
+                imgUri.isNotEmpty() ->
+                    result.add(ChatMediaItem(ChatMediaItem.absUrl(imgUri), isVideo = false))
+                videoUri.isNotEmpty() || hlsUri.isNotEmpty() -> {
+                    val u = if (hlsUri.isNotEmpty()) hlsUri else videoUri
+                    result.add(ChatMediaItem(ChatMediaItem.absUrl(u), isVideo = true))
+                }
+                fileUri.isNotEmpty() -> {
+                    val ext = fileUri.substringAfterLast('.', "").lowercase()
+                    when {
+                        imageTypes.contains(ext) ->
+                            result.add(ChatMediaItem(ChatMediaItem.absUrl(fileUri), isVideo = false))
+                        videoTypes.contains(ext) ->
+                            result.add(ChatMediaItem(ChatMediaItem.absUrl(fileUri), isVideo = true))
+                    }
+                }
+                else -> {
+                    val text = msg.content?.data ?: ""
+                    if (text.isEmpty()) continue
+                    if (text.contains("\"imgs\"")) {
+                        // 多图消息：JSON 含 imgs 数组
+                        try {
+                            val ti = gson.fromJson(text, TextImages::class.java)
+                            for (u in ti.imgs) {
+                                val ext = u.substringAfterLast('.', "").lowercase()
+                                result.add(ChatMediaItem(ChatMediaItem.absUrl(u), videoTypes.contains(ext)))
+                            }
+                        } catch (_: Exception) {
+                        }
+                    } else if (msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_CUSTOMER ||
+                        msg.msgSourceType == CMessage.MsgSourceType.MST_SYSTEM_WORKER
+                    ) {
+                        // 系统图文消息：TextBody 带 image / video 字段
+                        try {
+                            val tb = gson.fromJson(text, TextBody::class.java)
+                            val img = tb.image?.trim() ?: ""
+                            val vid = tb.video?.trim() ?: ""
+                            if (img.isNotEmpty()) {
+                                result.add(ChatMediaItem(ChatMediaItem.absUrl(img), isVideo = false))
+                            }
+                            if (vid.isNotEmpty()) {
+                                result.add(ChatMediaItem(ChatMediaItem.absUrl(vid), isVideo = true))
+                            }
+                        } catch (_: Exception) {
+                        }
+                    }
+                }
+            }
+        }
+        return result
     }
 
     // ============================== 客服评价 ==============================

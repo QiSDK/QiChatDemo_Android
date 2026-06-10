@@ -13,11 +13,7 @@ import com.bumptech.glide.Glide
 import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
-import com.teneasy.chatuisdk.ARG_IMAGEURL
-import com.teneasy.chatuisdk.ARG_KEFUNAME
-import com.teneasy.chatuisdk.ARG_VIDEOURL
-import com.teneasy.chatuisdk.FullImageActivity
-import com.teneasy.chatuisdk.FullVideoActivity
+import com.teneasy.chatuisdk.MediaPagerActivity
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -117,20 +113,13 @@ class ImageAdapter(private val imageUrls: List<String>, private val act: Activit
 
 
     }
+    // D4：多图 cell 点击改为打开会话媒体浏览器并定位到该项（对齐 Flutter text_images_cell → MediaPagerView）
     fun onPlayImage(url: String) {
-        val intent = Intent(this.act, FullImageActivity::class.java)
-        intent.putExtra(ARG_IMAGEURL, url)
-        intent.putExtra(ARG_KEFUNAME, "")
-        intent.setClass(act, FullImageActivity::class.java)
-        act.startActivity(intent)
+        MediaPagerActivity.start(act, url, isVideo = false)
     }
 
     fun onPlayVideo(url: String) {
-        val intent = Intent(this.act, FullVideoActivity::class.java)
-        intent.putExtra(ARG_VIDEOURL, url)
-        intent.putExtra(ARG_KEFUNAME, "")
-        intent.setClass(act, FullVideoActivity::class.java)
-        act.startActivity(intent)
+        MediaPagerActivity.start(act, url, isVideo = true)
     }
 
 }
