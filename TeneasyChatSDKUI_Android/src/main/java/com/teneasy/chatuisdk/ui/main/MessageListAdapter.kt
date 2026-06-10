@@ -165,7 +165,6 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                                 padding: 0;
                                 font-size: 14px;
                                 font-weight: bold;
-                                color: #484848;
                                 font-family: sans-serif;
                             }
                         </style>
@@ -175,6 +174,11 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 """.trimIndent()
 
                 holder.tvTitle.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                // WebView 背景透明，露出气泡底色
+                holder.tvTitle.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+
+                // 整个 ly_left_content 作为左气泡，用 ChatTheme.leftBubbleColor 着色
+                theme?.let { holder.lyLeftContent.background?.mutate()?.setTint(it.leftBubbleColor) }
 
                 autoReplyItem?.qa?.let {
                     holder.qaAdapter.setDataList(it)
@@ -183,14 +187,6 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                     holder.tvLeftTime.text = localTime
                 }
             }
-
-            //客服头像
-            val url = Constants.baseUrlImage + Constants.workerAvatar
-            print("avatar:$url")
-            Glide.with(act).load(url).dontAnimate()
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .into(holder.ivKefuImage)
         }
         else if (holder is ItemFileViewHolder) {
             val item = msgList!![position]
@@ -842,8 +838,9 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         var rcvQa = binding.rcvQa
         var tvTitle = binding.tvTitle
         var tvLeftTime = binding.tvLeftTime;
+        var lyLeftContent = binding.lyLeftContent
         var qaAdapter: GroupedQAdapter
-        var ivKefuImage =  binding.civKefuImage
+        //var ivKefuImage =  binding.civKefuImage
 
         init {
             // 初始化自动回复列表

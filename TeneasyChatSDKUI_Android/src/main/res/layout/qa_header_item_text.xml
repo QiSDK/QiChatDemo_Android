@@ -13,7 +13,7 @@
         android:drawablePadding="@dimen/dp_4"
         android:layout_gravity="center"
         android:ellipsize="end"
-        android:textColor="@color/black4848"
+        android:textColor="@color/blue"
         android:textSize="14sp"
         android:text="@string/app_name" />
 
