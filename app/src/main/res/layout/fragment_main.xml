@@ -68,6 +68,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="12dp" />
 
+        <TextView
+            android:id="@+id/tv_unread_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:minWidth="20dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:gravity="center"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_unread_badge"
+            android:elevation="6dp"
+            android:translationX="8dp"
+            android:translationY="-8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/btn_send"
+            app:layout_constraintEnd_toEndOf="@id/btn_send"
+            tools:text="3"
+            tools:visibility="visible" />
+
         <androidx.constraintlayout.utils.widget.MotionButton
             android:id="@+id/btn_backup"
             android:layout_width="220dp"

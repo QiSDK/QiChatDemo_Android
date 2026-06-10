@@ -23,11 +23,13 @@ import com.teneasy.chatuisdk.ChatSDKConfig
 import com.teneasy.chatuisdk.TeneasyChatUISDK
 import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.GlobalMessageDelegate
+import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
 import com.teneasy.chatuisdk.ui.base.Utils
 import com.teneasy.chatuisdk.ui.main.KeFuActivity
 import com.teneasy.chatuisdk.ui.main.KeFuFragment
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), GlobalMessageDelegate {
 
     companion object {
         fun newInstance() = MainFragment()
@@ -94,6 +96,37 @@ class MainFragment : Fragment() {
 
         updateThemeUI()
         return binding?.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 注册全局消息委托：进入聊天相关页面时本页已 onPause 让出槽位，时序错开不冲突
+        Constants.globalMessageDelegate = this
+        updateUnreadBadge()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (Constants.globalMessageDelegate == this) {
+            Constants.globalMessageDelegate = null
+        }
+    }
+
+    /** 未读数变化回调（新消息、聊天页读完清零都会触发） */
+    override fun onMessageReceived(consultId: Long) {
+        activity?.runOnUiThread { updateUnreadBadge() }
+    }
+
+    // 把所有会话的未读总数画到“联系客服”按钮角标，0 时隐藏
+    private fun updateUnreadBadge() {
+        val badge = binding?.tvUnreadBadge ?: return
+        val total = GlobalMessageManager.instance.getTotalUnReadCount()
+        if (total > 0) {
+            badge.text = if (total > 99) "99+" else total.toString()
+            badge.visibility = View.VISIBLE
+        } else {
+            badge.visibility = View.GONE
+        }
     }
 
     override fun onDestroyView() {
