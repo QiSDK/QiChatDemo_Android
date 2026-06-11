@@ -200,7 +200,7 @@ class MainFragment : Fragment(), GlobalMessageDelegate {
             btnBackup.backgroundTintList = null
             btnBackup.setTextColor(theme.tintColor)
 
-            ivSettings.setColorFilter(Color.WHITE)
+            ivSettings.setColorFilter(theme.gradientEndColor)
 
             swatches.forEachIndexed { i, v ->
                 v.background = circleDrawable(

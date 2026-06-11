@@ -77,7 +77,7 @@ class SettingsFragment : Fragment() {
             this.etPlatformName?.setText(Constants.platformName)  // 平台/商户名称
 
             // 设置用户类型下拉菜单
-            val userTypeOptions = arrayOf("官方会员", "邀请好友", "合营会员")
+            val userTypeOptions = arrayOf("1-官方会员", "2-邀请好友", "3-合营会员")
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, userTypeOptions)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             this.spinnerUserType?.adapter = adapter
@@ -88,6 +88,11 @@ class SettingsFragment : Fragment() {
                 2 -> this.spinnerUserType?.setSelection(1) // 邀请好友
                 3 -> this.spinnerUserType?.setSelection(2) // 合营会员
                 else -> this.spinnerUserType?.setSelection(1) // 默认选择邀请好友
+            }
+
+            // 关闭按钮点击事件，返回上一页
+            this.btnClose.setOnClickListener {
+                findNavController().popBackStack()
             }
 
             // 保存按钮点击事件
@@ -135,11 +140,12 @@ class SettingsFragment : Fragment() {
             }
 
             // 设置根视图的触摸事件，用于关闭软键盘
+            // 注意：必须返回 false，否则会消费触摸事件导致 ScrollView 无法滚动
             this.root.setOnTouchListener { v, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     Utils().closeSoftKeyboard(v)
                 }
-                true
+                false
             }
         }
 
