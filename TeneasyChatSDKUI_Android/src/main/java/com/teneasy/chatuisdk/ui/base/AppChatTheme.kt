@@ -8,7 +8,7 @@ import kotlin.random.Random
 /**
  * 聊天页主题配置：渐变背景 + 统一按钮着色 + 左右气泡色。
  *
- * 对齐 Flutter `lib/src/model/AppChatTheme.dart` 与 iOS `ChatTheme`。
+ * 对齐 iOS `ChatTheme`。
  * 每次进入会话默认随机一套（见 [random]），宿主也可指定（见 [fromIndex]）。
  */
 enum class AppChatGradientDirection {
@@ -20,6 +20,34 @@ enum class AppChatGradientDirection {
     TOP_RIGHT_TO_BOTTOM_LEFT,
 }
 
+/**
+ * 气泡阴影配置（对齐 iOS `ChatTheme.BubbleShadow`）。
+ */
+data class BubbleShadow(
+    val color: Int,
+    val opacity: Float,
+    val radius: Float,
+    val offsetX: Float,
+    val offsetY: Float,
+) {
+    companion object {
+        val default = BubbleShadow(
+            color = Color.BLACK,
+            opacity = 0.06f,
+            radius = 6f,
+            offsetX = 0f,
+            offsetY = 2f,
+        )
+        val none = BubbleShadow(
+            color = Color.TRANSPARENT,
+            opacity = 0f,
+            radius = 0f,
+            offsetX = 0f,
+            offsetY = 0f,
+        )
+    }
+}
+
 data class AppChatTheme(
     /** 渐变起始颜色 */
     val gradientStartColor: Int,
@@ -27,16 +55,18 @@ data class AppChatTheme(
     val gradientEndColor: Int,
     /** 渐变方向 */
     val gradientDirection: AppChatGradientDirection = AppChatGradientDirection.TOP_TO_BOTTOM,
-    /** 统一按钮 / 图标着色 */
+    /** 统一按钮 / 图标着色（返回按钮、发送按钮、附件图标等） */
     val tintColor: Int,
-    /** 左侧（客服）气泡背景色，默认白 88% */
+    /** 左侧（客服）气泡背景色，半透明让渐变背景透出来，与背景融合；默认白 88% */
     val leftBubbleColor: Int = withOpacity(Color.WHITE, 0.88),
     /** 左侧（客服）气泡文字色 */
     val leftBubbleTextColor: Int = 0xFF1A1A1A.toInt(),
-    /** 右侧（用户）气泡背景色，默认 tintColor 92% */
+    /** 右侧（用户）气泡背景色，默认从 tintColor 92% 派生 */
     val rightBubbleColor: Int = Int.MIN_VALUE,
     /** 右侧（用户）气泡文字色 */
     val rightBubbleTextColor: Int = Color.WHITE,
+    /** 气泡阴影 */
+    val bubbleShadow: BubbleShadow = BubbleShadow.default,
 ) {
     /** rightBubbleColor 若未显式给出（哨兵值），用 tintColor 92% 兜底。 */
     val resolvedRightBubbleColor: Int
@@ -65,7 +95,7 @@ data class AppChatTheme(
         GradientDrawable(gradientOrientation, intArrayOf(gradientStartColor, gradientEndColor))
 
     companion object {
-        /** Flutter `Color.fromRGBO(r,g,b,o)` 等价：用透明度 [opacity]（0~1）调制颜色 alpha。 */
+        /** 用透明度 [opacity]（0~1）调制颜色 alpha。 */
         fun withOpacity(color: Int, opacity: Double): Int =
             ColorUtils.setAlphaComponent(color, (opacity.coerceIn(0.0, 1.0) * 255).toInt())
 
@@ -90,24 +120,27 @@ data class AppChatTheme(
             else -> defaultTheme
         }
 
-        /** 10 套精选主题（与 Flutter / iOS 对齐）。 */
+        /** 11 套精选主题（与 iOS `ChatTheme.presets` 对齐）。 */
         val presets: List<AppChatTheme> = listOf(
-            // 1. 晴空蓝（默认蓝系，清爽专业）
+            // 1. 晨雾白（极淡渐变，干净柔和）
             AppChatTheme(
-                gradientStartColor = rgb(240, 247, 255),
-                gradientEndColor = rgb(199, 224, 255),
-                gradientDirection = AppChatGradientDirection.BOTTOM_TO_TOP,
-                tintColor = rgb(69, 137, 246),
-                leftBubbleColor = withOpacity(rgb(240, 247, 255), 0.3),
-                leftBubbleTextColor = rgb(38, 38, 38),
+                gradientStartColor = rgb(252, 250, 252),
+                gradientEndColor = rgb(220, 232, 244),
+                gradientDirection = AppChatGradientDirection.TOP_LEFT_TO_BOTTOM_RIGHT,
+                tintColor = rgb(120, 140, 210),
+                leftBubbleColor = withOpacity(Color.WHITE, 0.55),
+                leftBubbleTextColor = rgb(46, 46, 46),
             ),
-            // 2. 薄暮紫（优雅渐变紫）
+            // 2. 暗夜神殿（深紫渐变，神秘氛围）
             AppChatTheme(
-                gradientStartColor = rgb(245, 237, 250),
-                gradientEndColor = rgb(209, 184, 235),
-                tintColor = rgb(128, 90, 210),
-                leftBubbleColor = withOpacity(rgb(245, 237, 250), 0.3),
-                leftBubbleTextColor = rgb(38, 38, 38),
+                gradientStartColor = rgb(74, 62, 112),
+                gradientEndColor = rgb(28, 22, 62),
+                gradientDirection = AppChatGradientDirection.TOP_TO_BOTTOM,
+                tintColor = rgb(155, 120, 240),
+                leftBubbleColor = withOpacity(rgb(60, 50, 95), 0.72),
+                leftBubbleTextColor = rgb(242, 242, 242),
+                rightBubbleColor = withOpacity(rgb(130, 95, 220), 0.92),
+                rightBubbleTextColor = withOpacity(Color.WHITE, 0.98),
             ),
             // 3. 蜜桃粉（温暖柔和）
             AppChatTheme(
@@ -115,7 +148,7 @@ data class AppChatTheme(
                 gradientEndColor = rgb(255, 217, 209),
                 gradientDirection = AppChatGradientDirection.BOTTOM_TO_TOP,
                 tintColor = rgb(235, 105, 110),
-                leftBubbleColor = withOpacity(rgb(255, 245, 242), 0.3),
+                leftBubbleColor = withOpacity(rgb(255, 245, 242), 0.65),
                 leftBubbleTextColor = rgb(38, 38, 38),
             ),
             // 4. 抹茶绿（清新自然）
@@ -123,7 +156,7 @@ data class AppChatTheme(
                 gradientStartColor = rgb(242, 250, 237),
                 gradientEndColor = rgb(209, 237, 194),
                 tintColor = rgb(76, 175, 80),
-                leftBubbleColor = withOpacity(rgb(242, 250, 237), 0.3),
+                leftBubbleColor = withOpacity(rgb(242, 250, 237), 0.5),
                 leftBubbleTextColor = rgb(38, 38, 38),
             ),
             // 5. 日落橙（活力暖色）
@@ -132,7 +165,7 @@ data class AppChatTheme(
                 gradientEndColor = rgb(255, 224, 184),
                 gradientDirection = AppChatGradientDirection.BOTTOM_TO_TOP,
                 tintColor = rgb(255, 152, 0),
-                leftBubbleColor = withOpacity(rgb(255, 247, 235), 0.3),
+                leftBubbleColor = withOpacity(rgb(255, 247, 235), 0.6),
                 leftBubbleTextColor = rgb(38, 38, 38),
             ),
             // 6. 星空靛（深邃高级感）
@@ -175,15 +208,28 @@ data class AppChatTheme(
                 rightBubbleColor = withOpacity(rgb(120, 85, 210), 0.90),
                 rightBubbleTextColor = withOpacity(Color.WHITE, 0.95),
             ),
-            // 10. 晨雾白（极淡渐变，干净柔和）
+            // 10. 晴空蓝（默认蓝系，清爽专业）
             AppChatTheme(
-                gradientStartColor = rgb(252, 250, 252),
-                gradientEndColor = rgb(220, 232, 244),
-                gradientDirection = AppChatGradientDirection.TOP_LEFT_TO_BOTTOM_RIGHT,
-                tintColor = rgb(120, 140, 210),
-                leftBubbleColor = withOpacity(Color.WHITE, 0.55),
-                leftBubbleTextColor = rgb(46, 46, 46),
+                gradientStartColor = rgb(240, 247, 255),
+                gradientEndColor = rgb(199, 224, 255),
+                gradientDirection = AppChatGradientDirection.BOTTOM_TO_TOP,
+                tintColor = rgb(69, 137, 246),
+                leftBubbleColor = withOpacity(rgb(240, 247, 255), 0.6),
+                leftBubbleTextColor = rgb(38, 38, 38),
+            ),
+            // 11. 薄暮紫（优雅渐变紫）
+            AppChatTheme(
+                gradientStartColor = rgb(245, 237, 250),
+                gradientEndColor = rgb(209, 184, 235),
+                tintColor = rgb(128, 90, 210),
+                leftBubbleColor = withOpacity(rgb(245, 237, 250), 0.3),
+                leftBubbleTextColor = rgb(38, 38, 38),
             ),
         )
     }
+}
+
+/** 实现该接口的 View 可在绑定时接收主题（对齐 iOS `ChatThemable` 协议）。 */
+interface ChatThemable {
+    fun applyTheme(theme: AppChatTheme)
 }
