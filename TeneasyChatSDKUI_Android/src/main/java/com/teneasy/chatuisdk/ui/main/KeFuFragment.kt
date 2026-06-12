@@ -1104,7 +1104,8 @@ code: 1005 会话超时
     //对方删除了消息，会回调这个函数
     override fun msgDeleted(msg: CMessage.Message?, payloadId: Long, msgId: Long, errMsg: String) {
         viewModel.removeMsgItem(payloadId, msg?.msgId ?: 0)
-        viewModel.composeLocalMsg("对方撤回了一条消息", true, isTip = true)
+        // 灰条必须保留原 msgId，否则对方「撤回→编辑→发送」时 addMsgItem 按 msgId 匹配不到，编辑消息会被丢弃
+        viewModel.composeLocalMsg("对方撤回了一条消息", true, isTip = true, msgId = msg?.msgId ?: 0)
     }
 
     //消息发送出去，收到回执才算成功，并需要改变消息的状态
