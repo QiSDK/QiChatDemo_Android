@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.annotation.OptIn
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -59,6 +60,11 @@ class MediaPagerActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Edge-to-edge：内容绘制到状态栏后方，全页统一黑色背景
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+
         val b = ActivityMediaPagerBinding.inflate(layoutInflater)
         binding = b
         setContentView(b.root)
