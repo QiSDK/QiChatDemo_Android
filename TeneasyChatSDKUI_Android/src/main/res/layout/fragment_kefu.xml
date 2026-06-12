@@ -200,6 +200,7 @@
             android:inputType="text"
             android:imeOptions="actionSend"
             android:hint="说点什么吧"
+            android:textColorHint="#999999"
             android:text="@={vm.mlSendMsg}"
             android:textColor="@color/black4848"
             android:textSize="15sp"
