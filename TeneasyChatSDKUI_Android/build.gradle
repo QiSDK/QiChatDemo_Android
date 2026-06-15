@@ -170,6 +170,25 @@ dependencies {
     implementation 'com.github.VERO-Digital-Solutions:AndroidPdfViewerV2:1195a3d7d6'
 }
 
+// 发布版本号跟随 git tag：JitPack 构建时会 checkout 到对应 tag，
+// 这里取最近的 tag 作为版本号，保证产物版本与 JitPack 请求的版本一致。
+// 本地无 tag 或非 git 环境时回退到默认值。
+def resolvePublishVersion = {
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--abbrev=0'
+            standardOutput = stdout
+            errorOutput = new ByteArrayOutputStream()
+            ignoreExitValue = true
+        }
+        def tag = stdout.toString().trim()
+        return tag ? tag : '1.0.5'
+    } catch (Exception ignored) {
+        return '1.0.5'
+    }
+}
+
 afterEvaluate {
     publishing {
         publications {
@@ -178,7 +197,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.QiSDK'
                 artifactId = 'qi-chatsdkui'
-                version = '1.0.5'
+                version = resolvePublishVersion()
             }
         }
     }
