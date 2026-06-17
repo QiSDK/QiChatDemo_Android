@@ -101,13 +101,16 @@ data class AppChatTheme(
 
         private fun rgb(r: Int, g: Int, b: Int): Int = Color.rgb(r, g, b)
 
-        /** SDK 内置默认主题（晴空蓝）。 */
-        val defaultTheme = AppChatTheme(
-            gradientStartColor = rgb(242, 247, 255),
-            gradientEndColor = rgb(204, 224, 255),
-            gradientDirection = AppChatGradientDirection.TOP_TO_BOTTOM,
-            tintColor = rgb(69, 137, 246),
-        )
+        /** SDK 内置默认主题（晨雾白）。 */
+        val defaultTheme = // 1. 晨雾白（极淡渐变，干净柔和）
+            AppChatTheme(
+                gradientStartColor = rgb(252, 250, 252),
+                gradientEndColor = rgb(220, 232, 244),
+                gradientDirection = AppChatGradientDirection.TOP_LEFT_TO_BOTTOM_RIGHT,
+                tintColor = rgb(120, 140, 210),
+                leftBubbleColor = withOpacity(Color.WHITE, 0.55),
+                leftBubbleTextColor = rgb(46, 46, 46),
+            )
 
         /** 随机获取一套精选主题。 */
         fun random(): AppChatTheme =
