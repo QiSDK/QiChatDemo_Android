@@ -33,7 +33,7 @@ android {
         def defaultCert = propertyOrDefault('chatSdk.defaultCert', 'COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ')
         buildConfigField "String", "DEFAULT_CERT", '"' + asEscapedString(defaultCert) + '"'
 
-        def defaultBaseUrlImage = propertyOrDefault('chatSdk.defaultBaseUrlImage', 'https://imagesacc.hfxg.xyz')
+        def defaultBaseUrlImage = propertyOrDefault('chatSdk.defaultBaseUrlImage', 'https://images-3-test.qlbig05.xyz')
         buildConfigField "String", "DEFAULT_BASE_URL_IMAGE", '"' + asEscapedString(defaultBaseUrlImage) + '"'
 
         def defaultMerchantId = propertyOrDefault('chatSdk.defaultMerchantId', '367').toString()
