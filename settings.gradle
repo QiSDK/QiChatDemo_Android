@@ -26,9 +26,3 @@ include ':app'
 include ':TeneasyChatSDKUI_Android'
 
 
-//includeBuild('../QiChatSDK_Android') {
-//    dependencySubstitution {
-//        substitute module('com.github.QiSDK:QiChatSDK_Android') using project(':teneasyChatSDK_Android')
-//    }
-//}
-
