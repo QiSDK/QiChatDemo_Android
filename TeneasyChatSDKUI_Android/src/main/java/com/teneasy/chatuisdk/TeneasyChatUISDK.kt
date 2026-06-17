@@ -19,6 +19,7 @@ import com.teneasy.chatuisdk.ui.base.PARAM_USERNAME
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_ID
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_LEVEL
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_TYPE
+import com.teneasy.chatuisdk.ui.base.ServiceKeyword
 import com.teneasy.chatuisdk.ui.base.UserPreferences
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
@@ -56,6 +57,17 @@ data class ChatSDKConfig(
  */
 object TeneasyChatUISDK {
     private const val TAG = "TeneasyChatUISDK"
+
+    /**
+     * 设置「关键词自动卡片」配置。宿主调用自己的接口拿到 service_keyword 数组后原样传入。
+     * 可在任意时机重复调用覆盖。
+     *
+     * 之后当用户在聊天页输入的文本包含某条的任一 keyword 时，UISDK 会自动以
+     * msgSourceType = MST_AUTO_CARD 追加发送一条卡片消息。
+     */
+    fun setAutoCardKeywords(serviceKeywords: List<Map<String, Any?>>) {
+        Constants.serviceKeywords = serviceKeywords.map { ServiceKeyword(it) }
+    }
 
     fun init(context: Context, config: ChatSDKConfig) {
         // 宿主有自己的 Application 类时 ApplicationExt 不会运行，这里兜底环境准备

@@ -75,6 +75,8 @@ class KeFuViewModel : BaseViewModel() {
 
         // 根据消息类型设置cellType
         newItem.cellType = when {
+            // 关键词自动卡片：渲染成可点选项卡片
+            newItem.cMsg?.msgSourceType == CMessage.MsgSourceType.MST_AUTO_CARD -> CellType.TYPE_AUTO_CARD
             newItem.cMsg?.video != null && newItem.cMsg!!.video.uri.isNotEmpty() -> CellType.TYPE_VIDEO
             newItem.cMsg?.image != null && newItem.cMsg!!.image.uri.isNotEmpty() -> CellType.TYPE_Image
             newItem.cMsg?.file != null && newItem.cMsg!!.file.uri.isNotEmpty() -> CellType.TYPE_File

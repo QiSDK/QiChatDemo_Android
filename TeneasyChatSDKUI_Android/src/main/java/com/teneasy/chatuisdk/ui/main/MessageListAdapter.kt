@@ -11,7 +11,10 @@ import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.webkit.WebView
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.GridLayoutManager
@@ -29,6 +32,7 @@ import com.luck.picture.lib.utils.ToastUtils
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.interfaces.OnSelectListener
 import com.teneasy.chatuisdk.R
+import com.teneasy.chatuisdk.databinding.ItemAutoCardMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemFileMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemLastLineBinding
 import com.teneasy.chatuisdk.databinding.ItemQaListBinding
@@ -37,6 +41,7 @@ import com.teneasy.chatuisdk.databinding.ItemTextMessageBinding
 import com.teneasy.chatuisdk.databinding.ItemTipMsgBinding
 import com.teneasy.chatuisdk.databinding.ItemVideoImageMessageBinding
 import com.teneasy.chatuisdk.ui.base.AppChatTheme
+import com.teneasy.chatuisdk.ui.base.ServiceKeyword
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Utils
@@ -56,6 +61,8 @@ interface MessageItemOperateListener {
     fun onReSend(position: Int)
     fun onQuote(position: Int)
     fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
+    /** 点击自动卡片（MST_AUTO_CARD）上的选项时回调：把 [text] 当作普通文本消息真正发送出去。 */
+    fun onSendCardOption(text: String)
     fun onPlayVideo(url: String)
     fun onPlayImage(url: String)
     fun onDownload(position: Int)
@@ -124,6 +131,12 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 parent,
                 false)
             return TextImagesViewHolder(binding)
+        }else if (viewType == CellType.TYPE_AUTO_CARD.value) {
+            val binding = ItemAutoCardMessageBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false)
+            return AutoCardViewHolder(binding)
         }else {
 
             val binding = ItemTextMessageBinding.inflate(
@@ -524,6 +537,77 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 val timeStr = Utils().timestampToString(it.msgTime)
                 holder.tvCurrentTime.text = timeStr
                 holder.tvTitle.text = it.content.data?:""
+            }
+        }
+        else if (holder is AutoCardViewHolder) {
+            val item = msgList!![position]
+            if (item.cMsg == null) return
+
+            val ctx = holder.itemView.context
+            val density = ctx.resources.displayMetrics.density
+            holder.tvTime.text = item.cMsg?.let { Utils().timestampToString(it.msgTime) } ?: ""
+
+            // 主题着色
+            theme?.let {
+                holder.llCard.background?.mutate()?.setTint(it.leftBubbleColor)
+                holder.tvSubject.setTextColor(it.leftBubbleTextColor)
+                holder.tvContent.setTextColor(it.tintColor)
+            }
+            val tint = theme?.tintColor ?: android.graphics.Color.parseColor("#4589F6")
+
+            holder.llOptions.removeAllViews()
+
+            val card = ServiceKeyword.fromJsonString(item.cMsg!!.content.data)
+            if (card == null) {
+                // 兜底：当普通文本展示
+                holder.tvSubject.visibility = View.VISIBLE
+                holder.tvSubject.text = item.cMsg!!.content.data
+                holder.tvContent.visibility = View.GONE
+                return
+            }
+
+            val subject = card.subject ?: ""
+            holder.tvSubject.visibility = if (subject.isEmpty()) View.GONE else View.VISIBLE
+            holder.tvSubject.text = subject
+
+            if (card.contentText.isNotEmpty()) {
+                holder.tvContent.visibility = View.VISIBLE
+                holder.tvContent.text = card.contentText
+            } else {
+                holder.tvContent.visibility = View.GONE
+            }
+
+            // 添加一个选项按钮（label 显示文本，sendText 点击后发送的文本）
+            fun addOptionButton(label: String, sendText: String) {
+                val btn = Button(ctx)
+                btn.text = label
+                btn.isAllCaps = false
+                btn.setTextColor(android.graphics.Color.WHITE)
+                btn.textSize = 15f
+                if (btn.background != null) {
+                    btn.background.mutate().setTint(tint)
+                } else {
+                    btn.setBackgroundColor(tint)
+                }
+                val lp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                lp.topMargin = (8 * density).toInt()
+                btn.layoutParams = lp
+                btn.setOnClickListener {
+                    // 点击选项 → 当普通消息发送（不再触发关键词匹配）
+                    if (sendText.isNotEmpty()) listener?.onSendCardOption(sendText)
+                }
+                holder.llOptions.addView(btn)
+            }
+
+            if (card.options.isNotEmpty()) {
+                // questionType 1：每个选项一个按钮
+                for (opt in card.options) addOptionButton(opt, opt)
+            } else if (subject.isNotEmpty()) {
+                // questionType 2：无选项数组时给一个按钮（发送 subject）
+                addOptionButton(subject, subject)
             }
         }
         else if (holder is TextMsgViewHolder) {
@@ -944,6 +1028,14 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 withAutoReplyU = withAutoReplyBuilder.build()
             }
         }
+    }
+
+    inner class AutoCardViewHolder(binding: ItemAutoCardMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvTime = binding.tvCardTime
+        val llCard = binding.llCard
+        val tvSubject = binding.tvCardSubject
+        val tvContent = binding.tvCardContent
+        val llOptions = binding.llCardOptions
     }
 
     inner class TextMsgViewHolder(binding: ItemTextMessageBinding) : RecyclerView.ViewHolder(binding.root){

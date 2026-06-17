@@ -53,6 +53,7 @@ import com.teneasy.chatuisdk.ui.base.Constants.Companion.videoTypes
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.withAutoReplyU
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.workerAvatar
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.xToken
+import com.teneasy.chatuisdk.ui.base.matchAutoCard
 import com.teneasy.chatuisdk.ui.base.GlobalChatListener
 import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.GlobalMessageManager
@@ -457,6 +458,11 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                     } else if (msgType == "MSG_IMG") {
                         this@KeFuFragment.sendLocalImgMsg(msg, isLeft)
                     }
+                }
+
+                override fun onSendCardOption(text: String) {
+                    // 走真实发送路径（不再触发关键词匹配，避免点选项又弹卡片）
+                    this@KeFuFragment.sendMsg(text)
                 }
             }, chatTheme)
 
@@ -968,6 +974,28 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
         viewModel.addMsgItem(messageItem, Constants.chatLib?.payloadId ?: 0)
         lastActiveDateTime = Date()
         markSentInSession()
+    }
+
+    /**
+     * 用户手输消息命中关键词时，追加发送一条 MST_AUTO_CARD 卡片消息。
+     * 卡片体是命中条目的 JSON，本地以「客服侧（左）」展示。
+     * 仅供用户手输入口调用（点击卡片选项不再触发，避免反复弹卡片）。
+     */
+    fun maybeSendAutoCard(input: String) {
+        val hit = matchAutoCard(input, Constants.serviceKeywords) ?: return
+        val cardJson = hit.toJsonString()
+        Constants.chatLib?.sendMessage(
+            cardJson,
+            CMessage.MessageFormat.MSG_TEXT,
+            Constants.CONSULT_ID,
+            msgSourceType = CMessage.MsgSourceType.MST_AUTO_CARD
+        )
+        val item = MessageItem().apply {
+            cMsg = Constants.chatLib?.sendingMessage
+            isLeft = true
+            sendStatus = MessageSendState.发送成功
+        }
+        viewModel.addMsgItem(item, Constants.chatLib?.payloadId ?: 0)
     }
 
     /**
@@ -1614,6 +1642,8 @@ code: 1005 会话超时
             )?.msgId?.let { replayMsgId = it }
         }
         sendMsg(txt.trim(), false, replayMsgId)
+        // 仅对用户手输的消息做关键词匹配，命中则追加发送一张自动卡片。
+        maybeSendAutoCard(txt.trim())
         hidetvQuotedMsg()
         et.text?.clear()
     }

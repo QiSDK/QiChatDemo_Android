@@ -109,6 +109,10 @@ class Constants {
         var currentChatConsultId: Long = 0  // 当前正在聊天的consultId
         var chatLib: ChatLib? = null  // 全局ChatLib实例
 
+        // 关键词自动卡片配置：用户输入命中任一 keyword 时，自动发送 MST_AUTO_CARD 卡片消息。
+        // 由宿主通过 TeneasyChatUISDK.setAutoCardKeywords 传入。
+        var serviceKeywords: List<ServiceKeyword> = listOf()
+
         fun sanitizeDomain(raw: String): String {
             var result = raw.trim()
             when {
