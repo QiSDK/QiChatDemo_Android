@@ -279,7 +279,12 @@ class KeFuViewModel : BaseViewModel() {
         chatModel.cMsg = cMsg.build()
         chatModel.isLeft = isLeft
         chatModel.sendStatus = MessageSendState.发送成功
-        
+
+        // 关键词自动卡片历史消息：与实时 addMsgItem 的分发一致，渲染成卡片而非纯文本
+        if (history.msgSourceType == CMessage.MsgSourceType.MST_AUTO_CARD) {
+            chatModel.cellType = CellType.TYPE_AUTO_CARD
+        }
+
         return chatModel
     }
 
