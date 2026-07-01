@@ -113,6 +113,10 @@ class Constants {
         // 由宿主通过 TeneasyChatUISDK.setAutoCardKeywords 传入。
         var serviceKeywords: List<ServiceKeyword> = listOf()
 
+        // 宿主通过 TeneasyChatUISDK.setCardJumpHandler 注册的卡片跳转处理器。
+        // null 时 SDK 用内置模拟页 MiniProgramMockActivity 兜底。
+        var cardJumpHandler: CardJumpHandler? = null
+
         fun sanitizeDomain(raw: String): String {
             var result = raw.trim()
             when {

@@ -28,11 +28,19 @@ class ServiceKeyword(json: Map<String, Any?>) {
     /** 原始 content 是否为数组，决定 [toJsonString] 还原成数组还是字符串。 */
     val isContentArray: Boolean
 
+    /** 右侧图片链接（仅精准问题可用）。空串 / null 表示无图。 */
+    val rightImageUrl: String? = json["rightImageUrl"] as? String
+
     val keywords: List<String> =
         (json["keywords"] as? List<*>)?.map { it.toString() } ?: emptyList()
     val weight: Int = (json["weight"] as? Number)?.toInt() ?: 0
+    /** 跳转分类，见 [jumpNone] / [jumpMiniProgram] / [jumpH5] / [jumpNative]。 */
     val jumpCategory: Int? = (json["jumpCategory"] as? Number)?.toInt()
     val jumpUrl: String? = json["jumpUrl"] as? String
+
+    /** 是否需要跳转：jumpCategory 非「无」且 jumpUrl 非空。 */
+    val hasJump: Boolean
+        get() = (jumpCategory ?: jumpNone) != jumpNone && !jumpUrl.isNullOrEmpty()
 
     init {
         when (val content = json["content"]) {
@@ -62,6 +70,7 @@ class ServiceKeyword(json: Map<String, Any?>) {
         category?.let { map["category"] = it }
         subject?.let { map["subject"] = it }
         map["content"] = if (isContentArray) options else contentText
+        rightImageUrl?.let { map["rightImageUrl"] = it }
         map["keywords"] = keywords
         map["weight"] = weight
         jumpCategory?.let { map["jumpCategory"] = it }
@@ -70,6 +79,12 @@ class ServiceKeyword(json: Map<String, Any?>) {
     }
 
     companion object {
+        // jumpCategory 取值（见规范 mst_card_msg.md）：跳转分类。
+        const val jumpNone = 0        // 无跳转
+        const val jumpMiniProgram = 1 // 小程序
+        const val jumpH5 = 2          // H5
+        const val jumpNative = 3      // 原生页
+
         /** 从卡片消息文本体反解析（供 AutoCardViewHolder 渲染用）。 */
         @Suppress("UNCHECKED_CAST")
         fun fromJsonString(s: String): ServiceKeyword? = try {
@@ -98,4 +113,18 @@ fun matchAutoCard(input: String, list: List<ServiceKeyword>): ServiceKeyword? {
         }
     }
     return best
+}
+
+/**
+ * 宿主处理「卡片跳转」的回调。
+ *
+ * [jumpUrl] 为跳转链接，[jumpCategory] 为跳转类型：1=小程序（如 pages/Withdraw/Record）、
+ * 2=H5（完整网址）、3=原生页（见 [ServiceKeyword.jumpMiniProgram] 等常量）。宿主据此把
+ * 用户导航到自己的小程序容器 / WebView / 原生页。
+ *
+ * 注意：一旦注册处理器，【所有类型】（含 H5）都交给宿主；未注册时 SDK 才会用
+ * 「H5 → 外部浏览器、其余 → 内置模拟页」兜底。
+ */
+fun interface CardJumpHandler {
+    fun onJump(jumpUrl: String, jumpCategory: Int?)
 }

@@ -37,8 +37,11 @@ import com.teneasy.chatuisdk.MediaPagerActivity
 import com.teneasy.chatuisdk.ui.base.ChatMediaItem
 import com.teneasy.chatuisdk.R
 import com.teneasy.chatuisdk.SelectConsultTypeViewModel
+import android.net.Uri
+import com.teneasy.chatuisdk.MiniProgramMockActivity
 import com.teneasy.chatuisdk.WebViewActivity
 import com.teneasy.chatuisdk.ui.base.Constants
+import com.teneasy.chatuisdk.ui.base.ServiceKeyword
 import com.teneasy.chatuisdk.DeviceInfoActivity
 import com.teneasy.chatuisdk.ui.base.AppChatTheme
 import com.teneasy.chatuisdk.ui.base.Constants.Companion.CONSULT_ID
@@ -463,6 +466,10 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
                 override fun onSendCardOption(text: String) {
                     // 走真实发送路径（不再触发关键词匹配，避免点选项又弹卡片）
                     this@KeFuFragment.sendMsg(text)
+                }
+
+                override fun onCardJump(jumpUrl: String, jumpCategory: Int?) {
+                    this@KeFuFragment.handleCardJump(jumpUrl, jumpCategory)
                 }
             }, chatTheme)
 
@@ -921,6 +928,38 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             .isGif(true)
             .isDisplayCamera(false)
             .forResult(resultCallbackListener)
+    }
+
+    /**
+     * 处理带 jumpUrl 的卡片按钮点击。
+     *
+     * 宿主注册了处理器 → 交给宿主全权决定怎么打开（小程序 / 原生页 / H5）。
+     * 未注册时 SDK 兜底：H5 → 系统浏览器打开；其余类型 → 内置模拟页。
+     */
+    fun handleCardJump(jumpUrl: String, jumpCategory: Int?) {
+        Constants.cardJumpHandler?.let {
+            it.onJump(jumpUrl, jumpCategory)
+            return
+        }
+        if (jumpCategory == ServiceKeyword.jumpH5) {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(jumpUrl)))
+            } catch (e: Exception) {
+                // 打开失败兜底到模拟页，避免用户点击无反应。
+                openMiniProgramMock(jumpUrl, jumpCategory)
+            }
+            return
+        }
+        openMiniProgramMock(jumpUrl, jumpCategory)
+    }
+
+    private fun openMiniProgramMock(jumpUrl: String, jumpCategory: Int?) {
+        val intent = Intent(requireContext(), MiniProgramMockActivity::class.java).apply {
+            putExtra(MiniProgramMockActivity.EXTRA_JUMP_URL, jumpUrl)
+            if (jumpCategory != null) putExtra(MiniProgramMockActivity.EXTRA_JUMP_CATEGORY, jumpCategory)
+            putExtra(MiniProgramMockActivity.EXTRA_THEME_INDEX, chatThemeIndex)
+        }
+        startActivity(intent)
     }
 
     /**

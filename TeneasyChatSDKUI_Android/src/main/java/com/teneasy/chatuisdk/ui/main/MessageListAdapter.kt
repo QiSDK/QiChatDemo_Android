@@ -63,6 +63,12 @@ interface MessageItemOperateListener {
     fun onSendLocalMsg(msg: String, isLeft: Boolean, msgType: String = "MSG_TEXT")
     /** 点击自动卡片（MST_AUTO_CARD）上的选项时回调：把 [text] 当作普通文本消息真正发送出去。 */
     fun onSendCardOption(text: String)
+
+    /**
+     * 点击带 jumpUrl 的自动卡片按钮时回调：请求「打开」跳转页面。
+     * [jumpUrl] 为跳转链接，[jumpCategory] 为跳转类型（1=小程序 2=H5 3=原生页）。
+     */
+    fun onCardJump(jumpUrl: String, jumpCategory: Int?)
     fun onPlayVideo(url: String)
     fun onPlayImage(url: String)
     fun onDownload(position: Int)
@@ -563,6 +569,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.tvSubject.visibility = View.VISIBLE
                 holder.tvSubject.text = item.cMsg!!.content.data
                 holder.tvContent.visibility = View.GONE
+                holder.ivRight.visibility = View.GONE
                 return
             }
 
@@ -577,8 +584,18 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 holder.tvContent.visibility = View.GONE
             }
 
-            // 添加一个选项按钮（label 显示文本，sendText 点击后发送的文本）
-            fun addOptionButton(label: String, sendText: String) {
+            // 精准问题可带右侧配图（rightImageUrl）。绝对 URL 直接用；相对路径按图片 CDN 前缀补全。
+            val imageUrl = card.rightImageUrl?.trim() ?: ""
+            if (imageUrl.isEmpty()) {
+                holder.ivRight.visibility = View.GONE
+            } else {
+                holder.ivRight.visibility = View.VISIBLE
+                val fullUrl = if (imageUrl.startsWith("http")) imageUrl else "${Constants.baseUrlImage}$imageUrl"
+                Glide.with(act).load(fullUrl).dontAnimate().into(holder.ivRight)
+            }
+
+            // 添加一个选项按钮（label 显示文本，onClick 点击回调）
+            fun addButton(label: String, onClick: () -> Unit) {
                 val btn = Button(ctx)
                 btn.text = label
                 btn.isAllCaps = false
@@ -595,19 +612,23 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
                 )
                 lp.topMargin = (8 * density).toInt()
                 btn.layoutParams = lp
-                btn.setOnClickListener {
-                    // 点击选项 → 当普通消息发送（不再触发关键词匹配）
-                    if (sendText.isNotEmpty()) listener?.onSendCardOption(sendText)
-                }
+                btn.setOnClickListener { onClick() }
                 holder.llOptions.addView(btn)
             }
 
             if (card.options.isNotEmpty()) {
-                // questionType 1：每个选项一个按钮
-                for (opt in card.options) addOptionButton(opt, opt)
+                // questionType 1：每个选项一个按钮 → 当普通消息发送（不再触发关键词匹配）
+                for (opt in card.options) addButton(opt) {
+                    if (opt.isNotEmpty()) listener?.onSendCardOption(opt)
+                }
             } else if (subject.isNotEmpty()) {
-                // questionType 2：无选项数组时给一个按钮（发送 subject）
-                addOptionButton(subject, subject)
+                // questionType 2：无选项数组时给一个按钮。
+                // hasJump（jumpCategory 非 0 且 jumpUrl 非空）→ 请求跳转；否则回退成发送 subject。
+                if (card.hasJump) {
+                    addButton(subject) { listener?.onCardJump(card.jumpUrl!!, card.jumpCategory) }
+                } else {
+                    addButton(subject) { listener?.onSendCardOption(subject) }
+                }
             }
         }
         else if (holder is TextMsgViewHolder) {
@@ -1035,6 +1056,7 @@ class MessageListAdapter (myContext: Activity,  listener: MessageItemOperateList
         val llCard = binding.llCard
         val tvSubject = binding.tvCardSubject
         val tvContent = binding.tvCardContent
+        val ivRight = binding.ivCardRight
         val llOptions = binding.llCardOptions
     }
 

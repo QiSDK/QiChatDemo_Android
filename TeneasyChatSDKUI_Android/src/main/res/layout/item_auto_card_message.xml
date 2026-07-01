@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 关键词自动卡片（MST_AUTO_CARD）：标题 + 正文(可选) + 选项按钮(运行时填充)。
+<!-- 关键词自动卡片（MST_AUTO_CARD）：标题 + 正文(可选) + 右侧配图(可选) + 选项按钮(运行时填充)。
      对齐 iOS BWAutoCardCell / Flutter AutoCardCell。始终左侧展示。 -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -35,24 +35,50 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_card_time"
         app:layout_constraintWidth_max="300dp">
 
-        <TextView
-            android:id="@+id/tv_card_subject"
-            android:layout_width="wrap_content"
+        <!-- 顶部一行：左侧文字列 + 右侧配图 -->
+        <LinearLayout
+            android:id="@+id/ll_card_header"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/ps_color_4e4d4e"
-            tools:text="请选择补单类型" />
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_card_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="13sp"
-            android:visibility="gone"
-            tools:text="实时查看订单状态，无需找队"
-            tools:visibility="visible" />
+            <LinearLayout
+                android:id="@+id/ll_card_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_card_subject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/ps_color_4e4d4e"
+                    tools:text="请选择补单类型" />
+
+                <TextView
+                    android:id="@+id/tv_card_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    tools:text="实时查看订单状态，无需找队"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <!-- 精准问题右侧配图（rightImageUrl），运行时按需显示 -->
+            <ImageView
+                android:id="@+id/iv_card_right"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginStart="10dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <!-- 选项按钮在 onBindViewHolder 里按 content 动态添加 -->
         <LinearLayout

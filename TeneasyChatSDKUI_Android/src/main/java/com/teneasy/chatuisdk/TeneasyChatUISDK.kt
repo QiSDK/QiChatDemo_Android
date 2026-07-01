@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.teneasy.chatuisdk.ui.base.ApplicationExt
+import com.teneasy.chatuisdk.ui.base.CardJumpHandler
 import com.teneasy.chatuisdk.ui.base.Constants
 import com.teneasy.chatuisdk.ui.base.GlobalChatManager
 import com.teneasy.chatuisdk.ui.base.PARAM_BACKUP_WEB_URL
@@ -67,6 +68,19 @@ object TeneasyChatUISDK {
      */
     fun setAutoCardKeywords(serviceKeywords: List<Map<String, Any?>>) {
         Constants.serviceKeywords = serviceKeywords.map { ServiceKeyword(it) }
+    }
+
+    /**
+     * 注册「卡片跳转」处理器。
+     *
+     * 当用户点击带 jumpUrl（小程序页面路径，如 pages/Withdraw/Record）的自动卡片按钮时回调。
+     * 宿主在这里把用户导航到真正的小程序容器 / WebView / 原生页。
+     *
+     * 不注册（或传 null）时，SDK 用兜底逻辑：H5 → 外部浏览器打开，其余 → 内置模拟页
+     * MiniProgramMockActivity。该注册与具体商户会话无关，通常只需设置一次。
+     */
+    fun setCardJumpHandler(handler: CardJumpHandler?) {
+        Constants.cardJumpHandler = handler
     }
 
     fun init(context: Context, config: ChatSDKConfig) {
