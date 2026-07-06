@@ -45,6 +45,15 @@
         <activity android:name=".MiniProgramMockActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <!-- 网络日志调试页（TeneasyChatUISDK.openNetworkLog / 悬浮按钮入口） -->
+        <activity android:name=".ui.netlog.NetworkLogActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+
+        <activity android:name=".ui.netlog.NetworkLogDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
     </application>
 
 </manifest>

@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.emoji2.bundled.BundledEmojiCompatConfig
 import androidx.emoji2.text.EmojiCompat
+import com.teneasy.chatuisdk.ui.netlog.NetworkLogInterceptor
+import com.xuexiang.xhttp2.XHttp
 import com.xuexiang.xhttp2.XHttpSDK
 
 class ApplicationExt: Application(){
@@ -41,6 +43,8 @@ class ApplicationExt: Application(){
 //        if (MyApp.isDebug()) {
             XHttpSDK.debug()
 //        }
+            //注册网络日志拦截器：捕获所有 HTTP 请求，供 TeneasyChatUISDK.openNetworkLog 查看
+            XHttp.getInstance().addInterceptor(NetworkLogInterceptor())
             //设置网络请求的全局基础地址
             if (Constants.domain.isEmpty()) {
                 Constants.domain = Constants.sanitizeDomain(Constants.lines.split(",").firstOrNull()?.trim().orEmpty())

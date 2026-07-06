@@ -1,6 +1,8 @@
 package com.teneasy.chatuisdk
 
+import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -22,6 +24,8 @@ import com.teneasy.chatuisdk.ui.base.PARAM_USER_LEVEL
 import com.teneasy.chatuisdk.ui.base.PARAM_USER_TYPE
 import com.teneasy.chatuisdk.ui.base.ServiceKeyword
 import com.teneasy.chatuisdk.ui.base.UserPreferences
+import com.teneasy.chatuisdk.ui.netlog.NetworkLogActivity
+import com.teneasy.chatuisdk.ui.netlog.NetworkLogFloatingButton
 import com.teneasy.sdk.LineDetectDelegate
 import com.teneasy.sdk.LineDetectLib
 import com.teneasy.sdk.Result
@@ -81,6 +85,34 @@ object TeneasyChatUISDK {
      */
     fun setCardJumpHandler(handler: CardJumpHandler?) {
         Constants.cardJumpHandler = handler
+    }
+
+    /**
+     * 打开「网络日志」调试页面。展示 UISDK 经由 XHttp2 / OkHttp 发出的所有 HTTP 请求
+     * （请求头 / 请求体 / 响应体 / 状态码 / 耗时），点击可看详情。
+     *
+     * 日志由内置拦截器自动收集（SDK 初始化后即生效，最多保留 200 条），宿主只需在需要时
+     * 调用本方法即可，例如挂在设置页的某个隐藏入口后面。
+     */
+    fun openNetworkLog(context: Context) {
+        val intent = Intent(context, NetworkLogActivity::class.java)
+        if (context !is android.app.Activity) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    }
+
+    /**
+     * 显示可拖动的「网络日志」悬浮按钮，点击打开 [openNetworkLog] 页面。
+     * 有悬浮窗权限时全局显示，否则回退为 Activity 内嵌方式。仅建议在调试期开启。
+     */
+    fun showNetworkLogButton(app: Application) {
+        NetworkLogFloatingButton.show(app)
+    }
+
+    /** 隐藏「网络日志」悬浮按钮。 */
+    fun hideNetworkLogButton() {
+        NetworkLogFloatingButton.hide()
     }
 
     fun init(context: Context, config: ChatSDKConfig) {
