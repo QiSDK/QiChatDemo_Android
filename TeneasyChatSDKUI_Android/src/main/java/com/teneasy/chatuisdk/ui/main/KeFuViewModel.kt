@@ -430,7 +430,7 @@ class KeFuViewModel : BaseViewModel() {
     fun queryChatHistory(consultId: Long) {
         val param = JsonObject().apply {
             addProperty("consultId", consultId)
-            addProperty("chatId", 0)
+            addProperty("chatId", Constants.chatId)
             addProperty("count", 50)
             addProperty("userId", Constants.userId)
         }

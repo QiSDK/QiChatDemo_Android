@@ -95,7 +95,9 @@ class Constants {
         var workerId = 0  // 客服工作者ID
         var CONSULT_ID: Long = 0  // 咨询会话ID
         var workerAvatar = ""  // 客服头像
-        var chatId = "0"  // 聊天ID
+        // 聊天ID。连接维度：一条 wss 连接对应一个 chatId，跨咨询类型共用，
+        // 由 SCHi.id 在连接成功时下发。"0" 表示未知。只存内存，不落盘。
+        var chatId = "0"
         var withAutoReplyU: CMessage.WithAutoReply? = null  // 自动回复配置
         var errorReport = ErrorReport(arrayListOf())  // 错误报告
         //var uploadProgress = UploadUtil.uploadProgress  // 上传进度
@@ -156,6 +158,19 @@ class Constants {
          * 用固定 key 会互相覆盖。对齐 Flutter tokenStorageKey()。
          */
         fun tokenStorageKey(): String = "${PARAM_XTOKEN}_${merchantId}_$userId"
+
+        /**
+         * chatId 的统一写入口，只存内存、不落盘：chatId 跟着 wss 连接走，
+         * 断线重连会重新下发，缓存到本地反而可能是过期值。
+         * 服务端在「还不知道是哪条会话」时会给 0/空，这类值不能覆盖已拿到的 chatId。
+         */
+        fun updateChatId(newChatId: String?) {
+            val id = newChatId?.trim().orEmpty()
+            if (id.isEmpty() || id == "0" || id == chatId) {
+                return
+            }
+            chatId = id
+        }
 
         /**
          * 获取API基础URL

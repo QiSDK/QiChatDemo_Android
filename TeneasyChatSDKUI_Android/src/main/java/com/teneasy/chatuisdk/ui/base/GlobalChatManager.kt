@@ -159,6 +159,10 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
     override fun receivedMsg(msg: CMessage.Message) {
         Log.d(TAG, "GlobalChatManager收到消息: consultId=${msg.consultId}, current=${Constants.currentChatConsultId}")
 
+        // 兜底：正常情况 chatId 已由 connected() 的 SCHi.id 拿到，
+        // 万一 SCHi 没带上，这里从消息里补一个
+        Constants.updateChatId(msg.chatId.toString())
+
         // 如果不在当前聊天页面，增加未读数
         if (msg.consultId != Constants.currentChatConsultId) {
             GlobalMessageManager.instance.addUnReadMessage(msg.consultId)
@@ -189,8 +193,12 @@ class GlobalChatManager private constructor() : TeneasySDKDelegate {
     }
 
     override fun connected(c: GGateway.SCHi) {
-        Log.i(TAG, "GlobalChatManager连接成功")
+        Log.i(TAG, "GlobalChatManager连接成功, chatId=${c.id}")
+        // SCHi.id 就是 chatId（后端确认）。这是拉历史之前最早的赋值时机：
+        // connected → assignWorker → queryChatHistory，比历史请求早一个 HTTP 往返
+        Constants.updateChatId(c.id.toString())
         Constants.xToken = c.token
+
         UserPreferences().putString(Constants.tokenStorageKey(), c.token)
         ChatEventBus.post(ChatEvent.Connected(c))
     }

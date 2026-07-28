@@ -710,7 +710,7 @@ class KeFuFragment : KeFuBaseFragment(), TeneasySDKDelegate {
             it?.run {
                 //BuildHistory
                 if (!this.isEmpty()) {
-                    Constants.chatId = this[0].chatId
+                    Constants.updateChatId(this[0].chatId)
                 }
                 var historyList = ArrayList<MessageItem>()
                 for (item in this.reversed()) {
